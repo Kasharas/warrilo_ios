@@ -1,24 +1,31 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Alert, RefreshControl, Pressable, Modal } from 'react-native';
-import { Search, Filter, X } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, TextInput, Modal, RefreshControl } from 'react-native';
+import { Plus, Search, Filter, Shield } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
-import { DeviceCard } from '@/src/components/DeviceCard';
-import { FabButton } from '@/src/components/FabButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useData } from '@/contexts/DataContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { DeviceCard } from '@/src/components/DeviceCard';
+import { FabButton } from '@/src/components/FabButton';
 
 export default function DeviceListScreen() {
   const router = useRouter();
-  const { devices, refreshData, deleteDevice } = useData();
+  const { user } = useAuth();
+  
+  // Mock data - no more Supabase fetching
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deviceToDelete, setDeviceToDelete] = useState<string | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  const handleRefresh = () => {
-    refreshData();
+  const handleRefresh = async () => {
+    setLoading(true);
+    // Simulate refresh delay
+    setTimeout(() => setLoading(false), 1000);
   };
 
   const filters = [
@@ -42,7 +49,6 @@ export default function DeviceListScreen() {
 
   const handleDeleteDevice = (deviceId: string) => {
     console.log('Delete button pressed for device:', deviceId);
-    console.log('deleteDevice function available:', !!deleteDevice);
     
     // Show custom delete confirmation modal
     setDeviceToDelete(deviceId);
@@ -52,11 +58,10 @@ export default function DeviceListScreen() {
   const confirmDelete = async () => {
     if (!deviceToDelete) return;
     
-    console.log('User confirmed deletion, calling deleteDevice...');
+    console.log('User confirmed deletion');
     try {
-      await deleteDevice(deviceToDelete);
-      console.log('Item deleted successfully');
-      // Show success message
+      // Mock deletion - just remove from local state
+      setDevices(devices.filter(d => d.id !== deviceToDelete));
       Alert.alert('Success', 'Item deleted successfully!');
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -73,6 +78,37 @@ export default function DeviceListScreen() {
     setDeviceToDelete(null);
   };
 
+  if (loading && devices.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary[600]} />
+        <Text style={styles.loadingText}>Loading devices...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>{error}</Text>
+        <Text style={styles.emptySubtext}>Please try again later.</Text>
+      </View>
+    );
+  }
+
+  if (filteredDevices.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No items found</Text>
+        <Text style={styles.emptySubtext}>
+          {searchQuery || selectedFilter !== 'All' 
+            ? 'Try adjusting your search or filters' 
+            : 'Add your first item to get started'}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -88,88 +124,76 @@ export default function DeviceListScreen() {
         </Pressable>
       </View>
 
-             {/* Search Bar */}
-       <View style={[
-         styles.searchContainer,
-         isSearchFocused && styles.searchContainerFocused
-       ]}>
-         <Search size={20} color={theme.colors.neutral[400]} style={styles.searchIcon} />
-         <TextInput
-           style={styles.searchInput}
-           placeholder="Search items..."
-           value={searchQuery}
-           onChangeText={setSearchQuery}
-           placeholderTextColor={theme.colors.neutral[400]}
-           onFocus={() => setIsSearchFocused(true)}
-           onBlur={() => setIsSearchFocused(false)}
-         />
-       </View>
-      
-
+      {/* Search Bar */}
+      <View style={[
+        styles.searchContainer,
+        isSearchFocused && styles.searchContainerFocused
+      ]}>
+        <Search size={20} color={theme.colors.neutral[400]} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search items..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor={theme.colors.neutral[400]}
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={() => setIsSearchFocused(false)}
+        />
+      </View>
 
       {/* Filters */}
       <View style={styles.filtersContainer}>
-        <ScrollView
+        <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filtersContent}
-        >
-          {filters.map((filter) => (
+          data={filters}
+          renderItem={({ item }) => (
             <Pressable
-              key={filter.label}
+              key={item.label}
               style={[
                 styles.filterChip,
-                selectedFilter === filter.label && styles.filterChipActive
+                selectedFilter === item.label && styles.filterChipActive
               ]}
-              onPress={() => setSelectedFilter(filter.label)}
+              onPress={() => setSelectedFilter(item.label)}
             >
               <Text style={[
                 styles.filterChipText,
-                selectedFilter === filter.label && styles.filterChipTextActive
+                selectedFilter === item.label && styles.filterChipTextActive
               ]}>
-                {filter.label} ({filter.count})
+                {item.label} ({item.count})
               </Text>
             </Pressable>
-          ))}
-        </ScrollView>
+          )}
+          keyExtractor={(item) => item.label}
+          contentContainerStyle={styles.filtersContent}
+        />
       </View>
 
       {/* Device List */}
-      <ScrollView 
-        style={styles.deviceList} 
+      <FlatList 
+        data={filteredDevices}
+        renderItem={({ item }) => (
+          <View key={item.id} style={styles.deviceCardWrapper}>
+            <DeviceCard
+              device={item}
+              onPress={() => handleDevicePress(item.id)}
+              onDelete={() => handleDeleteDevice(item.id)}
+            />
+          </View>
+        )}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.deviceListContent}
         scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
-            refreshing={false}
+            refreshing={loading}
             onRefresh={handleRefresh}
             colors={[theme.colors.primary[600]]}
             tintColor={theme.colors.primary[600]}
           />
         }
-      >
-        {filteredDevices.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No items found</Text>
-            <Text style={styles.emptySubtext}>
-              {searchQuery || selectedFilter !== 'All' 
-                ? 'Try adjusting your search or filters' 
-                : 'Add your first item to get started'}
-            </Text>
-          </View>
-        ) : (
-          filteredDevices.map((device) => (
-            <View key={device.id} style={styles.deviceCardWrapper}>
-              <DeviceCard
-                device={device}
-                onPress={() => handleDevicePress(device.id)}
-                onDelete={() => handleDeleteDevice(device.id)}
-              />
-            </View>
-          ))
-        )}
-      </ScrollView>
+      />
 
       <FabButton onPress={() => router.push({
         pathname: '/add-device',

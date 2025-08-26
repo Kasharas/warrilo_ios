@@ -1,50 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { Slot } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { Stack } from 'expo-router';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { DataProvider, preloadData } from '@/contexts/DataContext';
+import { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
+import { theme } from '@/src/styles/theme';
 
 export default function RootLayout() {
-  const [isDataPreloaded, setIsDataPreloaded] = useState(false);
-  const [preloadedDevices, setPreloadedDevices] = useState([]);
-  const [preloadedTimestamp, setPreloadedTimestamp] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Pre-load data from local storage in background
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const { devices, lastUpdated } = await preloadData();
-        setPreloadedDevices(devices);
-        setPreloadedTimestamp(lastUpdated);
-        setIsDataPreloaded(true);
-      } catch (error) {
-        console.error('Error preloading data:', error);
-        setIsDataPreloaded(true); // Continue anyway
-      }
-    };
+    // Simulate initialization time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
 
-    loadInitialData();
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!isDataPreloaded) {
+  if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading...</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.white }}>
+        <ActivityIndicator size="large" color={theme.colors.primary[600]} />
+        <Text style={{ marginTop: 16, color: theme.colors.neutral[600] }}>Initializing...</Text>
       </View>
     );
   }
 
   return (
     <AuthProvider>
-      <DataProvider 
-        preloadedDevices={preloadedDevices}
-        preloadedTimestamp={preloadedTimestamp}
+      <Stack
+        screenOptions={{ headerShown: false }}
+        // Add this line to set initial route
+        initialRouteName="index"
       >
-        <StatusBar style="auto" />
-        <Slot />
-      </DataProvider>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="signup" />
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="plan-selection" />
+        <Stack.Screen name="add-device" />
+        <Stack.Screen name="device-details" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="auth-callback" />
+        <Stack.Screen name="+not-found" options={{ title: 'Oops!' }} />
+      </Stack>
     </AuthProvider>
   );
 }

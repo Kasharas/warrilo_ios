@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Shield, Check } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
 const features = [
@@ -16,34 +15,14 @@ const features = [
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { user, loading } = useAuth();
 
-  // Auto-redirect authenticated users to dashboard
-  useEffect(() => {
-    console.log('Welcome: useEffect triggered - user:', user ? 'logged in' : 'not logged in', 'loading:', loading);
-    
-    if (!loading) {
-      if (user) {
-        console.log('Welcome: User is logged in, redirecting to dashboard...');
-        // User is already logged in, go to dashboard
-        router.replace('/(tabs)');
-      } else {
-        console.log('Welcome: No user, staying on welcome screen');
-        // If no user, stay on welcome screen
-      }
-    } else {
-      console.log('Welcome: Still loading authentication state...');
-    }
-  }, [user, loading, router]);
+  // Note: Auto-redirect logic removed - now handled by app/index.tsx
+  // This prevents redirect loops and provides cleaner routing
 
   const handleGetStarted = () => {
-    if (user) {
-      // User is already logged in, go to dashboard
-      router.replace('/(tabs)');
-    } else {
-      // User is not logged in, go to login
-      router.push('/login');
-    }
+    // User is not logged in (welcome screen only shows for unauthenticated users)
+    // Go to login screen
+    router.push('/login');
   };
 
   return (

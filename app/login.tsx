@@ -46,27 +46,37 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = async () => {
+    if (googleLoading) return; // Prevent multiple clicks
+    
+    console.log('=== GOOGLE LOGIN DEBUG START ===');
+    console.log('1. Button clicked, setting loading state...');
+    console.log('2. Current window location:', window.location.href);
+    console.log('3. About to call signInWithGoogle...');
+    
     setGoogleLoading(true);
+    
     try {
-      console.log('Starting Google sign-in process...');
+      console.log('4. Calling signInWithGoogle function...');
       const { error } = await signInWithGoogle();
+      console.log('5. signInWithGoogle returned:', { error });
+      
       if (error) {
-        console.error('Google sign-in error:', error);
+        console.error('6. Google sign-in error:', error);
         Alert.alert('Google Sign-In Failed', error.message || 'An error occurred during Google sign-in');
-        setGoogleLoading(false);
+        setGoogleLoading(false); // Only reset on error
       } else {
-        // OAuth flow started successfully
-        // User will be redirected to Google's account selection page
-        // Keep loading state active until redirect happens
-        // The loading will be cleared when the page redirects
-        console.log('Google OAuth flow started - redirecting to account selection...');
+        console.log('7. OAuth flow started successfully - redirecting to Google...');
+        console.log('8. User should see Google account selection page now');
+        Alert.alert('Success', 'OAuth started! Check if Google account selection opened.');
         // Don't clear loading state here - let the OAuth redirect handle it
       }
     } catch (error) {
-      console.error('Unexpected error during Google sign-in:', error);
+      console.error('9. Unexpected error during Google sign-in:', error);
       Alert.alert('Error', 'An unexpected error occurred during Google Sign-In');
       setGoogleLoading(false);
     }
+    
+    console.log('=== GOOGLE LOGIN DEBUG END ===');
   };
 
   return (
@@ -91,6 +101,7 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor={theme.colors.neutral[400]}
+            onSubmitEditing={() => {}}
           />
 
           <View style={styles.passwordContainer}>
@@ -101,15 +112,16 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               placeholderTextColor={theme.colors.neutral[400]}
+              onSubmitEditing={() => {}}
             />
             <Pressable
               style={styles.passwordToggle}
               onPress={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
-                <EyeOff size={20} color={theme.colors.neutral[400]} />
+                <EyeOff size={20} color={theme.colors.primary[600]} />
               ) : (
-                <Eye size={20} color={theme.colors.neutral[400]} />
+                <Eye size={20} color={theme.colors.primary[600]} />
               )}
             </Pressable>
           </View>

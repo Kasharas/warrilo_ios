@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Pressable, Image, Platform } from 'react-native
 import { MoreVertical } from 'lucide-react-native';
 import { theme } from '../styles/theme';
 import { WarrantyBadge } from './WarrantyBadge';
-import { supabase } from '../../lib/supabaseClient';
 
 // Define interface for real device data from Supabase
 interface Device {
@@ -27,28 +26,8 @@ interface DeviceCardProps {
 export function DeviceCard({ device, onPress, onDelete, compact = false }: DeviceCardProps) {
   console.log('DeviceCard rendered with onDelete:', !!onDelete);
   
-  const [warrantyData, setWarrantyData] = useState<any>(null);
-  
-  // Fetch warranty data for this device
-  useEffect(() => {
-    const fetchWarranty = async () => {
-      try {
-        const { data: warranty, error } = await supabase
-          .from('warranties')
-          .select('*')
-          .eq('device_id', device.id)
-          .single();
-        
-        if (!error && warranty) {
-          setWarrantyData(warranty);
-        }
-      } catch (error) {
-        console.error('Error fetching warranty:', error);
-      }
-    };
-    
-    fetchWarranty();
-  }, [device.id]);
+  // Mock warranty data - no more Supabase fetching
+  const [warrantyData] = useState<any>(null);
   
   // Helper function to check if image URL is valid
   const isValidImageUrl = (url?: string) => {
@@ -98,152 +77,147 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
         })
         .catch(error => {
           console.log('Image fetch error:', error);
-          console.log('Image not accessible, setting error');
           setImageLoadError(true);
         });
     }
   }, [device.image_url]);
 
-  // Calculate warranty status based on real data
-  const getWarrantyStatus = () => {
-    if (!warrantyData) return 'no-warranty';
-    
-    const endDate = new Date(warrantyData.end_date);
-    const today = new Date();
-    const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysRemaining < 0) return 'expired';
-    if (daysRemaining <= 30) return 'expiring';
-    return 'active';
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
-  const warrantyStatus = getWarrantyStatus();
-  const getCategoryEmoji = (category?: string) => {
+  const formatPrice = (price?: number) => {
+    if (!price) return 'N/A';
+    return `$${price.toLocaleString()}`;
+  };
+
+  const getCategoryColor = (category?: string) => {
     switch (category?.toLowerCase()) {
-      case 'electronics': return '📱';
-      case 'cloth': return '👕';
-      case 'automotive': return '🚗';
-      case 'other': return '📦';
-      default: return '📦';
+      case 'electronics':
+        return theme.colors.primary[500];
+      case 'automotive':
+        return theme.colors.warning[500];
+      case 'clothing':
+      case 'cloth':
+        return theme.colors.secondary[500];
+      default:
+        return theme.colors.neutral[500];
     }
   };
 
-  // Now that all functions are defined, we can safely call them in console.log
-  console.log('=== DEVICE CARD DEBUG ===');
-  console.log('Device ID:', device.id);
-  console.log('Device name:', device.name);
-  console.log('Device image_url:', device.image_url);
-  console.log('Device image_url type:', typeof device.image_url);
-  console.log('Device image_url length:', device.image_url?.length);
-  console.log('isValidImageUrl result:', isValidImageUrl(device.image_url));
-  console.log('getImageSource result:', getImageSource(device.image_url));
-  console.log('imageLoadError state:', imageLoadError);
+  const getCategoryIcon = (category?: string) => {
+    switch (category?.toLowerCase()) {
+      case 'electronics':
+        return '🔌';
+      case 'automotive':
+        return '🚗';
+      case 'clothing':
+      case 'cloth':
+        return '👕';
+      default:
+        return '📦';
+    }
+  };
 
   if (compact) {
     return (
       <Pressable style={styles.compactCard} onPress={onPress}>
-        <View style={styles.compactImage}>
-          {isValidImageUrl(device.image_url) && !imageLoadError ? (
-            <Image 
-              source={getImageSource(device.image_url)!}
-              style={styles.compactImageContent}
-              resizeMode="cover"
-              onError={(error) => {
-                console.log('=== IMAGE LOAD ERROR ===');
-                console.log('Error loading image:', error);
-                console.log('Image source:', getImageSource(device.image_url));
-                console.log('Setting imageLoadError to true');
-                setImageLoadError(true);
-              }}
-              onLoad={() => {
-                console.log('=== IMAGE LOAD SUCCESS ===');
-                console.log('Image loaded successfully for device:', device.name);
-                console.log('Image source:', getImageSource(device.image_url));
-              }}
-            />
-          ) : (
-            <Text style={styles.compactEmoji}>{getCategoryEmoji(device.category)}</Text>
-          )}
+        <View style={styles.compactCardContent}>
+          <View style={styles.compactCardLeft}>
+            <Text style={styles.compactDeviceName} numberOfLines={1}>
+              {device.name}
+            </Text>
+            <Text style={styles.compactDeviceBrand} numberOfLines={1}>
+              {device.brand || 'Unknown Brand'}
+            </Text>
+          </View>
+          <View style={styles.compactCardRight}>
+            <Text style={styles.compactDevicePrice}>
+              {formatPrice(device.purchase_price)}
+            </Text>
+            <WarrantyBadge warranty={warrantyData} compact />
+          </View>
         </View>
-        <Text style={styles.compactName}>{device.name}</Text>
-        <Text style={[
-          styles.compactStatus,
-          warrantyStatus === 'active' && { color: theme.colors.success?.[500] || '#10b981' },
-          warrantyStatus === 'expiring' && { color: theme.colors.warning?.[500] || '#f59e0b' },
-          warrantyStatus === 'expired' && { color: theme.colors.error?.[500] || '#ef4444' },
-          warrantyStatus === 'no-warranty' && { color: theme.colors.neutral?.[500] || '#6b7280' },
-        ]}>
-          {warrantyStatus === 'active' ? 'Active' : 
-           warrantyStatus === 'expiring' ? 'Expiring' : 
-           warrantyStatus === 'expired' ? 'Expired' : 'No Warranty'}
-        </Text>
       </Pressable>
     );
   }
 
   return (
-    <Pressable style={styles.card} onPress={onPress}>
-      <View style={styles.cardContent}>
-        <View style={styles.deviceImage}>
-          {isValidImageUrl(device.image_url) && !imageLoadError ? (
-            <Image 
+    <View style={styles.card}>
+      <Pressable style={styles.cardContent} onPress={onPress}>
+        {/* Device Image */}
+        <View style={styles.imageContainer}>
+          {device.image_url && isValidImageUrl(device.image_url) && !imageLoadError ? (
+            <Image
               source={getImageSource(device.image_url)!}
-              style={styles.deviceImageContent}
+              style={styles.deviceImage}
               resizeMode="cover"
-              onError={(error) => {
-                console.log('=== IMAGE LOAD ERROR (REGULAR) ===');
-                console.log('Error loading image:', error);
-                console.log('Image source:', getImageSource(device.image_url));
-                console.log('Setting imageLoadError to true');
-                setImageLoadError(true);
-              }}
-              onLoad={() => {
-                console.log('=== IMAGE LOAD SUCCESS (REGULAR) ===');
-                console.log('Image loaded successfully for device:', device.name);
-                console.log('Image source:', getImageSource(device.image_url));
-              }}
+              onError={() => setImageLoadError(true)}
             />
           ) : (
-            <Text style={styles.deviceEmoji}>{getCategoryEmoji(device.category)}</Text>
+            <View style={styles.placeholderImage}>
+              <Text style={styles.placeholderText}>
+                {getCategoryIcon(device.category)}
+              </Text>
+            </View>
+          )}
+          
+          {/* Category Badge */}
+          {device.category && (
+            <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(device.category) }]}>
+              <Text style={styles.categoryBadgeText}>{device.category}</Text>
+            </View>
           )}
         </View>
-        
+
+        {/* Device Info */}
         <View style={styles.deviceInfo}>
-          <Text style={styles.deviceName}>{device.name}</Text>
-          <Text style={styles.deviceDetails}>
-            {device.brand || 'No brand'} • ${(device.purchase_price || 0).toLocaleString()}
+          <Text style={styles.deviceName} numberOfLines={2}>
+            {device.name}
           </Text>
-          <Text style={[
-            styles.warrantyText,
-            warrantyStatus === 'active' && { color: theme.colors.success?.[500] || '#10b981' },
-            warrantyStatus === 'expiring' && { color: theme.colors.warning?.[500] || '#f59e0b' },
-            warrantyStatus === 'expired' && { color: theme.colors.error?.[500] || '#ef4444' },
-            warrantyStatus === 'no-warranty' && { color: theme.colors.neutral?.[500] || '#6b7280' },
-          ]}>
-            {warrantyStatus === 'active' && warrantyData && 
-              `Warranty active until ${new Date(warrantyData.end_date).toLocaleDateString()}`}
-            {warrantyStatus === 'expiring' && warrantyData && 
-              `⚠ Expires in ${Math.ceil((new Date(warrantyData.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days`}
-            {warrantyStatus === 'expired' && 'Warranty expired'}
-            {warrantyStatus === 'no-warranty' && 'No warranty information'}
-          </Text>
-        </View>
-        
-        {onDelete && (
-          <View style={styles.deleteButtonContainer}>
-            <Pressable 
-              style={styles.deleteButton} 
-              onPress={() => {
-                console.log('Delete button pressed in DeviceCard');
-                onDelete();
-              }}
-            >
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </Pressable>
+          
+          {device.brand && (
+            <Text style={styles.deviceBrand} numberOfLines={1}>
+              {device.brand}
+            </Text>
+          )}
+          
+          {device.model && (
+            <Text style={styles.deviceModel} numberOfLines={1}>
+              Model: {device.model}
+            </Text>
+          )}
+          
+          <View style={styles.deviceMeta}>
+            <Text style={styles.devicePrice}>
+              {formatPrice(device.purchase_price)}
+            </Text>
+            <Text style={styles.deviceDate}>
+              {formatDate(device.created_at)}
+            </Text>
           </View>
-        )}
-      </View>
-    </Pressable>
+        </View>
+
+        {/* Warranty Badge */}
+        <View style={styles.warrantyContainer}>
+          <WarrantyBadge warranty={warrantyData} />
+        </View>
+      </Pressable>
+
+      {/* Action Buttons */}
+      {onDelete && (
+        <View style={styles.actionButtons}>
+          <Pressable style={styles.deleteButton} onPress={onDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </Pressable>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -260,21 +234,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: theme.spacing.lg,
   },
-  deviceImage: {
-    width: 120, // Increased from 60 to 120 (twice as big)
-    height: 120, // Increased from 60 to 120 (twice as big)
+  imageContainer: {
+    position: 'relative',
+    width: 120,
+    height: 120,
     backgroundColor: theme.colors.neutral?.[100] || '#f3f4f6',
     borderRadius: theme.borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  deviceEmoji: {
-    fontSize: 48, // Increased from 24 to 48 (twice as big to match larger container)
-  },
-  deviceImageContent: {
+  deviceImage: {
     width: '100%',
     height: '100%',
     borderRadius: theme.borderRadius.md,
+  },
+  placeholderImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.neutral?.[200] || '#e5e7eb',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 48,
+  },
+  categoryBadge: {
+    position: 'absolute',
+    top: theme.spacing.sm,
+    left: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.sm,
+    borderRadius: theme.borderRadius.sm,
+    zIndex: 1,
+  },
+  categoryBadgeText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.medium,
   },
   deviceInfo: {
     flex: 1,
@@ -285,57 +282,36 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral?.[900] || '#111827',
     marginBottom: theme.spacing.xs,
   },
-  deviceDetails: {
+  deviceBrand: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.neutral?.[600] || '#4b5563',
     marginBottom: theme.spacing.xs,
   },
-  warrantyText: {
+  deviceModel: {
     fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.medium,
+    color: theme.colors.neutral?.[500] || '#6b7280',
   },
-  moreButton: {
-    padding: theme.spacing.sm,
-  },
-  compactCard: {
-    backgroundColor: theme.colors.white || '#ffffff',
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
+  deviceMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '48%',
-    minHeight: 120, // Ensure consistent height for all compact cards
-    ...theme.shadows?.sm,
+    marginTop: theme.spacing.xs,
   },
-  compactImage: {
-    width: 120, // Increased from 60 to 120 (twice as big)
-    height: 120, // Increased from 60 to 120 (twice as big)
-    backgroundColor: theme.colors.neutral?.[100] || '#f3f4f6',
-    borderRadius: theme.borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  compactEmoji: {
-    fontSize: 48, // Increased from 24 to 48 (twice as big to match larger container)
-  },
-  compactImageContent: {
-    width: '100%',
-    height: '100%',
-    borderRadius: theme.borderRadius.md,
-  },
-  compactName: {
-    fontSize: theme.fontSize.sm,
+  devicePrice: {
+    fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.neutral?.[900] || '#111827',
-    marginBottom: theme.spacing.xs,
-    textAlign: 'center',
   },
-  compactStatus: {
+  deviceDate: {
     fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.medium,
-    textAlign: 'center',
+    color: theme.colors.neutral?.[500] || '#6b7280',
   },
-  deleteButtonContainer: {
+  warrantyContainer: {
+    marginTop: theme.spacing.md,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     marginTop: theme.spacing.md,
   },
   deleteButton: {
@@ -365,5 +341,41 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.semibold,
+  },
+  compactCard: {
+    backgroundColor: theme.colors.white || '#ffffff',
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+    width: '48%',
+    minHeight: 120, // Ensure consistent height for all compact cards
+    ...theme.shadows?.sm,
+  },
+  compactCardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  compactCardLeft: {
+    flex: 1,
+  },
+  compactCardRight: {
+    alignItems: 'flex-end',
+  },
+  compactDeviceName: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.neutral?.[900] || '#111827',
+    marginBottom: theme.spacing.xs,
+  },
+  compactDeviceBrand: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.neutral?.[600] || '#4b5563',
+  },
+  compactDevicePrice: {
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.neutral?.[900] || '#111827',
   },
 });

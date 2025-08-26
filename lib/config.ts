@@ -11,3 +11,4 @@ export const SUPABASE_CONFIG = {
 // 3. Go to Settings > API
 // 4. Copy the "Project URL" and "anon public" key
 // 5. Replace the values above
+

@@ -1,16 +1,14 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { User } from '@supabase/supabase-js';
-import { signInWithGoogle as supabaseSignInWithGoogle } from '../warrilo_app/lib/supabase';
-import { supabase } from '../warrilo_app/lib/supabaseClient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase, signInWithGoogle as supabaseSignInWithGoogle } from '../lib/supabaseClient';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
+  signInWithGoogle: (options?: { redirectTo?: string }) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -26,267 +24,260 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const isInitializedRef = useRef(false);
-  const authSubscriptionRef = useRef<any>(null);
-  const oauthProcessedRef = useRef(false);
-
-  // Explicit OAuth callback detection and processing
-  const processOAuthCallback = async () => {
-    if (typeof window === 'undefined' || oauthProcessedRef.current) return;
-    
-    try {
-      const hash = window.location.hash;
-      const searchParams = window.location.search;
-      
-      // Check both hash and search params for OAuth tokens
-      const hasOAuthTokens = (hash && (hash.includes('access_token') || hash.includes('refresh_token'))) ||
-                            (searchParams && (searchParams.includes('access_token') || searchParams.includes('refresh_token')));
-      
-      if (hasOAuthTokens) {
-        console.log('🔐 OAuth callback detected, processing tokens...');
-        console.log('📍 URL hash:', hash);
-        console.log('📍 URL search params:', searchParams);
-        oauthProcessedRef.current = true;
-        
-        // Wait for Supabase to process tokens automatically
-        console.log('⏳ Waiting for Supabase to process OAuth tokens...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check if session was established
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          console.log('✅ OAuth session established successfully:', session.user.id);
-          setUser(session.user);
-          setLoading(false);
-        } else {
-          console.log('⚠️ OAuth session not established, checking again...');
-          // Force a refresh to trigger auth state change
-          await supabase.auth.refreshSession();
-          
-          // Check again after refresh
-          const { data: { session: refreshedSession } } = await supabase.auth.getSession();
-          if (refreshedSession?.user) {
-            console.log('✅ OAuth session established after refresh:', refreshedSession.user.id);
-            setUser(refreshedSession.user);
-            setLoading(false);
-          } else {
-            console.log('❌ OAuth session still not established after refresh');
-          }
-        }
-        
-        // Clear URL parameters to prevent repeated processing
-        if (hash) {
-          window.location.hash = '';
-          console.log('🧹 URL hash cleared');
-        }
-        if (searchParams) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-          console.log('🧹 URL search params cleared');
-        }
-      } else {
-        console.log('ℹ️ No OAuth tokens detected in URL');
-      }
-    } catch (error) {
-      console.error('❌ Error processing OAuth callback:', error);
-      oauthProcessedRef.current = false;
-    }
-  };
-
-  // Initialize authentication state
-  const initializeAuth = async () => {
-    if (isInitializedRef.current) {
-      console.log('🔄 AuthContext already initialized, skipping...');
-      return;
-    }
-    
-    console.log('🚀 AuthContext: Initializing authentication...');
-    isInitializedRef.current = true;
-    
-    // Add timeout protection to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      console.log('⏰ Auth initialization timeout reached, forcing loading to false');
-      setLoading(false);
-    }, 10000); // 10 second timeout
-    
-    try {
-      // Step 1: Check for OAuth callback first
-      await processOAuthCallback();
-      
-      // Step 2: Check current session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        console.log('✅ Existing session found:', session.user.id);
-        setUser(session.user);
-      } else {
-        console.log('ℹ️ No existing session found');
-      }
-      
-      // Step 3: Set up auth state change listener
-      if (!authSubscriptionRef.current) {
-        console.log('👂 Setting up auth state change listener...');
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            console.log('🔄 Auth state change:', event, session?.user?.id || 'no user');
-            
-            if (event === 'SIGNED_IN' && session?.user) {
-              console.log('✅ User signed in:', session.user.id);
-              setUser(session.user);
-              
-              // Create user preferences if needed
-              try {
-                const { data: existingPrefs, error: checkError } = await supabase
-                  .from('user_preferences')
-                  .select('user_id')
-                  .eq('user_id', session.user.id)
-                  .single();
-                
-                if (checkError && checkError.code === 'PGRST116') {
-                  console.log('📝 Creating default user preferences...');
-                  const { error: insertError } = await supabase
-                    .from('user_preferences')
-                    .insert({
-                      user_id: session.user.id,
-                      warranty_reminder_days: 30,
-                      email_reminders_enabled: true,
-                      warranty_display_format: 'days'
-                    });
-                  
-                  if (insertError) {
-                    console.error('❌ Error creating user preferences:', insertError);
-                  } else {
-                    console.log('✅ User preferences created successfully');
-                  }
-                }
-              } catch (error) {
-                console.error('❌ Error handling user preferences:', error);
-              }
-            } else if (event === 'SIGNED_OUT') {
-              console.log('👋 User signed out');
-              setUser(null);
-              oauthProcessedRef.current = false; // Reset for next login
-            } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-              console.log('🔄 Token refreshed:', session.user.id);
-              setUser(session.user);
-            }
-            
-            setLoading(false);
-          }
-        );
-        
-        authSubscriptionRef.current = subscription;
-      }
-      
-    } catch (error) {
-      console.error('❌ Error initializing authentication:', error);
-    } finally {
-      clearTimeout(timeoutId); // Clear timeout
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    console.log('🏗️ AuthProvider mounting...');
+    console.log('=== AUTH CONTEXT useEffect TRIGGERED ===');
+    console.log('0a. useEffect dependency array changed');
+    console.log('0b. Current window.location.href:', window.location.href);
+    console.log('0c. Current window.location.search:', window.location.search);
     
-    initializeAuth();
-    
-    return () => {
-      console.log('🧹 AuthProvider unmounting, cleaning up...');
-      if (authSubscriptionRef.current) {
-        authSubscriptionRef.current.unsubscribe();
-        authSubscriptionRef.current = null;
-      }
-      isInitializedRef.current = false;
+    const getInitialSession = async () => {
+      console.log('=== AUTH CONTEXT INITIALIZATION ===');
+      console.log('1. Getting initial session...');
+      
+      // Handle OAuth callback first - this is crucial!
+      const handleAuthCallback = async () => {
+        try {
+          console.log('2a. Checking for OAuth callback in URL...');
+          console.log('2b. Current URL:', window.location.href);
+          console.log('2c. URL Hash:', window.location.hash);
+          console.log('2d. URL Search:', window.location.search);
+          
+          // Check if we have OAuth tokens in URL hash
+          if (window.location.hash && window.location.hash.includes('access_token')) {
+            console.log('3a. OAuth callback detected in URL hash');
+            const { data, error } = await supabase.auth.getSessionFromUrl();
+            if (error) {
+              console.error('3b. OAuth callback error:', error);
+            }
+            if (data.session) {
+              console.log('3c. OAuth session established:', data.session.user.id);
+              setSession(data.session);
+              setUser(data.session.user);
+              setLoading(false);
+              return;
+            }
+          }
+          
+          // NEW: Also check for OAuth code in query parameters
+          console.log('2e. Checking query parameters...');
+          console.log('2f. Raw search string:', window.location.search);
+          console.log('2g. Search string length:', window.location.search.length);
+          console.log('2h. Search string type:', typeof window.location.search);
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          console.log('2i. URLSearchParams created');
+          console.log('2j. All URL params:', Object.fromEntries(urlParams.entries()));
+          
+          const code = urlParams.get('code');
+          console.log('2k. Code parameter value:', code);
+          
+          if (code) {
+            console.log('3d. OAuth code detected in query parameters:', code);
+            
+            try {
+              console.log('3e. Attempting to process OAuth code with Supabase...');
+              
+              // Method 1: Try exchangeCodeForSession (modern Supabase method)
+              if (supabase.auth.exchangeCodeForSession) {
+                console.log('3f. Method 1: exchangeCodeForSession');
+                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                console.log('3g. Method 1 result:', { data, error });
+                
+                if (data?.session) {
+                  console.log('3h. Method 1 successful - OAuth session established:', data.session.user.id);
+                  setSession(data.session);
+                  setUser(data.session.user);
+                  setLoading(false);
+                  
+                  // Clean up URL by removing the code parameter
+                  window.history.replaceState({}, '', window.location.origin);
+                  return;
+                }
+              } else {
+                console.log('3f. exchangeCodeForSession method not available');
+              }
+              
+              // Method 2: Try to refresh session (fallback)
+              console.log('3i. Method 2: refreshSession fallback');
+              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+              console.log('3j. Method 2 result:', { data: refreshData, error: refreshError });
+              
+              if (refreshData?.session) {
+                console.log('3k. Method 2 successful - Session refreshed:', refreshData.session.user.id);
+                setSession(refreshData.session);
+                setUser(refreshData.session.user);
+                setLoading(false);
+                
+                // Clean up URL by removing the code parameter
+                window.history.replaceState({}, '', window.location.origin);
+                return;
+              }
+              
+              // Method 3: Manual OAuth processing via direct API call
+              console.log('3l. Method 3: Manual OAuth processing via API');
+              try {
+                const response = await fetch(`${supabase.supabaseUrl}/auth/v1/token?grant_type=authorization_code&code=${code}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': supabase.supabaseKey
+                  }
+                });
+                
+                const tokenData = await response.json();
+                console.log('3m. Manual API response:', tokenData);
+                
+                if (tokenData.access_token) {
+                  console.log('3n. Manual API successful, setting session...');
+                  
+                  // Set the session manually
+                  const { data: manualData, error: manualError } = await supabase.auth.setSession({
+                    access_token: tokenData.access_token,
+                    refresh_token: tokenData.refresh_token
+                  });
+                  
+                  console.log('3o. Manual session set result:', { data: manualData, error: manualError });
+                  
+                  if (manualData?.session) {
+                    console.log('3p. Manual method successful - OAuth session established:', manualData.session.user.id);
+                    setSession(manualData.session);
+                    setUser(manualData.session.user);
+                    setLoading(false);
+                    
+                    // Clean up URL by removing the code parameter
+                    window.history.replaceState({}, '', window.location.origin);
+                    return;
+                  }
+                }
+              } catch (apiError) {
+                console.error('3q. Manual API method failed:', apiError);
+              }
+              
+              console.log('3r. All OAuth processing methods failed');
+              
+            } catch (error) {
+              console.error('3s. Error during OAuth processing:', error);
+            }
+          } else {
+            console.log('3d. No OAuth code found in query parameters');
+          }
+        } catch (error) {
+          console.error('3g. Error handling OAuth callback:', error);
+        }
+        
+        // Regular session check if no OAuth callback
+        console.log('4. No OAuth callback, checking regular session...');
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('DEBUG: Initial session check:', session?.user?.id || 'No session');
+        console.log('DEBUG: Session access token exists:', !!session?.access_token);
+        console.log('DEBUG: Full session:', session);
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        console.log('5. Initial session set, user:', session?.user?.id || 'No user');
+      };
+
+      // Add a small delay to ensure URL is fully loaded
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Debug Supabase client state
+      console.log('1a. Supabase client available:', !!supabase);
+      console.log('1b. Supabase auth available:', !!supabase.auth);
+      console.log('1c. Supabase auth methods:', Object.keys(supabase.auth || {}));
+      console.log('1d. exchangeCodeForSession available:', !!supabase.auth?.exchangeCodeForSession);
+      
+      await handleAuthCallback();
     };
+
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('=== AUTH STATE CHANGE ===');
+        console.log('DEBUG: Auth state changed:', event);
+        console.log('DEBUG: New session user ID:', session?.user?.id || 'No user');
+        console.log('DEBUG: New session access token exists:', !!session?.access_token);
+        console.log('DEBUG: Full new session:', session);
+        console.log('DEBUG: Event type:', event);
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+
+        // Handle user preferences creation
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('DEBUG: User signed in, creating preferences for:', session.user.id);
+          await createUserPreferencesIfNeeded(session.user.id);
+        }
+        
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('DEBUG: Token refreshed for user:', session?.user?.id);
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('DEBUG: User signed out');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Manual authentication methods
-  const signIn = async (email: string, password: string) => {
-    console.log('🔐 Manual sign in attempt for:', email);
+  const createUserPreferencesIfNeeded = async (userId: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error('❌ Manual sign in error:', error);
-        return { error };
+      const { data: existingPrefs } = await supabase
+        .from('user_preferences')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (!existingPrefs) {
+        await supabase.from('user_preferences').insert({
+          user_id: userId,
+          warranty_reminder_days: 30,
+          email_reminders_enabled: true,
+          warranty_display_format: 'days'
+        });
       }
-      
-      console.log('✅ Manual sign in successful:', data.user?.id);
-      return { error: null };
-    } catch (error: any) {
-      console.error('❌ Manual sign in exception:', error);
-      return { error };
+    } catch (error) {
+      console.error('Error handling user preferences:', error);
     }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { error };
   };
 
   const signUp = async (email: string, password: string) => {
-    console.log('📝 Manual sign up attempt for:', email);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error('❌ Manual sign up error:', error);
-        return { error };
-      }
-      
-      console.log('✅ Manual sign up successful:', data.user?.id);
-      return { error: null };
-    } catch (error: any) {
-      console.error('❌ Manual sign up exception:', error);
-      return { error };
-    }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    return { error };
   };
 
-  const signInWithGoogle = async () => {
-    console.log('🔐 Google OAuth sign in attempt...');
-    try {
-      const { data, error } = await supabaseSignInWithGoogle();
-      
-      if (error) {
-        console.error('❌ Google OAuth error:', error);
-        return { error };
-      }
-      
-      console.log('✅ Google OAuth initiated successfully');
-      return { error: null };
-    } catch (error: any) {
-      console.error('❌ Google OAuth exception:', error);
-      return { error };
-    }
+  const signInWithGoogle = async (options?: { redirectTo?: string }) => {
+    const { error } = await supabaseSignInWithGoogle(options);
+    return { error };
   };
 
   const signOut = async () => {
-    console.log('👋 Starting sign out process...');
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('❌ Error signing out:', error);
-        throw error;
-      }
-      
-      console.log('✅ Sign out successful');
-      
-      // Clear local storage
-      if (Platform.OS === 'web') {
-        localStorage.clear();
-      } else {
-        await AsyncStorage.clear();
-      }
-      
-      console.log('🧹 Local storage cleared');
-    } catch (error) {
-      console.error('❌ Sign out exception:', error);
-    }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   };
 
   const value = {
     user,
+    session,
     loading,
     signIn,
     signUp,
@@ -294,15 +285,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
   };
 
-  console.log('🎯 AuthContext state:', { 
-    user: user?.id || 'null', 
-    loading, 
-    isInitialized: isInitializedRef.current 
-  });
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

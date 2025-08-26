@@ -78,6 +78,7 @@ export default function DeviceListScreen() {
     setDeviceToDelete(null);
   };
 
+  // Show loading only when initially loading and no devices
   if (loading && devices.length === 0) {
     return (
       <View style={styles.loadingContainer}>
@@ -87,24 +88,12 @@ export default function DeviceListScreen() {
     );
   }
 
-  if (error) {
+  // Show error only when there's an error and no devices
+  if (error && devices.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>{error}</Text>
         <Text style={styles.emptySubtext}>Please try again later.</Text>
-      </View>
-    );
-  }
-
-  if (filteredDevices.length === 0) {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No items found</Text>
-        <Text style={styles.emptySubtext}>
-          {searchQuery || selectedFilter !== 'All' 
-            ? 'Try adjusting your search or filters' 
-            : 'Add your first item to get started'}
-        </Text>
       </View>
     );
   }
@@ -169,31 +158,44 @@ export default function DeviceListScreen() {
         />
       </View>
 
-      {/* Device List */}
-      <FlatList 
-        data={filteredDevices}
-        renderItem={({ item }) => (
-          <View key={item.id} style={styles.deviceCardWrapper}>
-            <DeviceCard
-              device={item}
-              onPress={() => handleDevicePress(item.id)}
-              onDelete={() => handleDeleteDevice(item.id)}
+      {/* Content Area - Show devices list or empty state */}
+      {filteredDevices.length === 0 ? (
+        // Empty state within the main layout
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No items found</Text>
+          <Text style={styles.emptySubtext}>
+            {searchQuery || selectedFilter !== 'All' 
+              ? 'Try adjusting your search or filters' 
+              : 'Add your first item to get started'}
+          </Text>
+        </View>
+      ) : (
+        // Device List
+        <FlatList 
+          data={filteredDevices}
+          renderItem={({ item }) => (
+            <View key={item.id} style={styles.deviceCardWrapper}>
+              <DeviceCard
+                device={item}
+                onPress={() => handleDevicePress(item.id)}
+                onDelete={() => handleDeleteDevice(item.id)}
+              />
+            </View>
+          )}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.deviceListContent}
+          scrollEventThrottle={16}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={handleRefresh}
+              colors={[theme.colors.primary[600]]}
+              tintColor={theme.colors.primary[600]}
             />
-          </View>
-        )}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.deviceListContent}
-        scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={handleRefresh}
-            colors={[theme.colors.primary[600]]}
-            tintColor={theme.colors.primary[600]}
-          />
-        }
-      />
+          }
+        />
+      )}
 
       <FabButton onPress={() => router.push({
         pathname: '/add-device',

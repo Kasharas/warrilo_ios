@@ -2,10 +2,12 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator, Switch, Image, Modal, Dimensions } from 'react-native';
 import { ArrowLeft, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
+import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+
 
 export default function AddDeviceScreen() {
   const router = useRouter();
@@ -117,7 +119,7 @@ export default function AddDeviceScreen() {
          purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
                  purchase_date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
         store_name: storeName || null,
-        warranty_duration: warrantyDuration || null,
+                 warranty_duration: warrantyDuration ? parseInt(warrantyDuration) : null,
         warranty_end_date: warrantyExpiryDate || null,
         notes: notes || null,
         image_url: deviceImage,
@@ -147,29 +149,23 @@ export default function AddDeviceScreen() {
     }
   };
 
-     // Calculate warranty expiry date when purchase date or warranty duration changes
-   useEffect(() => {
-     if (selectedDate && warrantyDuration) {
-       const purchase = new Date(selectedDate);
-       const duration = warrantyDuration;
-       
-       let expiryDate = new Date(purchase);
-       
-       if (duration.includes('Month')) {
-         const months = parseInt(duration.split(' ')[0]);
-         expiryDate.setMonth(expiryDate.getMonth() + months);
-       } else if (duration.includes('Year')) {
-         const years = parseInt(duration.split(' ')[0]);
-         expiryDate.setFullYear(expiryDate.getFullYear() + years);
-       } else if (duration === 'Lifetime') {
-         expiryDate = new Date('2099-12-31');
-       }
-       
-       setWarrantyExpiryDate(expiryDate.toLocaleDateString());
-     } else {
-       setWarrantyExpiryDate('');
-     }
-   }, [selectedDate, warrantyDuration]);
+           // Calculate warranty expiry date when purchase date or warranty duration changes
+    useEffect(() => {
+      if (selectedDate && warrantyDuration) {
+        const purchase = new Date(selectedDate);
+        const duration = parseInt(warrantyDuration);
+        
+        if (!isNaN(duration)) {
+          let expiryDate = new Date(purchase);
+          expiryDate.setMonth(expiryDate.getMonth() + duration);
+          setWarrantyExpiryDate(expiryDate.toLocaleDateString());
+        } else {
+          setWarrantyExpiryDate('');
+        }
+      } else {
+        setWarrantyExpiryDate('');
+      }
+    }, [selectedDate, warrantyDuration]);
 
   // Calculate scroll position to align all selections on same line
   const getScrollPosition = (selectedIndex, targetY = 0) => {
@@ -331,12 +327,13 @@ export default function AddDeviceScreen() {
               <Text style={styles.proFeatureText}>Auto receipt extraction</Text>
             </View>
             <Text style={styles.proBadge}>PRO</Text>
-            <Switch
-              value={autoReceiptExtraction}
-              onValueChange={setAutoReceiptExtraction}
-              trackColor={{ false: theme.colors.neutral[200], true: theme.colors.primary[600] }}
-              thumbColor={theme.colors.white}
-            />
+                         <Switch
+               value={autoReceiptExtraction}
+               onValueChange={setAutoReceiptExtraction}
+               trackColor={{ false: '#E5E5EA', true: '#E5E5EA' }}
+               thumbColor={autoReceiptExtraction ? '#10B981' : '#FF3B30'}
+               ios_backgroundColor="#E5E5EA"
+             />
           </View>
         </View>
 
@@ -354,19 +351,27 @@ export default function AddDeviceScreen() {
              />
           </View>
 
-          <View style={styles.inputGroup}>
-                         <TextInput
-               style={styles.textInput}
-               value={brand}
-               onChangeText={setBrand}
-               placeholder="Enter brand name"
-               placeholderTextColor="#8E8E93"
-             />
-          </View>
+                     <View style={styles.inputGroup}>
+                          <TextInput
+                style={styles.textInput}
+                value={brand}
+                onChangeText={setBrand}
+                placeholder="Enter brand name"
+                placeholderTextColor="#8E8E93"
+              />
+           </View>
 
+           <View style={styles.inputGroup}>
+                          <TextInput
+                style={styles.textInput}
+                value={modelNumber}
+                onChangeText={setModelNumber}
+                placeholder="Enter model number"
+                placeholderTextColor="#8E8E93"
+              />
+           </View>
 
-
-          <View style={styles.inputGroup}>
+           <View style={styles.inputGroup}>
                          <TextInput
                style={styles.textInput}
                value={serialNumber}
@@ -449,47 +454,26 @@ export default function AddDeviceScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Warranty Information</Text>
           
-          <View style={styles.inputGroup}>
-            <View style={styles.dropdownContainer}>
-              <Pressable 
-                style={styles.dropdownButton}
-                onPress={() => setShowWarrantyDropdown(!showWarrantyDropdown)}
-              >
-                <Text style={[styles.dropdownText, !warrantyDuration && styles.dropdownPlaceholder]}>
-                  {warrantyDuration || 'Choose duration'}
-                </Text>
-                <ChevronDown size={20} color={theme.colors.neutral[400]} />
-              </Pressable>
-              
-              <View style={[
-                styles.dropdownOptions,
-                { opacity: showWarrantyDropdown ? 1 : 0, height: showWarrantyDropdown ? 'auto' : 0 }
-              ]}>
-                {warrantyDurations.map((duration) => (
-                  <Pressable
-                    key={duration}
-                    style={styles.dropdownOption}
-                    onPress={() => {
-                      setWarrantyDuration(duration);
-                      setShowWarrantyDropdown(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownOptionText}>{duration}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          </View>
+                     <View style={styles.inputGroup}>
+             <TextInput
+               style={styles.textInput}
+               value={warrantyDuration}
+               onChangeText={setWarrantyDuration}
+               placeholder="Enter warranty duration (months)"
+               placeholderTextColor="#8E8E93"
+               keyboardType="numeric"
+             />
+           </View>
 
-          <View style={styles.warrantyExpiryInfo}>
-            <Text style={styles.warrantyExpiryLabel}>Warranty expires on</Text>
-            <Text style={[
-              styles.warrantyExpiryDate,
-              !warrantyExpiryDate && styles.warrantyExpiryPlaceholder
-            ]}>
-              {warrantyExpiryDate || 'Select purchase date and duration'}
-            </Text>
-          </View>
+                     <View style={styles.warrantyExpiryInfo}>
+                           <Text style={styles.warrantyExpiryLabel}>Active </Text>
+             <Text style={[
+               styles.warrantyExpiryDate,
+               !warrantyExpiryDate && styles.warrantyExpiryPlaceholder
+             ]}>
+               {warrantyExpiryDate || 'Select purchase date and duration'}
+             </Text>
+           </View>
         </View>
 
         {/* Submit Button */}
@@ -552,12 +536,12 @@ export default function AddDeviceScreen() {
                        setTempSelectedCategory(cat); // Only update temporary selection
                      }}
                    >
-                     <Text style={[
-                       styles.pickerOptionText,
-                       tempSelectedCategory === cat && styles.pickerOptionSelected
-                     ]}>
-                       {cat}
-                     </Text>
+                                           <Text style={[
+                        styles.pickerOptionText,
+                        tempSelectedCategory === cat && styles.pickerOptionTextSelected
+                      ]}>
+                        {cat}
+                      </Text>
                    </Pressable>
                  ))}
                </View>
@@ -743,9 +727,9 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.lg,
   },
   headerTitle: {
-    fontSize: theme.fontSize['2xl'],
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.neutral[900],
+    fontSize: iosFonts.title1,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
   },
   saveButton: {
     fontSize: theme.fontSize.base,
@@ -760,13 +744,13 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing['3xl'],
   },
   sectionTitle: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral[900],
-    marginBottom: theme.spacing.lg,
+    fontSize: iosFonts.title3,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.label,
+    marginBottom: iosSpacing.lg,
   },
   inputGroup: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: iosSpacing.lg,
   },
   inputLabel: {
     fontSize: theme.fontSize.base,
@@ -774,21 +758,21 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral[700],
     marginBottom: theme.spacing.xs,
   },
-     textInput: {
-     borderWidth: 1,
-     borderColor: theme.colors.neutral[200],
-     borderRadius: theme.borderRadius.md,
-     paddingHorizontal: theme.spacing.lg,
-     paddingVertical: theme.spacing.lg,
-     fontSize: 17,
-     color: '#000',
-     backgroundColor: theme.colors.white,
-     shadowColor: theme.colors.neutral[900],
-     shadowOffset: { width: 0, height: 1 },
-     shadowOpacity: 0.06,
-     shadowRadius: 4,
-     elevation: 2,
-   },
+           textInput: {
+      borderWidth: 1,
+      borderColor: iosColors.systemGray5,
+      borderRadius: iosRadius.md,
+      paddingHorizontal: iosSpacing.lg,
+      paddingVertical: iosSpacing.lg,
+      fontSize: iosFonts.body,
+      color: iosColors.label,
+      backgroundColor: iosColors.systemBackground,
+      shadowColor: iosColors.label,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -834,285 +818,290 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   submitButton: {
-    backgroundColor: theme.colors.primary[600],
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: theme.spacing.lg,
+    backgroundColor: iosColors.systemBlue,
+    borderRadius: iosRadius.md,
+    paddingVertical: iosSpacing.lg,
     alignItems: 'center',
-    marginTop: theme.spacing.xl,
-    marginBottom: theme.spacing['4xl'],
-    ...theme.shadows.sm,
+    marginTop: iosSpacing.xl,
+    marginBottom: iosSpacing.xxxl,
+    shadowColor: iosColors.label,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
   submitButtonText: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.white,
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.systemBackground,
   },
   submitButtonDisabled: {
     opacity: 0.6,
   },
   bottomSpacing: {
-    height: theme.spacing['4xl'],
+    height: iosSpacing.xxxl,
   },
-     dropdownContainer: {
-     position: 'relative',
-     borderWidth: 1,
-     borderColor: theme.colors.neutral[200],
-     borderRadius: theme.borderRadius.md,
-     overflow: 'hidden',
-     shadowColor: theme.colors.neutral[900],
-     shadowOffset: { width: 0, height: 1 },
-     shadowOpacity: 0.06,
-     shadowRadius: 4,
-     elevation: 2,
-   },
-  dropdownButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.lg,
-    backgroundColor: theme.colors.white,
-  },
-  dropdownText: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[700],
-  },
-  dropdownPlaceholder: {
-    color: theme.colors.neutral[400],
-  },
-  dropdownOptions: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: theme.colors.white,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[200],
-    borderRadius: theme.borderRadius.md,
-    overflow: 'hidden',
-    zIndex: 1,
-  },
-  dropdownOption: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.neutral[100],
-  },
-  dropdownOptionText: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[700],
-  },
-     uploadRow: {
-     flexDirection: 'row',
-     gap: theme.spacing.md,
-   },
-   uploadZone: {
-     flex: 1,
-     backgroundColor: theme.colors.neutral[100],
-     borderRadius: theme.borderRadius.md,
-     padding: theme.spacing.lg,
-     borderWidth: 1,
-     borderColor: theme.colors.neutral[200],
-     alignItems: 'center',
-     justifyContent: 'center',
-     minHeight: 120,
-     shadowColor: theme.colors.neutral[900],
-     shadowOffset: { width: 0, height: 2 },
-     shadowOpacity: 0.08,
-     shadowRadius: 8,
-     elevation: 3,
-   },
-   imagePreviewContainer: {
-     alignItems: 'center',
-     justifyContent: 'center',
-     minHeight: 120,
-     shadowColor: theme.colors.neutral[900],
-     shadowOffset: { width: 0, height: 2 },
-     shadowOpacity: 0.08,
-     shadowRadius: 8,
-     elevation: 3,
-   },
-   imagePreview: {
-     width: '100%',
-     height: 200,
-     borderRadius: theme.borderRadius.md,
-   },
-   imageWrapper: {
-     position: 'relative',
-     width: '100%',
-   },
-       removeImageButton: {
-      position: 'absolute',
-      top: -11,
-      right: -8,
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: '#FF3B30',
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-       removeImageButtonText: {
-      color: '#FFFFFF',
-      fontSize: 16,
-      fontWeight: '600',
-      textAlign: 'center',
-      textAlignVertical: 'center',
-      includeFontPadding: false,
-      width: 24,
-      height: 24,
-      lineHeight: 24,
-      marginTop: -2,
-    },
-  uploadContent: {
-    alignItems: 'center',
-  },
-  uploadText: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[400],
-    marginTop: theme.spacing.sm,
-    textAlign: 'center',
-  },
-  uploadSuccessText: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.success[500],
-    marginTop: theme.spacing.sm,
-  },
-  changePhotoButton: {
-    marginTop: theme.spacing.sm,
-  },
-  changePhotoText: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.primary[600],
-    textDecorationLine: 'underline',
-  },
-     warrantyExpiryInfo: {
-     backgroundColor: theme.colors.neutral[50],
-     borderRadius: theme.borderRadius.md,
-     padding: theme.spacing.lg,
-     borderWidth: 1,
-     borderColor: theme.colors.neutral[200],
-     minHeight: 80,
-     alignItems: 'center',
-     justifyContent: 'center',
-     shadowColor: theme.colors.neutral[900],
-     shadowOffset: { width: 0, height: 2 },
-     shadowOpacity: 0.08,
-     shadowRadius: 8,
-     elevation: 3,
-   },
-  warrantyExpiryLabel: {
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.neutral[600],
-    marginBottom: theme.spacing.xs,
-  },
-  warrantyExpiryDate: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral[900],
-  },
-  warrantyExpiryPlaceholder: {
-    color: theme.colors.neutral[400],
-    fontWeight: theme.fontWeight.normal,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: theme.spacing.sm,
-  },
-  backText: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[600],
-    marginLeft: theme.spacing.xs,
-  },
-  saveButtonText: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.primary[600],
-  },
-                       proFeatureRow: {
-         flexDirection: 'row',
-         justifyContent: 'space-between',
-         alignItems: 'center',
-         marginTop: theme.spacing.lg,
-         paddingHorizontal: theme.spacing.lg,
-         paddingVertical: theme.spacing.lg,
-         backgroundColor: theme.colors.neutral[50],
-         borderRadius: theme.borderRadius.md,
-       },
-  proFeatureInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  proFeatureText: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[600],
-    marginLeft: theme.spacing.sm,
-  },
-  proBadge: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: theme.spacing.xs,
-    paddingVertical: theme.spacing.xs,
-    marginLeft: 'auto',
-    marginRight: theme.spacing.md,
-    fontSize: theme.fontSize.sm,
-    fontWeight: '600',
-    color: '#22C55E',
-    letterSpacing: 0.3,
-  },
-  
-     dateInputContainer: {
-     flexDirection: 'row',
-     alignItems: 'center',
-     borderWidth: 1,
-     borderColor: theme.colors.neutral[200],
-     borderRadius: theme.borderRadius.md,
-     paddingHorizontal: theme.spacing.lg,
-     paddingVertical: theme.spacing.lg,
-     backgroundColor: theme.colors.white,
-     shadowColor: theme.colors.neutral[900],
-     shadowOffset: { width: 0, height: 1 },
-     shadowOpacity: 0.06,
-     shadowRadius: 4,
-     elevation: 2,
-   },
-     dateInput: {
-     flex: 1,
-     paddingRight: theme.spacing.sm,
-     fontSize: 17,
-     color: '#000',
-   },
-   
-       // Apple-style picker styles
-    categoryButton: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+           dropdownContainer: {
+      position: 'relative',
       borderWidth: 1,
-      borderColor: theme.colors.neutral[200],
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.lg,
-      backgroundColor: theme.colors.white,
-      shadowColor: theme.colors.neutral[900],
+      borderColor: iosColors.systemGray5,
+      borderRadius: iosRadius.md,
+      overflow: 'hidden',
+      shadowColor: iosColors.label,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.06,
       shadowRadius: 4,
       elevation: 2,
     },
-   categoryButtonText: {
-     fontSize: 17,
-     color: '#000',
+     dropdownButton: {
+     flexDirection: 'row',
+     justifyContent: 'space-between',
+     alignItems: 'center',
+     paddingHorizontal: iosSpacing.lg,
+     paddingVertical: iosSpacing.lg,
+     backgroundColor: iosColors.systemBackground,
    },
-   categoryPlaceholder: {
-     color: '#8E8E93',
+     dropdownText: {
+     fontSize: iosFonts.body,
+     color: iosColors.label,
    },
+     dropdownPlaceholder: {
+     color: iosColors.placeholderText,
+   },
+     dropdownOptions: {
+     position: 'absolute',
+     top: '100%',
+     left: 0,
+     right: 0,
+     backgroundColor: iosColors.systemBackground,
+     borderWidth: 1,
+     borderColor: iosColors.systemGray5,
+     borderRadius: iosRadius.md,
+     overflow: 'hidden',
+     zIndex: 1,
+   },
+     dropdownOption: {
+     paddingHorizontal: iosSpacing.lg,
+     paddingVertical: iosSpacing.lg,
+     borderBottomWidth: 1,
+     borderBottomColor: iosColors.systemGray6,
+   },
+     dropdownOptionText: {
+     fontSize: iosFonts.body,
+     color: iosColors.label,
+   },
+           uploadRow: {
+      flexDirection: 'row',
+      gap: iosSpacing.md,
+    },
+       uploadZone: {
+      flex: 1,
+      backgroundColor: iosColors.systemGray6,
+      borderRadius: iosRadius.md,
+      padding: iosSpacing.lg,
+      borderWidth: 1,
+      borderColor: iosColors.systemGray5,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 120,
+      shadowColor: iosColors.label,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+       imagePreviewContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 120,
+      shadowColor: iosColors.label,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+       imagePreview: {
+      width: '100%',
+      height: 200,
+      borderRadius: iosRadius.md,
+    },
+   imageWrapper: {
+     position: 'relative',
+     width: '100%',
+   },
+               removeImageButton: {
+       position: 'absolute',
+       top: -11,
+       right: -8,
+       width: 24,
+       height: 24,
+       borderRadius: iosRadius.pill,
+       backgroundColor: iosColors.systemRed,
+       alignItems: 'center',
+       justifyContent: 'center',
+       shadowColor: iosColors.label,
+       shadowOffset: { width: 0, height: 2 },
+       shadowOpacity: 0.25,
+       shadowRadius: 4,
+       elevation: 5,
+     },
+               removeImageButtonText: {
+       color: iosColors.systemBackground,
+       fontSize: iosFonts.callout,
+       fontWeight: iosFonts.semibold,
+       textAlign: 'center',
+       textAlignVertical: 'center',
+       includeFontPadding: false,
+       width: 24,
+       height: 24,
+       lineHeight: 24,
+       marginTop: -2,
+     },
+  uploadContent: {
+    alignItems: 'center',
+  },
+     uploadText: {
+     fontSize: iosFonts.body,
+     color: iosColors.systemGray,
+     marginTop: iosSpacing.sm,
+     textAlign: 'center',
+   },
+     uploadSuccessText: {
+     fontSize: iosFonts.body,
+     color: iosColors.systemGreen,
+     marginTop: iosSpacing.sm,
+   },
+     changePhotoButton: {
+     marginTop: iosSpacing.sm,
+   },
+     changePhotoText: {
+     fontSize: iosFonts.footnote,
+     color: iosColors.systemBlue,
+     textDecorationLine: 'underline',
+   },
+                       warrantyExpiryInfo: {
+       backgroundColor: iosColors.systemGray6,
+       borderRadius: iosRadius.md,
+       padding: iosSpacing.lg,
+       borderWidth: 1,
+       borderColor: iosColors.systemGray5,
+       minHeight: 60,
+       flexDirection: 'row',
+       alignItems: 'center',
+       justifyContent: 'center',
+       shadowColor: iosColors.label,
+       shadowOffset: { width: 0, height: 2 },
+       shadowOpacity: 0.08,
+       shadowRadius: 8,
+       elevation: 3,
+     },
+       warrantyExpiryLabel: {
+      fontSize: iosFonts.body,
+      fontWeight: iosFonts.medium,
+      color: iosColors.systemGreen,
+      marginRight: iosSpacing.xs,
+    },
+       warrantyExpiryDate: {
+      fontSize: iosFonts.body,
+      fontWeight: iosFonts.semibold,
+      color: iosColors.systemGreen,
+    },
+     warrantyExpiryPlaceholder: {
+     color: iosColors.placeholderText,
+     fontWeight: iosFonts.regular,
+   },
+     backButton: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     marginRight: iosSpacing.sm,
+   },
+     backText: {
+     fontSize: iosFonts.body,
+     color: iosColors.systemGray,
+     marginLeft: iosSpacing.xs,
+   },
+  saveButtonText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.systemBlue,
+  },
+                                               proFeatureRow: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: iosSpacing.lg,
+          paddingHorizontal: iosSpacing.lg,
+          paddingVertical: iosSpacing.lg,
+          backgroundColor: iosColors.systemGray6,
+          borderRadius: iosRadius.md,
+        },
+  proFeatureInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+     proFeatureText: {
+     fontSize: iosFonts.body,
+     color: iosColors.systemGray,
+     marginLeft: iosSpacing.sm,
+   },
+     proBadge: {
+     backgroundColor: 'transparent',
+     paddingHorizontal: iosSpacing.xs,
+     paddingVertical: iosSpacing.xs,
+     marginLeft: 'auto',
+     marginRight: iosSpacing.md,
+     fontSize: iosFonts.footnote,
+     fontWeight: iosFonts.semibold,
+     color: iosColors.systemGreen,
+     letterSpacing: 0.3,
+   },
+  
+           dateInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: iosColors.systemGray5,
+      borderRadius: iosRadius.md,
+      paddingHorizontal: iosSpacing.lg,
+      paddingVertical: iosSpacing.lg,
+      backgroundColor: iosColors.systemBackground,
+      shadowColor: iosColors.label,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+           dateInput: {
+      flex: 1,
+      paddingRight: iosSpacing.sm,
+      fontSize: iosFonts.body,
+      color: iosColors.label,
+    },
+   
+       // Apple-style picker styles
+         categoryButton: {
+       flexDirection: 'row',
+       justifyContent: 'space-between',
+       alignItems: 'center',
+       borderWidth: 1,
+       borderColor: iosColors.systemGray5,
+       borderRadius: iosRadius.md,
+       paddingHorizontal: iosSpacing.lg,
+       paddingVertical: iosSpacing.lg,
+       backgroundColor: iosColors.systemBackground,
+       shadowColor: iosColors.label,
+       shadowOffset: { width: 0, height: 1 },
+       shadowOpacity: 0.06,
+       shadowRadius: 4,
+       elevation: 2,
+     },
+       categoryButtonText: {
+      fontSize: iosFonts.body,
+      color: iosColors.label,
+    },
+       categoryPlaceholder: {
+      color: iosColors.placeholderText,
+    },
    modalOverlay: {
      flex: 1,
      justifyContent: 'flex-end',
@@ -1121,126 +1110,135 @@ const styles = StyleSheet.create({
    modalBackdrop: {
      flex: 1,
    },
-   pickerContainer: {
-     backgroundColor: '#F2F2F7',
-     borderTopLeftRadius: 16,
-     borderTopRightRadius: 16,
-     paddingBottom: 34, // Safe area bottom
-   },
-   pickerHeader: {
-     flexDirection: 'row',
-     justifyContent: 'space-between',
-     alignItems: 'center',
-     paddingHorizontal: 16,
-     paddingVertical: 16,
-     backgroundColor: '#FFFFFF',
-     borderTopLeftRadius: 16,
-     borderTopRightRadius: 16,
-     borderBottomWidth: 0.5,
-     borderBottomColor: '#C7C7CC',
-   },
-   cancelButton: {
-     fontSize: 17,
-     color: '#007AFF',
-   },
-   pickerTitle: {
-     fontSize: 17,
-     fontWeight: '600',
-     color: '#000',
-   },
-   doneButton: {
-     fontSize: 17,
-     color: '#007AFF',
-     fontWeight: '600',
-   },
-   pickerWheel: {
-     paddingVertical: 20,
-   },
-   pickerOption: {
-     paddingHorizontal: 16,
-     paddingVertical: 16,
-     alignItems: 'center',
-     backgroundColor: 'transparent',
-   },
-   pickerOptionSelected: {
-     backgroundColor: '#007AFF',
-   },
-   pickerOptionText: {
-     fontSize: 20,
-     color: '#000',
-     fontWeight: '400',
-   },
-   pickerOptionTextSelected: {
-     color: '#FFFFFF',
-     fontWeight: '600',
-   },
-
-       // Date picker styles
-    dateButton: {
+       pickerContainer: {
+      backgroundColor: iosColors.secondarySystemBackground,
+      borderTopLeftRadius: iosRadius.xl,
+      borderTopRightRadius: iosRadius.xl,
+      paddingBottom: iosSpacing.safeBottom, // Safe area bottom
+    },
+       pickerHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      borderWidth: 1,
-      borderColor: theme.colors.neutral[200],
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.lg,
-      backgroundColor: theme.colors.white,
-      shadowColor: theme.colors.neutral[900],
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.06,
-      shadowRadius: 4,
-      elevation: 2,
+      paddingHorizontal: iosSpacing.lg,
+      paddingVertical: iosSpacing.lg,
+      backgroundColor: iosColors.systemBackground,
+      borderTopLeftRadius: iosRadius.xl,
+      borderTopRightRadius: iosRadius.xl,
+      borderBottomWidth: 0.5,
+      borderBottomColor: iosColors.systemGray3,
     },
-   dateButtonText: {
-     fontSize: 17,
-     color: '#000',
-   },
-   datePlaceholder: {
-     color: '#8E8E93',
-   },
-   datePickerContainer: {
-     backgroundColor: '#F2F2F7',
-     borderTopLeftRadius: 16,
-     borderTopRightRadius: 16,
-     paddingBottom: 34,
-     maxHeight: '60%',
-   },
-   dateWheelContainer: {
-     flexDirection: 'row',
-     paddingVertical: 20,
-     paddingHorizontal: 20,
-   },
-       wheelColumn: {
-      flex: 1,
-      height: 200, // Fixed height for scrollable area
-      marginHorizontal: 5,
+       cancelButton: {
+      fontSize: iosFonts.body,
+      color: iosColors.systemBlue,
     },
+       pickerTitle: {
+      fontSize: iosFonts.body,
+      fontWeight: iosFonts.semibold,
+      color: iosColors.label,
+    },
+       doneButton: {
+      fontSize: iosFonts.body,
+      color: iosColors.systemBlue,
+      fontWeight: iosFonts.semibold,
+    },
+               pickerWheel: {
+       paddingVertical: iosSpacing.xl,
+       paddingHorizontal: iosSpacing.sm,
+     },
+               pickerOption: {
+       paddingHorizontal: iosSpacing.lg,
+       paddingVertical: iosSpacing.lg,
+       alignItems: 'center',
+       backgroundColor: 'transparent',
+       borderRadius: iosRadius.md,
+       marginHorizontal: iosSpacing.sm,
+       marginVertical: iosSpacing.xs,
+     },
+               pickerOptionSelected: {
+       backgroundColor: iosColors.systemBlue,
+       borderRadius: iosRadius.md,
+       marginHorizontal: iosSpacing.sm,
+       marginVertical: iosSpacing.xs,
+     },
+       pickerOptionText: {
+      fontSize: iosFonts.title3,
+      color: iosColors.label,
+      fontWeight: iosFonts.regular,
+    },
+       pickerOptionTextSelected: {
+      color: iosColors.systemBackground,
+      fontWeight: iosFonts.semibold,
+    },
+
+       // Date picker styles
+         dateButton: {
+       flexDirection: 'row',
+       justifyContent: 'space-between',
+       alignItems: 'center',
+       borderWidth: 1,
+       borderColor: iosColors.systemGray5,
+       borderRadius: iosRadius.md,
+       paddingHorizontal: iosSpacing.lg,
+       paddingVertical: iosSpacing.lg,
+       backgroundColor: iosColors.systemBackground,
+       shadowColor: iosColors.label,
+       shadowOffset: { width: 0, height: 1 },
+       shadowOpacity: 0.06,
+       shadowRadius: 4,
+       elevation: 2,
+     },
+       dateButtonText: {
+      fontSize: iosFonts.body,
+      color: iosColors.label,
+    },
+       datePlaceholder: {
+      color: iosColors.placeholderText,
+    },
+       datePickerContainer: {
+      backgroundColor: iosColors.secondarySystemBackground,
+      borderTopLeftRadius: iosRadius.xl,
+      borderTopRightRadius: iosRadius.xl,
+      paddingBottom: iosSpacing.safeBottom,
+      maxHeight: '60%',
+    },
+       dateWheelContainer: {
+      flexDirection: 'row',
+      paddingVertical: iosSpacing.xl,
+      paddingHorizontal: iosSpacing.xl,
+    },
+               wheelColumn: {
+       flex: 1,
+       height: 200, // Fixed height for scrollable area
+       marginHorizontal: iosSpacing.xs,
+     },
     wheelScrollContent: {
       paddingVertical: 0, // Remove padding to allow proper alignment
     },
     wheelScrollView: {
       maxHeight: 200,
     },
-       wheelOption: {
-      height: 44,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 8,
-      marginVertical: 1,
-      paddingHorizontal: 10,
+               wheelOption: {
+       height: iosSpacing.minTouch,
+       justifyContent: 'center',
+       alignItems: 'center',
+       borderRadius: iosRadius.sm,
+       marginVertical: 1,
+       paddingHorizontal: iosSpacing.md,
+     },
+       wheelOptionSelected: {
+      backgroundColor: iosColors.systemBlue,
     },
-   wheelOptionSelected: {
-     backgroundColor: '#007AFF',
-   },
-   wheelOptionText: {
-     fontSize: 20,
-     color: '#000',
-     fontWeight: '400',
-   },
-   wheelOptionTextSelected: {
-     color: '#FFFFFF',
-     fontWeight: '600',
-   },
+       wheelOptionText: {
+      fontSize: iosFonts.title3,
+      color: iosColors.label,
+      fontWeight: iosFonts.regular,
+    },
+               wheelOptionTextSelected: {
+      color: iosColors.systemBackground,
+      fontWeight: iosFonts.semibold,
+    },
+
+
  
   });

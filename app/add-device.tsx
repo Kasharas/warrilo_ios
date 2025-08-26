@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator, Switch, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator, Switch, Image, Modal, Dimensions } from 'react-native';
 import { ArrowLeft, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -47,6 +47,8 @@ export default function AddDeviceScreen() {
   // UI state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showWarrantyDropdown, setShowWarrantyDropdown] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const handleBackPress = () => {
     console.log('Back button pressed - function called');
@@ -92,14 +94,14 @@ export default function AddDeviceScreen() {
 
     try {
       // Mock device creation
-      const newDevice = {
-        id: Date.now().toString(),
-        name: deviceName,
-        brand: brand || null,
-        modelNumber: modelNumber || null,
-        serialNumber: serialNumber || null,
-        category: category || 'Other',
-        purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
+             const newDevice = {
+         id: Date.now().toString(),
+         name: deviceName,
+         brand: brand || null,
+         modelNumber: modelNumber || null,
+         serialNumber: serialNumber || null,
+         category: selectedCategory || 'Other',
+         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
         purchase_date: purchaseDate || null,
         store_name: storeName || null,
         warranty_duration: warrantyDuration || null,
@@ -319,37 +321,20 @@ export default function AddDeviceScreen() {
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <View style={styles.dropdownContainer}>
-              <Pressable 
-                style={styles.dropdownButton}
-                onPress={() => setShowCategoryDropdown(!showCategoryDropdown)}
-              >
-                <Text style={[styles.dropdownText, !category && styles.dropdownPlaceholder]}>
-                  {category || 'Choose category'}
-                </Text>
-                <ChevronDown size={20} color={theme.colors.neutral[400]} />
-              </Pressable>
-              
-              <View style={[
-                styles.dropdownOptions,
-                { opacity: showCategoryDropdown ? 1 : 0, height: showCategoryDropdown ? 'auto' : 0 }
-              ]}>
-                {categories.map((cat) => (
-                  <Pressable
-                    key={cat}
-                    style={styles.dropdownOption}
-                    onPress={() => {
-                      setCategory(cat);
-                      setShowCategoryDropdown(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownOptionText}>{cat}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          </View>
+                     <View style={styles.inputGroup}>
+             <Pressable 
+               style={styles.categoryButton}
+               onPress={() => setShowCategoryPicker(true)}
+             >
+               <Text style={[
+                 styles.categoryButtonText,
+                 !selectedCategory && styles.categoryPlaceholder
+               ]}>
+                 {selectedCategory || 'Choose category'}
+               </Text>
+               <ChevronDown size={20} color="#999" />
+             </Pressable>
+           </View>
         </View>
 
         {/* Purchase Details Section */}
@@ -451,8 +436,60 @@ export default function AddDeviceScreen() {
           )}
         </Pressable>
 
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+                 <View style={styles.bottomSpacing} />
+         
+         {/* Category Picker Modal */}
+         <Modal
+           visible={showCategoryPicker}
+           transparent
+           animationType="slide"
+           onRequestClose={() => setShowCategoryPicker(false)}
+         >
+           <View style={styles.modalOverlay}>
+             <Pressable 
+               style={styles.modalBackdrop} 
+               onPress={() => setShowCategoryPicker(false)} 
+             />
+             
+             <View style={styles.pickerContainer}>
+               {/* Header */}
+               <View style={styles.pickerHeader}>
+                 <Pressable onPress={() => setShowCategoryPicker(false)}>
+                   <Text style={styles.cancelButton}>Cancel</Text>
+                 </Pressable>
+                 <Text style={styles.pickerTitle}>Category</Text>
+                 <Pressable onPress={() => setShowCategoryPicker(false)}>
+                   <Text style={styles.doneButton}>Done</Text>
+                 </Pressable>
+               </View>
+               
+               {/* Picker Wheel */}
+               <View style={styles.pickerWheel}>
+                 {categories.map((cat) => (
+                   <Pressable
+                     key={cat}
+                     style={[
+                       styles.pickerOption,
+                       selectedCategory === cat && styles.pickerOptionSelected
+                     ]}
+                     onPress={() => {
+                       setSelectedCategory(cat);
+                       setCategory(cat);
+                     }}
+                   >
+                     <Text style={[
+                       styles.pickerOptionText,
+                       selectedCategory === cat && styles.pickerOptionTextSelected
+                     ]}>
+                       {cat}
+                     </Text>
+                   </Pressable>
+                 ))}
+               </View>
+             </View>
+           </View>
+         </Modal>
+       </ScrollView>
     </SafeAreaView>
   );
 }
@@ -808,9 +845,95 @@ const styles = StyleSheet.create({
      shadowRadius: 4,
      elevation: 2,
    },
-  dateInput: {
-    flex: 1,
-    paddingRight: theme.spacing.sm,
-  },
-
-});
+     dateInput: {
+     flex: 1,
+     paddingRight: theme.spacing.sm,
+   },
+   
+       // Apple-style picker styles
+    categoryButton: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.neutral[200],
+      borderRadius: theme.borderRadius.md,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.lg,
+      backgroundColor: theme.colors.white,
+      shadowColor: theme.colors.neutral[900],
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+   categoryButtonText: {
+     fontSize: 17,
+     color: '#000',
+   },
+   categoryPlaceholder: {
+     color: '#8E8E93',
+   },
+   modalOverlay: {
+     flex: 1,
+     justifyContent: 'flex-end',
+     backgroundColor: 'rgba(0,0,0,0.4)',
+   },
+   modalBackdrop: {
+     flex: 1,
+   },
+   pickerContainer: {
+     backgroundColor: '#F2F2F7',
+     borderTopLeftRadius: 16,
+     borderTopRightRadius: 16,
+     paddingBottom: 34, // Safe area bottom
+   },
+   pickerHeader: {
+     flexDirection: 'row',
+     justifyContent: 'space-between',
+     alignItems: 'center',
+     paddingHorizontal: 16,
+     paddingVertical: 16,
+     backgroundColor: '#FFFFFF',
+     borderTopLeftRadius: 16,
+     borderTopRightRadius: 16,
+     borderBottomWidth: 0.5,
+     borderBottomColor: '#C7C7CC',
+   },
+   cancelButton: {
+     fontSize: 17,
+     color: '#007AFF',
+   },
+   pickerTitle: {
+     fontSize: 17,
+     fontWeight: '600',
+     color: '#000',
+   },
+   doneButton: {
+     fontSize: 17,
+     color: '#007AFF',
+     fontWeight: '600',
+   },
+   pickerWheel: {
+     paddingVertical: 20,
+   },
+   pickerOption: {
+     paddingHorizontal: 16,
+     paddingVertical: 16,
+     alignItems: 'center',
+     backgroundColor: 'transparent',
+   },
+   pickerOptionSelected: {
+     backgroundColor: '#007AFF',
+   },
+   pickerOptionText: {
+     fontSize: 20,
+     color: '#000',
+     fontWeight: '400',
+   },
+   pickerOptionTextSelected: {
+     color: '#FFFFFF',
+     fontWeight: '600',
+   },
+ 
+  });

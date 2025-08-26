@@ -1,15 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator } from 'react-native';
-import { ArrowLeft, Camera, Upload, X, Plus } from 'lucide-react-native';
+import { ArrowLeft, Camera, Upload, X, Plus, ChevronDown } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { UploadZone } from '@/src/components/UploadZone';
 
 export default function AddDeviceScreen() {
   const router = useRouter();
-  const { user } = useRouter();
+  const { user } = useAuth();
   
   // Form state
   const [deviceName, setDeviceName] = useState('');
@@ -19,7 +18,8 @@ export default function AddDeviceScreen() {
   const [purchasePrice, setPurchasePrice] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [storeName, setStoreName] = useState('');
-  const [warrantyEndDate, setWarrantyEndDate] = useState('');
+  const [warrantyDuration, setWarrantyDuration] = useState('');
+  const [warrantyExpiryDate, setWarrantyExpiryDate] = useState('');
   const [notes, setNotes] = useState('');
   
   // Image state
@@ -28,6 +28,10 @@ export default function AddDeviceScreen() {
   
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // UI state
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showWarrantyDropdown, setShowWarrantyDropdown] = useState(false);
 
   const handleBackPress = () => {
     router.back();
@@ -62,7 +66,7 @@ export default function AddDeviceScreen() {
         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
         purchase_date: purchaseDate || null,
         store_name: storeName || null,
-        warranty_end_date: warrantyEndDate || null,
+        warranty_end_date: warrantyExpiryDate || null,
         notes: notes || null,
         image_url: deviceImage,
         receipt_url: receiptImage,
@@ -90,6 +94,30 @@ export default function AddDeviceScreen() {
     }
   };
 
+  // Calculate warranty expiry date when purchase date or warranty duration changes
+  useEffect(() => {
+    if (purchaseDate && warrantyDuration) {
+      const purchase = new Date(purchaseDate);
+      const duration = warrantyDuration;
+      
+      let expiryDate = new Date(purchase);
+      
+      if (duration.includes('Month')) {
+        const months = parseInt(duration.split(' ')[0]);
+        expiryDate.setMonth(expiryDate.getMonth() + months);
+      } else if (duration.includes('Year')) {
+        const years = parseInt(duration.split(' ')[0]);
+        expiryDate.setFullYear(expiryDate.getFullYear() + years);
+      } else if (duration === 'Lifetime') {
+        expiryDate = new Date('2099-12-31'); // Far future date
+      }
+      
+      setWarrantyExpiryDate(expiryDate.toLocaleDateString());
+    } else {
+      setWarrantyExpiryDate('');
+    }
+  }, [purchaseDate, warrantyDuration]);
+
   const categories = [
     'Electronics',
     'Automotive',
@@ -97,6 +125,17 @@ export default function AddDeviceScreen() {
     'Home & Garden',
     'Sports & Recreation',
     'Other'
+  ];
+
+  const warrantyDurations = [
+    '1 Month',
+    '3 Months',
+    '6 Months',
+    '1 Year',
+    '2 Years',
+    '3 Years',
+    '5 Years',
+    'Lifetime'
   ];
 
   return (
@@ -152,24 +191,34 @@ export default function AddDeviceScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Category</Text>
-            <View style={styles.categoryContainer}>
-              {categories.map((cat) => (
-                <Pressable
-                  key={cat}
-                  style={[
-                    styles.categoryChip,
-                    category === cat && styles.categoryChipActive
-                  ]}
-                  onPress={() => setCategory(cat)}
-                >
-                  <Text style={[
-                    styles.categoryChipText,
-                    category === cat && styles.categoryChipTextActive
-                  ]}>
-                    {cat}
-                  </Text>
-                </Pressable>
-              ))}
+            <View style={styles.dropdownContainer}>
+              <Pressable 
+                style={styles.dropdownButton}
+                onPress={() => setShowCategoryDropdown(!showCategoryDropdown)}
+              >
+                <Text style={[styles.dropdownText, !category && styles.dropdownPlaceholder]}>
+                  {category || 'Choose category'}
+                </Text>
+                <ChevronDown size={20} color={theme.colors.neutral[400]} />
+              </Pressable>
+              
+              <View style={[
+                styles.dropdownOptions,
+                { opacity: showCategoryDropdown ? 1 : 0, height: showCategoryDropdown ? 'auto' : 0 }
+              ]}>
+                {categories.map((cat) => (
+                  <Pressable
+                    key={cat}
+                    style={styles.dropdownOption}
+                    onPress={() => {
+                      setCategory(cat);
+                      setShowCategoryDropdown(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownOptionText}>{cat}</Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
           </View>
         </View>
@@ -220,37 +269,92 @@ export default function AddDeviceScreen() {
           <Text style={styles.sectionTitle}>Warranty Information</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Warranty End Date</Text>
-            <TextInput
-              style={styles.textInput}
-              value={warrantyEndDate}
-              onChangeText={setWarrantyEndDate}
-              placeholder="MM/DD/YYYY"
-              placeholderTextColor={theme.colors.neutral[400]}
-            />
+            <Text style={styles.inputLabel}>Warranty Duration</Text>
+            <View style={styles.dropdownContainer}>
+              <Pressable 
+                style={styles.dropdownButton}
+                onPress={() => setShowWarrantyDropdown(!showWarrantyDropdown)}
+              >
+                <Text style={[styles.dropdownText, !warrantyDuration && styles.dropdownPlaceholder]}>
+                  {warrantyDuration || 'Choose duration'}
+                </Text>
+                <ChevronDown size={20} color={theme.colors.neutral[400]} />
+              </Pressable>
+              
+              <View style={[
+                styles.dropdownOptions,
+                { opacity: showWarrantyDropdown ? 1 : 0, height: showWarrantyDropdown ? 'auto' : 0 }
+              ]}>
+                {warrantyDurations.map((duration) => (
+                  <Pressable
+                    key={duration}
+                    style={styles.dropdownOption}
+                    onPress={() => {
+                      setWarrantyDuration(duration);
+                      setShowWarrantyDropdown(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownOptionText}>{duration}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.warrantyExpiryInfo}>
+            <Text style={styles.warrantyExpiryLabel}>Warranty expires on</Text>
+            <Text style={[
+              styles.warrantyExpiryDate,
+              !warrantyExpiryDate && styles.warrantyExpiryPlaceholder
+            ]}>
+              {warrantyExpiryDate || 'Select purchase date and duration'}
+            </Text>
           </View>
         </View>
 
-        {/* Images */}
+        {/* Device Photo Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Images</Text>
-          
-          <View style={styles.imageSection}>
-            <Text style={styles.imageLabel}>Device Photo</Text>
-            <UploadZone
-              onImageSelected={handleDeviceImageUpload}
-              placeholder="Tap to add device photo"
-              selectedImage={deviceImage}
-            />
+          <Text style={styles.sectionTitle}>Device Photo</Text>
+          <View style={styles.uploadZone}>
+            <View style={styles.uploadContent}>
+              {deviceImage ? (
+                <>
+                  <Camera size={32} color={theme.colors.success[500]} />
+                  <Text style={styles.uploadSuccessText}>Photo added successfully</Text>
+                  <Pressable style={styles.changePhotoButton} onPress={() => setDeviceImage(null)}>
+                    <Text style={styles.changePhotoText}>Change photo</Text>
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <Camera size={32} color={theme.colors.neutral[400]} />
+                  <Text style={styles.uploadText}>Take a photo or choose from library</Text>
+                </>
+              )}
+            </View>
           </View>
+        </View>
 
-          <View style={styles.imageSection}>
-            <Text style={styles.imageLabel}>Receipt/Invoice</Text>
-            <UploadZone
-              onImageSelected={handleReceiptImageUpload}
-              placeholder="Tap to add receipt"
-              selectedImage={receiptImage}
-            />
+        {/* Add Receipt Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Add Receipt</Text>
+          <View style={styles.uploadZone}>
+            <View style={styles.uploadContent}>
+              {receiptImage ? (
+                <>
+                  <Camera size={32} color={theme.colors.success[500]} />
+                  <Text style={styles.uploadSuccessText}>Receipt added successfully</Text>
+                  <Pressable style={styles.changePhotoButton} onPress={() => setReceiptImage(null)}>
+                    <Text style={styles.changePhotoText}>Change receipt</Text>
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <Camera size={32} color={theme.colors.neutral[400]} />
+                  <Text style={styles.uploadText}>Take a photo or add from library</Text>
+                </>
+              )}
+            </View>
           </View>
         </View>
 
@@ -407,5 +511,106 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: theme.spacing['4xl'],
+  },
+  dropdownContainer: {
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[200],
+    borderRadius: theme.borderRadius.md,
+    overflow: 'hidden',
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.lg,
+    backgroundColor: theme.colors.white,
+  },
+  dropdownText: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[700],
+  },
+  dropdownPlaceholder: {
+    color: theme.colors.neutral[400],
+  },
+  dropdownOptions: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: theme.colors.white,
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[200],
+    borderRadius: theme.borderRadius.md,
+    overflow: 'hidden',
+    zIndex: 1,
+  },
+  dropdownOption: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.neutral[100],
+  },
+  dropdownOptionText: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[700],
+  },
+  uploadZone: {
+    backgroundColor: theme.colors.neutral[100],
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[200],
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 120,
+  },
+  uploadContent: {
+    alignItems: 'center',
+  },
+  uploadText: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[400],
+    marginTop: theme.spacing.sm,
+    textAlign: 'center',
+  },
+  uploadSuccessText: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.success[500],
+    marginTop: theme.spacing.sm,
+  },
+  changePhotoButton: {
+    marginTop: theme.spacing.sm,
+  },
+  changePhotoText: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.primary[600],
+    textDecorationLine: 'underline',
+  },
+  warrantyExpiryInfo: {
+    backgroundColor: theme.colors.neutral[50],
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[200],
+    minHeight: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  warrantyExpiryLabel: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium,
+    color: theme.colors.neutral[600],
+    marginBottom: theme.spacing.xs,
+  },
+  warrantyExpiryDate: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.neutral[900],
+  },
+  warrantyExpiryPlaceholder: {
+    color: theme.colors.neutral[400],
+    fontWeight: theme.fontWeight.normal,
   },
 });

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl } from 'react-native';
-import { Plus, Bell, Shield, TrendingUp, Calendar, DollarSign, Store, FileText, TriangleAlert as AlertTriangle, Eye, Clock, Smartphone, Laptop, Watch, Headphones } from 'lucide-react-native';
+import { Plus, Eye, Clock, Smartphone, Laptop, Watch, Headphones, AlertTriangle } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
-import { SummaryCard } from '@/src/components/SummaryCard';
-import { DeviceCard } from '@/src/components/DeviceCard';
 import { FabButton } from '@/src/components/FabButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -21,7 +19,7 @@ export default function DashboardScreen() {
       name: 'iPhone 15 Pro',
       status: 'Active',
       statusColor: 'success',
-      icon: Smartphone,
+      iconName: 'Smartphone',
       iconColor: '#8B5CF6'
     },
     {
@@ -29,7 +27,7 @@ export default function DashboardScreen() {
       name: 'MacBook Pro',
       status: 'Expiring',
       statusColor: 'warning',
-      icon: Laptop,
+      iconName: 'Laptop',
       iconColor: '#06B6D4'
     },
     {
@@ -37,7 +35,7 @@ export default function DashboardScreen() {
       name: 'Apple Watch',
       status: 'Active',
       statusColor: 'success',
-      icon: Watch,
+      iconName: 'Watch',
       iconColor: '#8B5CF6'
     },
     {
@@ -45,7 +43,7 @@ export default function DashboardScreen() {
       name: 'AirPods Pro',
       status: 'Active',
       statusColor: 'success',
-      icon: Headphones,
+      iconName: 'Headphones',
       iconColor: '#10B981'
     }
   ]);
@@ -140,7 +138,17 @@ export default function DashboardScreen() {
         
         <View style={styles.deviceGrid}>
           {devices.map((device) => {
-            const IconComponent = device.icon;
+            const getIconComponent = (iconName: string) => {
+              switch (iconName) {
+                case 'Smartphone': return Smartphone;
+                case 'Laptop': return Laptop;
+                case 'Watch': return Watch;
+                case 'Headphones': return Headphones;
+                default: return Smartphone;
+              }
+            };
+            
+            const IconComponent = getIconComponent(device.iconName);
             return (
               <View key={device.id} style={styles.deviceCard}>
                 <View style={styles.deviceIconContainer}>

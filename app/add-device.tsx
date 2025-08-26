@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator, Switch, Image, Modal, Dimensions } from 'react-native';
 import { ArrowLeft, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
@@ -49,6 +49,19 @@ export default function AddDeviceScreen() {
   const [showWarrantyDropdown, setShowWarrantyDropdown] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [tempSelectedCategory, setTempSelectedCategory] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [tempDate, setTempDate] = useState(new Date());
+  
+  // Refs for scrolling to current date
+  const monthScrollRef = useRef<ScrollView>(null);
+  const dayScrollRef = useRef<ScrollView>(null);
+  const yearScrollRef = useRef<ScrollView>(null);
+  
+  // Track if user has manually scrolled or selected a date (to prevent auto-alignment)
+  const [hasUserScrolled, setHasUserScrolled] = useState(false);
+  const [hasUserSelectedDate, setHasUserSelectedDate] = useState(false);
 
   const handleBackPress = () => {
     console.log('Back button pressed - function called');
@@ -102,7 +115,7 @@ export default function AddDeviceScreen() {
          serialNumber: serialNumber || null,
          category: selectedCategory || 'Other',
          purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
-        purchase_date: purchaseDate || null,
+                 purchase_date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
         store_name: storeName || null,
         warranty_duration: warrantyDuration || null,
         warranty_end_date: warrantyExpiryDate || null,
@@ -134,29 +147,63 @@ export default function AddDeviceScreen() {
     }
   };
 
-  // Calculate warranty expiry date when purchase date or warranty duration changes
+     // Calculate warranty expiry date when purchase date or warranty duration changes
+   useEffect(() => {
+     if (selectedDate && warrantyDuration) {
+       const purchase = new Date(selectedDate);
+       const duration = warrantyDuration;
+       
+       let expiryDate = new Date(purchase);
+       
+       if (duration.includes('Month')) {
+         const months = parseInt(duration.split(' ')[0]);
+         expiryDate.setMonth(expiryDate.getMonth() + months);
+       } else if (duration.includes('Year')) {
+         const years = parseInt(duration.split(' ')[0]);
+         expiryDate.setFullYear(expiryDate.getFullYear() + years);
+       } else if (duration === 'Lifetime') {
+         expiryDate = new Date('2099-12-31');
+       }
+       
+       setWarrantyExpiryDate(expiryDate.toLocaleDateString());
+     } else {
+       setWarrantyExpiryDate('');
+     }
+   }, [selectedDate, warrantyDuration]);
+
+  // Calculate scroll position to align all selections on same line
+  const getScrollPosition = (selectedIndex, targetY = 0) => {
+    // All columns scroll so their selected item appears at the same targetY position
+    return Math.max(0, (selectedIndex * 44) - targetY);
+  };
+
+  // Auto-scroll all columns when date picker first opens (only if user hasn't scrolled or selected a date)
   useEffect(() => {
-    if (purchaseDate && warrantyDuration) {
-      const purchase = new Date(purchaseDate);
-      const duration = warrantyDuration;
+    if (showDatePicker && monthScrollRef.current && dayScrollRef.current && yearScrollRef.current && !hasUserScrolled && !hasUserSelectedDate) {
+      const monthIndex = tempDate.getMonth();
+      const dayIndex = tempDate.getDate() - 1; // Day is 1-based
+      const yearIndex = years.findIndex(year => year === tempDate.getFullYear());
       
-      let expiryDate = new Date(purchase);
+      const monthTargetY = 35; // Month column target Y position
+      const dayTargetY = 0;    // Day column target Y position  
+      const yearTargetY = 0;   // Year column target Y position
       
-      if (duration.includes('Month')) {
-        const months = parseInt(duration.split(' ')[0]);
-        expiryDate.setMonth(expiryDate.getMonth() + months);
-      } else if (duration.includes('Year')) {
-        const years = parseInt(duration.split(' ')[0]);
-        expiryDate.setFullYear(expiryDate.getFullYear() + years);
-      } else if (duration === 'Lifetime') {
-        expiryDate = new Date('2099-12-31');
-      }
-      
-      setWarrantyExpiryDate(expiryDate.toLocaleDateString());
-    } else {
-      setWarrantyExpiryDate('');
+      setTimeout(() => {
+        monthScrollRef.current?.scrollTo({ 
+          y: getScrollPosition(monthIndex, monthTargetY), 
+          animated: false 
+        });
+        dayScrollRef.current?.scrollTo({ 
+          y: getScrollPosition(dayIndex, dayTargetY), 
+          animated: false 
+        });
+        yearScrollRef.current?.scrollTo({ 
+          y: getScrollPosition(yearIndex, yearTargetY), 
+          animated: false 
+        });
+      }, 100);
     }
-  }, [purchaseDate, warrantyDuration]);
+  }, [showDatePicker, tempDate, hasUserScrolled]);
 
   const categories = [
     'Electronics',
@@ -164,6 +211,14 @@ export default function AddDeviceScreen() {
     'Automotive',
     'Other'
   ];
+
+  // Generate date options
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const days = Array.from({length: 31}, (_, i) => i + 1);
+  const years = Array.from({length: 50}, (_, i) => new Date().getFullYear() - 25 + i);
 
   const warrantyDurations = [
     '1 Month',
@@ -290,41 +345,44 @@ export default function AddDeviceScreen() {
           <Text style={styles.sectionTitle}>Device Information</Text>
           
           <View style={styles.inputGroup}>
-            <TextInput
-              style={styles.textInput}
-              value={deviceName}
-              onChangeText={setDeviceName}
-              placeholder="Enter device name"
-              placeholderTextColor={theme.colors.neutral[400]}
-            />
+                         <TextInput
+               style={styles.textInput}
+               value={deviceName}
+               onChangeText={setDeviceName}
+               placeholder="Enter device name"
+               placeholderTextColor="#8E8E93"
+             />
           </View>
 
           <View style={styles.inputGroup}>
-            <TextInput
-              style={styles.textInput}
-              value={brand}
-              onChangeText={setBrand}
-              placeholder="Enter brand name"
-              placeholderTextColor={theme.colors.neutral[400]}
-            />
+                         <TextInput
+               style={styles.textInput}
+               value={brand}
+               onChangeText={setBrand}
+               placeholder="Enter brand name"
+               placeholderTextColor="#8E8E93"
+             />
           </View>
 
 
 
           <View style={styles.inputGroup}>
-            <TextInput
-              style={styles.textInput}
-              value={serialNumber}
-              onChangeText={setSerialNumber}
-              placeholder="Enter serial number"
-              placeholderTextColor={theme.colors.neutral[400]}
-            />
+                         <TextInput
+               style={styles.textInput}
+               value={serialNumber}
+               onChangeText={setSerialNumber}
+               placeholder="Enter serial number"
+               placeholderTextColor="#8E8E93"
+             />
           </View>
 
                      <View style={styles.inputGroup}>
              <Pressable 
                style={styles.categoryButton}
-               onPress={() => setShowCategoryPicker(true)}
+               onPress={() => {
+                 setTempSelectedCategory(selectedCategory); // Initialize with current selection
+                 setShowCategoryPicker(true);
+               }}
              >
                <Text style={[
                  styles.categoryButtonText,
@@ -341,38 +399,49 @@ export default function AddDeviceScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Purchase Details</Text>
           
+                     <View style={styles.inputGroup}>
+                           <Pressable 
+                style={styles.dateButton}
+                                 onPress={() => {
+                   setTempDate(selectedDate || new Date()); // Use current date if none selected
+                   setShowDatePicker(true);
+                   setHasUserScrolled(false); // Reset user scroll flag when opening
+                   setHasUserSelectedDate(false); // Reset user selection flag when opening
+                 }}
+              >
+               <Text style={[
+                 styles.dateButtonText,
+                 !selectedDate && styles.datePlaceholder
+               ]}>
+                 {selectedDate ? selectedDate.toLocaleDateString('en-US', {
+                   month: 'long',
+                   day: 'numeric', 
+                   year: 'numeric'
+                 }) : 'Purchase date'}
+               </Text>
+               <Calendar size={20} color="#999" />
+             </Pressable>
+           </View>
+
           <View style={styles.inputGroup}>
-            <View style={styles.dateInputContainer}>
-              <TextInput
-                style={styles.dateInput}
-                value={purchaseDate}
-                onChangeText={setPurchaseDate}
-                placeholder="Purchase date"
-                placeholderTextColor={theme.colors.neutral[400]}
-              />
-              <Calendar size={20} color={theme.colors.neutral[400]} />
-            </View>
+                         <TextInput
+               style={styles.textInput}
+               value={purchasePrice}
+               onChangeText={setPurchasePrice}
+               placeholder="Purchase price"
+               placeholderTextColor="#8E8E93"
+               keyboardType="numeric"
+             />
           </View>
 
           <View style={styles.inputGroup}>
-            <TextInput
-              style={styles.textInput}
-              value={purchasePrice}
-              onChangeText={setPurchasePrice}
-              placeholder="Purchase price"
-              placeholderTextColor={theme.colors.neutral[400]}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <TextInput
-              style={styles.textInput}
-              value={storeName}
-              onChangeText={setStoreName}
-              placeholder="Enter store name"
-              placeholderTextColor={theme.colors.neutral[400]}
-            />
+                         <TextInput
+               style={styles.textInput}
+               value={storeName}
+               onChangeText={setStoreName}
+               placeholder="Enter store name"
+               placeholderTextColor="#8E8E93"
+             />
           </View>
         </View>
 
@@ -454,11 +523,18 @@ export default function AddDeviceScreen() {
              <View style={styles.pickerContainer}>
                {/* Header */}
                <View style={styles.pickerHeader}>
-                 <Pressable onPress={() => setShowCategoryPicker(false)}>
+                 <Pressable onPress={() => {
+                   setTempSelectedCategory(selectedCategory); // Reset to original selection
+                   setShowCategoryPicker(false);
+                 }}>
                    <Text style={styles.cancelButton}>Cancel</Text>
                  </Pressable>
                  <Text style={styles.pickerTitle}>Category</Text>
-                 <Pressable onPress={() => setShowCategoryPicker(false)}>
+                 <Pressable onPress={() => {
+                   setSelectedCategory(tempSelectedCategory); // Apply the temporary selection
+                   setCategory(tempSelectedCategory);
+                   setShowCategoryPicker(false);
+                 }}>
                    <Text style={styles.doneButton}>Done</Text>
                  </Pressable>
                </View>
@@ -470,16 +546,15 @@ export default function AddDeviceScreen() {
                      key={cat}
                      style={[
                        styles.pickerOption,
-                       selectedCategory === cat && styles.pickerOptionSelected
+                       tempSelectedCategory === cat && styles.pickerOptionSelected
                      ]}
                      onPress={() => {
-                       setSelectedCategory(cat);
-                       setCategory(cat);
+                       setTempSelectedCategory(cat); // Only update temporary selection
                      }}
                    >
                      <Text style={[
                        styles.pickerOptionText,
-                       selectedCategory === cat && styles.pickerOptionTextSelected
+                       tempSelectedCategory === cat && styles.pickerOptionSelected
                      ]}>
                        {cat}
                      </Text>
@@ -488,11 +563,172 @@ export default function AddDeviceScreen() {
                </View>
              </View>
            </View>
+                  </Modal>
+
+         {/* Date Picker Modal */}
+         <Modal
+           visible={showDatePicker}
+           transparent
+           animationType="slide"
+           onRequestClose={() => setShowDatePicker(false)}
+         >
+           <View style={styles.modalOverlay}>
+             <Pressable 
+               style={styles.modalBackdrop} 
+               onPress={() => setShowDatePicker(false)} 
+             />
+             
+             <View style={styles.datePickerContainer}>
+               {/* Header */}
+               <View style={styles.pickerHeader}>
+                 <Pressable onPress={() => setShowDatePicker(false)}>
+                   <Text style={styles.cancelButton}>Cancel</Text>
+                 </Pressable>
+                 <Text style={styles.pickerTitle}>Purchase Date</Text>
+                 <Pressable onPress={() => {
+                   setSelectedDate(tempDate);
+                   setShowDatePicker(false);
+                 }}>
+                   <Text style={styles.doneButton}>Done</Text>
+                 </Pressable>
+               </View>
+               
+               {/* Date Wheel Picker */}
+               <View style={styles.dateWheelContainer}>
+                                   {/* Month Column */}
+                  <View style={styles.wheelColumn}>
+                                         <ScrollView 
+                       ref={monthScrollRef}
+                       showsVerticalScrollIndicator={false}
+                       snapToInterval={44}
+                       decelerationRate="fast"
+                       bounces={true}
+                       scrollEnabled={true} // Ensure scrolling is enabled
+                       nestedScrollEnabled={true} // For Android
+                       contentContainerStyle={styles.wheelScrollContent}
+                       style={styles.wheelScrollView} // Add this style
+                       onScrollBeginDrag={() => setHasUserScrolled(true)}
+                     >
+                     {months.map((month, index) => (
+                       <Pressable
+                         key={month}
+                         style={[
+                           styles.wheelOption,
+                                                       tempDate?.getMonth() === index && styles.wheelOptionSelected
+                         ]}
+                                                                             onPress={() => {
+                             const newDate = new Date(tempDate.getTime()); // Create proper copy
+                             const currentDay = tempDate.getDate(); // Preserve current day
+                             newDate.setMonth(index);
+                             
+                             // Check if the current day is valid for the new month
+                             const daysInNewMonth = new Date(newDate.getFullYear(), index + 1, 0).getDate();
+                             if (currentDay <= daysInNewMonth) {
+                               newDate.setDate(currentDay); // Keep the same day if valid
+                             } else {
+                               newDate.setDate(daysInNewMonth); // Use last day of month if current day is invalid
+                             }
+                             
+                             setTempDate(newDate);
+                             setHasUserSelectedDate(true); // Mark that user manually selected a date
+                           }}
+                       >
+                         <Text style={[
+                           styles.wheelOptionText,
+                           tempDate?.getMonth() === index && styles.wheelOptionTextSelected
+                         ]}>
+                           {month}
+                         </Text>
+                       </Pressable>
+                     ))}
+                   </ScrollView>
+                 </View>
+                 
+                                   {/* Day Column */}
+                  <View style={styles.wheelColumn}>
+                                         <ScrollView 
+                       ref={dayScrollRef}
+                       showsVerticalScrollIndicator={false}
+                       snapToInterval={44}
+                       decelerationRate="fast"
+                       bounces={true}
+                       scrollEnabled={true} // Ensure scrolling is enabled
+                       nestedScrollEnabled={true} // For Android
+                       contentContainerStyle={styles.wheelScrollContent}
+                       style={styles.wheelScrollView} // Add this style
+                       onScrollBeginDrag={() => setHasUserScrolled(true)}
+                     >
+                     {days.map((day) => (
+                       <Pressable
+                         key={day}
+                         style={[
+                           styles.wheelOption,
+                                                       tempDate?.getDate() === day && styles.wheelOptionSelected
+                         ]}
+                                                                             onPress={() => {
+                             const newDate = new Date(tempDate.getTime());
+                             newDate.setDate(day);
+                             setTempDate(newDate);
+                             setHasUserSelectedDate(true); // Mark that user manually selected a date
+                           }}
+                       >
+                         <Text style={[
+                           styles.wheelOptionText,
+                           tempDate?.getDate() === day && styles.wheelOptionTextSelected
+                         ]}>
+                           {day}
+                         </Text>
+                       </Pressable>
+                     ))}
+                   </ScrollView>
+                 </View>
+                 
+                                   {/* Year Column */}
+                  <View style={styles.wheelColumn}>
+                    <ScrollView 
+                      ref={yearScrollRef}
+                      showsVerticalScrollIndicator={false}
+                      snapToInterval={44}
+                      decelerationRate="fast"
+                      bounces={true}
+                      scrollEnabled={true} // Ensure scrolling is enabled
+                      nestedScrollEnabled={true} // For Android
+                      contentContainerStyle={styles.wheelScrollContent}
+                      style={styles.wheelScrollView} // Add this style
+                      onScrollBeginDrag={() => setHasUserScrolled(true)}
+                    >
+                     {years.map((year) => (
+                       <Pressable
+                         key={year}
+                         style={[
+                           styles.wheelOption,
+                                                       tempDate?.getFullYear() === year && styles.wheelOptionSelected
+                         ]}
+                                                                             onPress={() => {
+                             const newDate = new Date(tempDate.getTime());
+                             newDate.setFullYear(year);
+                             setTempDate(newDate);
+                             setHasUserSelectedDate(true); // Mark that user manually selected a date
+                           }}
+                       >
+                         <Text style={[
+                           styles.wheelOptionText,
+                           tempDate?.getFullYear() === year && styles.wheelOptionTextSelected
+                         ]}>
+                           {year}
+                         </Text>
+                       </Pressable>
+                     ))}
+                   </ScrollView>
+                 </View>
+               </View>
+             </View>
+           </View>
          </Modal>
        </ScrollView>
-    </SafeAreaView>
-  );
-}
+     </SafeAreaView>
+   );
+ }
 
 const styles = StyleSheet.create({
   container: {
@@ -544,7 +780,8 @@ const styles = StyleSheet.create({
      borderRadius: theme.borderRadius.md,
      paddingHorizontal: theme.spacing.lg,
      paddingVertical: theme.spacing.lg,
-     fontSize: theme.fontSize.base,
+     fontSize: 17,
+     color: '#000',
      backgroundColor: theme.colors.white,
      shadowColor: theme.colors.neutral[900],
      shadowOffset: { width: 0, height: 1 },
@@ -848,6 +1085,8 @@ const styles = StyleSheet.create({
      dateInput: {
      flex: 1,
      paddingRight: theme.spacing.sm,
+     fontSize: 17,
+     color: '#000',
    },
    
        // Apple-style picker styles
@@ -932,6 +1171,74 @@ const styles = StyleSheet.create({
      fontWeight: '400',
    },
    pickerOptionTextSelected: {
+     color: '#FFFFFF',
+     fontWeight: '600',
+   },
+
+       // Date picker styles
+    dateButton: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.neutral[200],
+      borderRadius: theme.borderRadius.md,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.lg,
+      backgroundColor: theme.colors.white,
+      shadowColor: theme.colors.neutral[900],
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+   dateButtonText: {
+     fontSize: 17,
+     color: '#000',
+   },
+   datePlaceholder: {
+     color: '#8E8E93',
+   },
+   datePickerContainer: {
+     backgroundColor: '#F2F2F7',
+     borderTopLeftRadius: 16,
+     borderTopRightRadius: 16,
+     paddingBottom: 34,
+     maxHeight: '60%',
+   },
+   dateWheelContainer: {
+     flexDirection: 'row',
+     paddingVertical: 20,
+     paddingHorizontal: 20,
+   },
+       wheelColumn: {
+      flex: 1,
+      height: 200, // Fixed height for scrollable area
+      marginHorizontal: 5,
+    },
+    wheelScrollContent: {
+      paddingVertical: 0, // Remove padding to allow proper alignment
+    },
+    wheelScrollView: {
+      maxHeight: 200,
+    },
+       wheelOption: {
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 8,
+      marginVertical: 1,
+      paddingHorizontal: 10,
+    },
+   wheelOptionSelected: {
+     backgroundColor: '#007AFF',
+   },
+   wheelOptionText: {
+     fontSize: 20,
+     color: '#000',
+     fontWeight: '400',
+   },
+   wheelOptionTextSelected: {
      color: '#FFFFFF',
      fontWeight: '600',
    },

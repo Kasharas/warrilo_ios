@@ -11,6 +11,16 @@ export default function AddDeviceScreen() {
   const router = useRouter();
   const { user } = useAuth();
   
+  // Get the previous route from navigation state
+  const getPreviousRoute = () => {
+    // Try to get the previous route from the navigation state
+    if (router.canGoBack()) {
+      return 'back';
+    }
+    // If no previous route, default to devices
+    return 'devices';
+  };
+  
   // Form state
   const [deviceName, setDeviceName] = useState('');
   const [brand, setBrand] = useState('');
@@ -39,7 +49,15 @@ export default function AddDeviceScreen() {
   const [showWarrantyDropdown, setShowWarrantyDropdown] = useState(false);
 
   const handleBackPress = () => {
-    router.back();
+    console.log('Back button pressed - function called');
+    const route = getPreviousRoute();
+    if (route === 'back') {
+      console.log('Going back to previous screen');
+      router.back();
+    } else {
+      console.log('No previous screen, going to devices');
+      router.push('/devices');
+    }
   };
 
   const pickImage = async (type: 'device' | 'receipt') => {
@@ -160,9 +178,23 @@ export default function AddDeviceScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-                 <Pressable onPress={handleBackPress} style={styles.backButton}>
-           <ArrowLeft size={20} color={theme.colors.neutral[600]} />
-         </Pressable>
+                 <Pressable 
+                   onPress={() => {
+                     console.log('Back button pressed - checking navigation state');
+                     const route = getPreviousRoute();
+                     if (route === 'back') {
+                       console.log('Going back to previous screen');
+                       router.back();
+                     } else {
+                       console.log('No previous screen, going to devices');
+                       router.push('/devices');
+                     }
+                   }} 
+                   style={styles.backButton}
+                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                 >
+                   <ArrowLeft size={20} color={theme.colors.neutral[600]} />
+                 </Pressable>
         <Text style={styles.headerTitle}>Add Device</Text>
         <Pressable style={styles.saveButton}>
           <Text style={styles.saveButtonText}>Save</Text>
@@ -238,10 +270,10 @@ export default function AddDeviceScreen() {
           {/* PRO Feature Toggle */}
           <View style={styles.proFeatureRow}>
             <View style={styles.proFeatureInfo}>
-                             <Lightbulb size={20} color="#FFD700" />
+              <Lightbulb size={20} color="#FFD700" />
               <Text style={styles.proFeatureText}>Auto receipt extraction</Text>
-              <Text style={styles.proBadge}>PRO</Text>
             </View>
+            <Text style={styles.proBadge}>PRO</Text>
             <Switch
               value={autoReceiptExtraction}
               onValueChange={setAutoReceiptExtraction}
@@ -754,7 +786,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.xs,
     paddingVertical: theme.spacing.xs,
     marginLeft: 'auto',
-    marginRight: theme.spacing.lg,
+    marginRight: theme.spacing.md,
     fontSize: theme.fontSize.sm,
     fontWeight: '600',
     color: '#22C55E',
@@ -780,9 +812,5 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: theme.spacing.sm,
   },
-  proBadgeText: {
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.white,
-  },
+
 });

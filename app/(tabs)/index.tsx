@@ -1,47 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, ActivityIndicator, RefreshControl } from 'react-native';
-import { Plus, Bell, Shield, TrendingUp, Calendar, DollarSign, Store, FileText } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { Plus, Bell, Shield, TrendingUp, Calendar, DollarSign, Store, FileText, TriangleAlert as AlertTriangle, Eye, Clock, Smartphone, Laptop, Watch, Headphones } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
 import { SummaryCard } from '@/src/components/SummaryCard';
 import { DeviceCard } from '@/src/components/DeviceCard';
 import { FabButton } from '@/src/components/FabButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   
-  // Mock data - no more Supabase fetching
-  const [devices] = useState<any[]>([]);
-  const [totalValue] = useState(0);
-  const [deviceCount] = useState(0);
-
-  const handleRefresh = async () => {
-    setLoading(true);
-    // Simulate refresh delay
-    setTimeout(() => setLoading(false), 1000);
-  };
-
-  const handleAddDevice = () => {
-    router.push('/add-device');
-  };
+  // Mock data - replace with real data later
+  const [devices] = useState<any[]>([
+    {
+      id: '1',
+      name: 'iPhone 15 Pro',
+      status: 'Active',
+      statusColor: 'success',
+      icon: Smartphone,
+      iconColor: '#8B5CF6'
+    },
+    {
+      id: '2',
+      name: 'MacBook Pro',
+      status: 'Expiring',
+      statusColor: 'warning',
+      icon: Laptop,
+      iconColor: '#06B6D4'
+    },
+    {
+      id: '3',
+      name: 'Apple Watch',
+      status: 'Active',
+      statusColor: 'success',
+      icon: Watch,
+      iconColor: '#8B5CF6'
+    },
+    {
+      id: '4',
+      name: 'AirPods Pro',
+      status: 'Active',
+      statusColor: 'success',
+      icon: Headphones,
+      iconColor: '#10B981'
+    }
+  ]);
+  const [totalValue] = useState(4250);
+  const [deviceCount] = useState(7);
 
   const handleDevicePress = (deviceId: string) => {
     router.push(`/device-details?id=${deviceId}`);
   };
 
-  const handleDeleteDevice = (deviceId: string) => {
-    Alert.alert(
-      'Delete Device',
-      'Are you sure you want to delete this device?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => console.log('Delete device:', deviceId) }
-      ]
-    );
+  const handleRefresh = () => {
+    setLoading(true);
+    // Simulate refresh delay
+    setTimeout(() => setLoading(false), 1000);
+  };
+
+  const getStatusColor = (statusColor: string) => {
+    switch (statusColor) {
+      case 'success':
+        return theme.colors.success[600];
+      case 'warning':
+        return theme.colors.warning[600];
+      case 'error':
+        return theme.colors.error[600];
+      default:
+        return theme.colors.neutral[600];
+    }
   };
 
   return (
@@ -60,91 +91,72 @@ export default function DashboardScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Hello, {user?.email?.split('@')[0] || 'User'}!</Text>
-            <Text style={styles.subtitle}>Manage your warranties and devices</Text>
-          </View>
-          <Pressable style={styles.notificationButton} onPress={() => router.push('/alerts')}>
-            <Bell size={24} color={theme.colors.neutral[600]} />
+          <Text style={styles.headerTitle}>Dashboard</Text>
+          <Pressable style={styles.menuButton} onPress={() => router.push('/settings')}>
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
           </Pressable>
         </View>
 
-        {/* Summary Cards */}
-        <View style={styles.summarySection}>
-          <SummaryCard
-            icon={Shield}
-            title="Total Items"
-            value={deviceCount.toString()}
-            subtitle="Devices tracked"
-            color={theme.colors.primary[500]}
-          />
-          <SummaryCard
-            icon={DollarSign}
-            title="Total Value"
-            value={`$${totalValue.toLocaleString()}`}
-            subtitle="Worth of items"
-            color={theme.colors.success[500]}
-          />
+        {/* Total Warranty Value Card */}
+        <View style={styles.warrantyValueCard}>
+          <Text style={styles.warrantyValueTitle}>Total Warranty Value</Text>
+          <Text style={styles.warrantyValueAmount}>${totalValue.toLocaleString()}</Text>
+          <Text style={styles.warrantyValueSubtitle}>{deviceCount} active warranties</Text>
         </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsSection}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
-            <Pressable style={styles.quickActionCard} onPress={() => router.push('/add-device')}>
-              <Plus size={24} color={theme.colors.primary[600]} />
-              <Text style={styles.quickActionText}>Add Device</Text>
+        
+        {/* Warranty Alert */}
+        <View style={styles.alertCard}>
+          <View style={styles.alertHeader}>
+            <AlertTriangle size={20} color={theme.colors.warning[600]} />
+            <Text style={styles.alertTitle}>Warranty Expiring Soon</Text>
+          </View>
+          <Text style={styles.alertMessage}>
+            Your MacBook Pro warranty expires in 15 days
+          </Text>
+          <View style={styles.alertActions}>
+            <Pressable style={styles.alertButton}>
+              <Eye size={16} color={theme.colors.white} />
+              <Text style={styles.alertButtonText}>View Details</Text>
             </Pressable>
-            <Pressable style={styles.quickActionCard} onPress={() => router.push('/alerts')}>
-              <Bell size={24} color={theme.colors.warning[500]} />
-              <Text style={styles.quickActionText}>View Alerts</Text>
-            </Pressable>
-            <Pressable style={styles.quickActionCard} onPress={() => router.push('/profile')}>
-              <Store size={24} color={theme.colors.secondary[500]} />
-              <Text style={styles.quickActionText}>Profile</Text>
-            </Pressable>
-            <Pressable style={styles.quickActionCard} onPress={() => router.push('/settings')}>
-              <FileText size={24} color={theme.colors.neutral[500]} />
-              <Text style={styles.quickActionText}>Settings</Text>
+            <Pressable style={[styles.alertButton, styles.alertButtonSecondary]}>
+              <Clock size={16} color={theme.colors.warning[600]} />
+              <Text style={[styles.alertButtonText, styles.alertButtonSecondaryText]}>
+                Remind Later
+              </Text>
             </Pressable>
           </View>
         </View>
 
-        {/* Recent Devices */}
-        <View style={styles.recentDevicesSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Devices</Text>
-            <Pressable onPress={() => router.push('/devices')}>
-              <Text style={styles.viewAllText}>View All</Text>
-            </Pressable>
-          </View>
-          
-          {devices.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Shield size={48} color={theme.colors.neutral[400]} />
-              <Text style={styles.emptyStateTitle}>No devices yet</Text>
-              <Text style={styles.emptyStateSubtitle}>Add your first device to get started</Text>
-              <Pressable style={styles.addFirstDeviceButton} onPress={handleAddDevice}>
-                <Text style={styles.addFirstDeviceButtonText}>Add Your First Device</Text>
-              </Pressable>
-            </View>
-          ) : (
-            <View style={styles.devicesList}>
-              {devices.slice(0, 3).map((device) => (
-                <DeviceCard
-                  key={device.id}
-                  device={device}
-                  onPress={() => handleDevicePress(device.id)}
-                  onDelete={() => handleDeleteDevice(device.id)}
-                  compact
-                />
-              ))}
-            </View>
-          )}
+        {/* Recent Devices Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Devices</Text>
+          <Pressable onPress={() => router.push('/devices')}>
+            <Text style={styles.viewAllText}>View All</Text>
+          </Pressable>
+        </View>
+        
+        <View style={styles.deviceGrid}>
+          {devices.map((device) => {
+            const IconComponent = device.icon;
+            return (
+              <View key={device.id} style={styles.deviceCard}>
+                <View style={styles.deviceIconContainer}>
+                  <IconComponent size={24} color={device.iconColor} />
+                </View>
+                <Text style={styles.deviceName}>{device.name}</Text>
+                <Text style={[styles.deviceStatus, { color: getStatusColor(device.statusColor) }]}>
+                  {device.status}
+                </Text>
+              </View>
+            );
+          })}
         </View>
       </ScrollView>
 
-      <FabButton onPress={handleAddDevice} />
+      <FabButton onPress={() => router.push('/add-device')} />
     </SafeAreaView>
   );
 }
@@ -165,89 +177,155 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing['2xl'],
     marginTop: theme.spacing.lg,
   },
-  greeting: {
-    fontSize: theme.fontSize.xl,
+  headerTitle: {
+    fontSize: theme.fontSize['2xl'],
     fontWeight: theme.fontWeight.bold,
     color: theme.colors.neutral[900],
   },
-  subtitle: {
+  menuButton: {
+    width: 32,
+    height: 32,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.primary[600],
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+  },
+  menuLine: {
+    width: 16,
+    height: 2,
+    backgroundColor: theme.colors.white,
+    borderRadius: 1,
+    marginVertical: 1,
+    opacity: 0.9,
+  },
+  warrantyValueCard: {
+    backgroundColor: theme.colors.primary[600],
+    borderRadius: theme.borderRadius.xl,
+    padding: theme.spacing['2xl'],
+    marginBottom: theme.spacing.lg,
+    elevation: 3,
+  },
+  warrantyValueTitle: {
     fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[600],
-    marginTop: theme.spacing.xs,
+    color: theme.colors.white,
+    opacity: 0.9,
+    marginBottom: theme.spacing.sm,
   },
-  notificationButton: {
-    padding: theme.spacing.sm,
+  warrantyValueAmount: {
+    fontSize: theme.fontSize['4xl'],
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.white,
+    marginBottom: theme.spacing.xs,
   },
-  summarySection: {
+  warrantyValueSubtitle: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.white,
+    opacity: 0.8,
+  },
+  alertCard: {
+    backgroundColor: '#fef3c7',
+    borderColor: theme.colors.warning[500],
+    borderWidth: 1,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    elevation: 3,
+  },
+  alertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  alertTitle: {
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.semibold,
+    color: '#92400e',
+    marginLeft: theme.spacing.sm,
+  },
+  alertMessage: {
+    fontSize: theme.fontSize.sm,
+    color: '#92400e',
+    marginBottom: theme.spacing.md,
+  },
+  alertActions: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+  },
+  alertButton: {
+    backgroundColor: theme.colors.warning[500],
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.sm,
+    gap: theme.spacing.xs,
+  },
+  alertButtonSecondary: {
+    backgroundColor: 'transparent',
+  },
+  alertButtonText: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium,
+    color: theme.colors.white,
+  },
+  alertButtonSecondaryText: {
+    color: theme.colors.warning[600],
+  },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.lg,
-  },
-  quickActionsSection: {
+    alignItems: 'center',
     marginBottom: theme.spacing.lg,
   },
   sectionTitle: {
     fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.neutral[900],
-    marginBottom: theme.spacing.md,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    gap: theme.spacing.md,
-  },
-  quickActionCard: {
-    width: '45%', // Adjust as needed for two columns
-    alignItems: 'center',
-    backgroundColor: theme.colors.neutral[100],
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-  },
-  quickActionText: {
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.neutral[900],
-    marginTop: theme.spacing.xs,
-  },
-  recentDevicesSection: {
-    marginBottom: theme.spacing.lg,
-  },
-  devicesList: {
-    gap: theme.spacing.lg,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: theme.spacing['2xl'],
-  },
-  emptyStateTitle: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral[700],
-    marginTop: theme.spacing.md,
-  },
-  emptyStateSubtitle: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.neutral[500],
-    textAlign: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  addFirstDeviceButton: {
-    backgroundColor: theme.colors.primary[600],
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.md,
-  },
-  addFirstDeviceButtonText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.medium,
   },
   viewAllText: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.primary[600],
+    fontWeight: theme.fontWeight.medium,
+  },
+  deviceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.md,
+    justifyContent: 'space-between',
+    marginBottom: 120, // Space for FAB and tab bar
+    paddingBottom: theme.spacing.xl,
+  },
+  deviceCard: {
+    width: '48%',
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  deviceIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.colors.neutral[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  deviceName: {
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.neutral[900],
+    textAlign: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  deviceStatus: {
+    fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium,
   },
 });

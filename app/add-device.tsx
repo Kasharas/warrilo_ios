@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator } from 'react-native';
-import { ArrowLeft, Camera, Upload, X, Plus, ChevronDown } from 'lucide-react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator, Switch, Image } from 'react-native';
+import { ArrowLeft, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddDeviceScreen() {
   const router = useRouter();
@@ -13,7 +14,8 @@ export default function AddDeviceScreen() {
   // Form state
   const [deviceName, setDeviceName] = useState('');
   const [brand, setBrand] = useState('');
-  const [model, setModel] = useState('');
+  const [modelNumber, setModelNumber] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
   const [category, setCategory] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
@@ -26,6 +28,9 @@ export default function AddDeviceScreen() {
   const [deviceImage, setDeviceImage] = useState<string | null>(null);
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   
+  // Feature toggles
+  const [autoReceiptExtraction, setAutoReceiptExtraction] = useState(false);
+  
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,15 +42,27 @@ export default function AddDeviceScreen() {
     router.back();
   };
 
-  const handleDeviceImageUpload = useCallback((imageUri: string) => {
-    console.log('Device image uploaded:', imageUri);
-    setDeviceImage(imageUri);
-  }, []);
+  const pickImage = async (type: 'device' | 'receipt') => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-  const handleReceiptImageUpload = useCallback((imageUri: string) => {
-    console.log('Receipt image uploaded:', imageUri);
-    setReceiptImage(imageUri);
-  }, []);
+      if (!result.canceled && result.assets[0]) {
+        if (type === 'device') {
+          setDeviceImage(result.assets[0].uri);
+        } else {
+          setReceiptImage(result.assets[0].uri);
+        }
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image. Please try again.');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!deviceName.trim()) {
@@ -56,20 +73,23 @@ export default function AddDeviceScreen() {
     setIsSubmitting(true);
 
     try {
-      // Mock device creation - no more Supabase
+      // Mock device creation
       const newDevice = {
         id: Date.now().toString(),
         name: deviceName,
         brand: brand || null,
-        model: model || null,
+        modelNumber: modelNumber || null,
+        serialNumber: serialNumber || null,
         category: category || 'Other',
         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
         purchase_date: purchaseDate || null,
         store_name: storeName || null,
+        warranty_duration: warrantyDuration || null,
         warranty_end_date: warrantyExpiryDate || null,
         notes: notes || null,
         image_url: deviceImage,
         receipt_url: receiptImage,
+        auto_receipt_extraction: autoReceiptExtraction,
         user_id: user?.id,
         created_at: new Date().toISOString(),
       };
@@ -109,7 +129,7 @@ export default function AddDeviceScreen() {
         const years = parseInt(duration.split(' ')[0]);
         expiryDate.setFullYear(expiryDate.getFullYear() + years);
       } else if (duration === 'Lifetime') {
-        expiryDate = new Date('2099-12-31'); // Far future date
+        expiryDate = new Date('2099-12-31');
       }
       
       setWarrantyExpiryDate(expiryDate.toLocaleDateString());
@@ -120,10 +140,8 @@ export default function AddDeviceScreen() {
 
   const categories = [
     'Electronics',
+    'Cloth',
     'Automotive',
-    'Clothing',
-    'Home & Garden',
-    'Sports & Recreation',
     'Other'
   ];
 
@@ -142,55 +160,134 @@ export default function AddDeviceScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={handleBackPress}>
-          <ArrowLeft size={24} color={theme.colors.neutral[900]} />
+                 <Pressable onPress={handleBackPress} style={styles.backButton}>
+           <ArrowLeft size={20} color={theme.colors.neutral[600]} />
+         </Pressable>
+        <Text style={styles.headerTitle}>Add Device</Text>
+        <Pressable style={styles.saveButton}>
+          <Text style={styles.saveButtonText}>Save</Text>
         </Pressable>
-        <Text style={styles.headerTitle}>Add New Device</Text>
-        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Device Information */}
+                          {/* Device Photo Section */}
+         <View style={styles.section}>
+           <Text style={styles.sectionTitle}>Device Photo</Text>
+                       {deviceImage ? (
+              <View style={styles.imagePreviewContainer}>
+                <View style={styles.imageWrapper}>
+                  <Image source={{ uri: deviceImage }} style={styles.imagePreview} />
+                  <Pressable 
+                    style={styles.removeImageButton} 
+                    onPress={() => setDeviceImage(null)}
+                  >
+                    <Text style={styles.removeImageButtonText}>✕</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+             <View style={styles.uploadRow}>
+               <Pressable style={styles.uploadZone} onPress={() => pickImage('device')}>
+                 <View style={styles.uploadContent}>
+                   <Camera size={32} color={theme.colors.neutral[400]} />
+                   <Text style={styles.uploadText}>Take a photo</Text>
+                 </View>
+               </Pressable>
+               <Pressable style={styles.uploadZone} onPress={() => pickImage('device')}>
+                 <View style={styles.uploadContent}>
+                   <FolderOpen size={32} color={theme.colors.neutral[400]} />
+                   <Text style={styles.uploadText}>Choose from library</Text>
+                 </View>
+               </Pressable>
+             </View>
+           )}
+         </View>
+
+                          {/* Add Receipt Section */}
+         <View style={styles.section}>
+           <Text style={styles.sectionTitle}>Add Receipt</Text>
+                       {receiptImage ? (
+              <View style={styles.imagePreviewContainer}>
+                <View style={styles.imageWrapper}>
+                  <Image source={{ uri: receiptImage }} style={styles.imagePreview} />
+                  <Pressable 
+                    style={styles.removeImageButton} 
+                    onPress={() => setReceiptImage(null)}
+                  >
+                    <Text style={styles.removeImageButtonText}>✕</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+             <View style={styles.uploadRow}>
+                               <Pressable style={styles.uploadZone} onPress={() => pickImage('receipt')}>
+                  <View style={styles.uploadContent}>
+                    <Camera size={32} color={theme.colors.neutral[400]} />
+                    <Text style={styles.uploadText}>Take a photo</Text>
+                  </View>
+                </Pressable>
+                <Pressable style={styles.uploadZone} onPress={() => pickImage('receipt')}>
+                  <View style={styles.uploadContent}>
+                    <FolderOpen size={32} color={theme.colors.neutral[400]} />
+                    <Text style={styles.uploadText}>Add from library</Text>
+                  </View>
+                </Pressable>
+              </View>
+            )}
+          
+          {/* PRO Feature Toggle */}
+          <View style={styles.proFeatureRow}>
+            <View style={styles.proFeatureInfo}>
+                             <Lightbulb size={20} color="#FFD700" />
+              <Text style={styles.proFeatureText}>Auto receipt extraction</Text>
+              <Text style={styles.proBadge}>PRO</Text>
+            </View>
+            <Switch
+              value={autoReceiptExtraction}
+              onValueChange={setAutoReceiptExtraction}
+              trackColor={{ false: theme.colors.neutral[200], true: theme.colors.primary[600] }}
+              thumbColor={theme.colors.white}
+            />
+          </View>
+        </View>
+
+        {/* Device Information Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Device Information</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Device Name *</Text>
             <TextInput
               style={styles.textInput}
               value={deviceName}
               onChangeText={setDeviceName}
-              placeholder="e.g., iPhone 15, Samsung TV"
+              placeholder="Enter device name"
               placeholderTextColor={theme.colors.neutral[400]}
             />
           </View>
 
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: theme.spacing.sm }]}>
-              <Text style={styles.inputLabel}>Brand</Text>
-              <TextInput
-                style={styles.textInput}
-                value={brand}
-                onChangeText={setBrand}
-                placeholder="e.g., Apple, Samsung"
-                placeholderTextColor={theme.colors.neutral[400]}
-              />
-            </View>
-            
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={styles.inputLabel}>Model</Text>
-              <TextInput
-                style={styles.textInput}
-                value={model}
-                onChangeText={setModel}
-                placeholder="e.g., Pro Max, QLED"
-                placeholderTextColor={theme.colors.neutral[400]}
-              />
-            </View>
+          <View style={styles.inputGroup}>
+            <TextInput
+              style={styles.textInput}
+              value={brand}
+              onChangeText={setBrand}
+              placeholder="Enter brand name"
+              placeholderTextColor={theme.colors.neutral[400]}
+            />
+          </View>
+
+
+
+          <View style={styles.inputGroup}>
+            <TextInput
+              style={styles.textInput}
+              value={serialNumber}
+              onChangeText={setSerialNumber}
+              placeholder="Enter serial number"
+              placeholderTextColor={theme.colors.neutral[400]}
+            />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Category</Text>
             <View style={styles.dropdownContainer}>
               <Pressable 
                 style={styles.dropdownButton}
@@ -223,53 +320,50 @@ export default function AddDeviceScreen() {
           </View>
         </View>
 
-        {/* Purchase Information */}
+        {/* Purchase Details Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Purchase Information</Text>
+          <Text style={styles.sectionTitle}>Purchase Details</Text>
           
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: theme.spacing.sm }]}>
-              <Text style={styles.inputLabel}>Purchase Price</Text>
+          <View style={styles.inputGroup}>
+            <View style={styles.dateInputContainer}>
               <TextInput
-                style={styles.textInput}
-                value={purchasePrice}
-                onChangeText={setPurchasePrice}
-                placeholder="0.00"
-                placeholderTextColor={theme.colors.neutral[400]}
-                keyboardType="numeric"
-              />
-            </View>
-            
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={styles.inputLabel}>Purchase Date</Text>
-              <TextInput
-                style={styles.textInput}
+                style={styles.dateInput}
                 value={purchaseDate}
                 onChangeText={setPurchaseDate}
-                placeholder="MM/DD/YYYY"
+                placeholder="Purchase date"
                 placeholderTextColor={theme.colors.neutral[400]}
               />
+              <Calendar size={20} color={theme.colors.neutral[400]} />
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Store Name</Text>
+            <TextInput
+              style={styles.textInput}
+              value={purchasePrice}
+              onChangeText={setPurchasePrice}
+              placeholder="Purchase price"
+              placeholderTextColor={theme.colors.neutral[400]}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
             <TextInput
               style={styles.textInput}
               value={storeName}
               onChangeText={setStoreName}
-              placeholder="e.g., Best Buy, Amazon"
+              placeholder="Enter store name"
               placeholderTextColor={theme.colors.neutral[400]}
             />
           </View>
         </View>
 
-        {/* Warranty Information */}
+        {/* Warranty Information Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Warranty Information</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Warranty Duration</Text>
             <View style={styles.dropdownContainer}>
               <Pressable 
                 style={styles.dropdownButton}
@@ -309,70 +403,6 @@ export default function AddDeviceScreen() {
             ]}>
               {warrantyExpiryDate || 'Select purchase date and duration'}
             </Text>
-          </View>
-        </View>
-
-        {/* Device Photo Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Device Photo</Text>
-          <View style={styles.uploadZone}>
-            <View style={styles.uploadContent}>
-              {deviceImage ? (
-                <>
-                  <Camera size={32} color={theme.colors.success[500]} />
-                  <Text style={styles.uploadSuccessText}>Photo added successfully</Text>
-                  <Pressable style={styles.changePhotoButton} onPress={() => setDeviceImage(null)}>
-                    <Text style={styles.changePhotoText}>Change photo</Text>
-                  </Pressable>
-                </>
-              ) : (
-                <>
-                  <Camera size={32} color={theme.colors.neutral[400]} />
-                  <Text style={styles.uploadText}>Take a photo or choose from library</Text>
-                </>
-              )}
-            </View>
-          </View>
-        </View>
-
-        {/* Add Receipt Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Add Receipt</Text>
-          <View style={styles.uploadZone}>
-            <View style={styles.uploadContent}>
-              {receiptImage ? (
-                <>
-                  <Camera size={32} color={theme.colors.success[500]} />
-                  <Text style={styles.uploadSuccessText}>Receipt added successfully</Text>
-                  <Pressable style={styles.changePhotoButton} onPress={() => setReceiptImage(null)}>
-                    <Text style={styles.changePhotoText}>Change receipt</Text>
-                  </Pressable>
-                </>
-              ) : (
-                <>
-                  <Camera size={32} color={theme.colors.neutral[400]} />
-                  <Text style={styles.uploadText}>Take a photo or add from library</Text>
-                </>
-              )}
-            </View>
-          </View>
-        </View>
-
-        {/* Notes */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Additional Notes</Text>
-          
-          <View style={styles.inputGroup}>
-            <TextInput
-              style={[styles.textInput, styles.textArea]}
-              value={notes}
-              onChangeText={setNotes}
-              placeholder="Any additional information about your device..."
-              placeholderTextColor={theme.colors.neutral[400]}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
           </View>
         </View>
 
@@ -439,15 +469,20 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral[700],
     marginBottom: theme.spacing.xs,
   },
-  textInput: {
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[200],
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.lg,
-    fontSize: theme.fontSize.base,
-    backgroundColor: theme.colors.white,
-  },
+     textInput: {
+     borderWidth: 1,
+     borderColor: theme.colors.neutral[200],
+     borderRadius: theme.borderRadius.md,
+     paddingHorizontal: theme.spacing.lg,
+     paddingVertical: theme.spacing.lg,
+     fontSize: theme.fontSize.base,
+     backgroundColor: theme.colors.white,
+     shadowColor: theme.colors.neutral[900],
+     shadowOffset: { width: 0, height: 1 },
+     shadowOpacity: 0.06,
+     shadowRadius: 4,
+     elevation: 2,
+   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -512,13 +547,18 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     height: theme.spacing['4xl'],
   },
-  dropdownContainer: {
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[200],
-    borderRadius: theme.borderRadius.md,
-    overflow: 'hidden',
-  },
+     dropdownContainer: {
+     position: 'relative',
+     borderWidth: 1,
+     borderColor: theme.colors.neutral[200],
+     borderRadius: theme.borderRadius.md,
+     overflow: 'hidden',
+     shadowColor: theme.colors.neutral[900],
+     shadowOffset: { width: 0, height: 1 },
+     shadowOpacity: 0.06,
+     shadowRadius: 4,
+     elevation: 2,
+   },
   dropdownButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -556,16 +596,73 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.base,
     color: theme.colors.neutral[700],
   },
-  uploadZone: {
-    backgroundColor: theme.colors.neutral[100],
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[200],
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 120,
-  },
+     uploadRow: {
+     flexDirection: 'row',
+     gap: theme.spacing.md,
+   },
+   uploadZone: {
+     flex: 1,
+     backgroundColor: theme.colors.neutral[100],
+     borderRadius: theme.borderRadius.md,
+     padding: theme.spacing.lg,
+     borderWidth: 1,
+     borderColor: theme.colors.neutral[200],
+     alignItems: 'center',
+     justifyContent: 'center',
+     minHeight: 120,
+     shadowColor: theme.colors.neutral[900],
+     shadowOffset: { width: 0, height: 2 },
+     shadowOpacity: 0.08,
+     shadowRadius: 8,
+     elevation: 3,
+   },
+   imagePreviewContainer: {
+     alignItems: 'center',
+     justifyContent: 'center',
+     minHeight: 120,
+     shadowColor: theme.colors.neutral[900],
+     shadowOffset: { width: 0, height: 2 },
+     shadowOpacity: 0.08,
+     shadowRadius: 8,
+     elevation: 3,
+   },
+   imagePreview: {
+     width: '100%',
+     height: 200,
+     borderRadius: theme.borderRadius.md,
+   },
+   imageWrapper: {
+     position: 'relative',
+     width: '100%',
+   },
+       removeImageButton: {
+      position: 'absolute',
+      top: -11,
+      right: -8,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: '#FF3B30',
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+       removeImageButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
+      textAlignVertical: 'center',
+      includeFontPadding: false,
+      width: 24,
+      height: 24,
+      lineHeight: 24,
+      marginTop: -2,
+    },
   uploadContent: {
     alignItems: 'center',
   },
@@ -588,16 +685,21 @@ const styles = StyleSheet.create({
     color: theme.colors.primary[600],
     textDecorationLine: 'underline',
   },
-  warrantyExpiryInfo: {
-    backgroundColor: theme.colors.neutral[50],
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[200],
-    minHeight: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+     warrantyExpiryInfo: {
+     backgroundColor: theme.colors.neutral[50],
+     borderRadius: theme.borderRadius.md,
+     padding: theme.spacing.lg,
+     borderWidth: 1,
+     borderColor: theme.colors.neutral[200],
+     minHeight: 80,
+     alignItems: 'center',
+     justifyContent: 'center',
+     shadowColor: theme.colors.neutral[900],
+     shadowOffset: { width: 0, height: 2 },
+     shadowOpacity: 0.08,
+     shadowRadius: 8,
+     elevation: 3,
+   },
   warrantyExpiryLabel: {
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium,
@@ -612,5 +714,75 @@ const styles = StyleSheet.create({
   warrantyExpiryPlaceholder: {
     color: theme.colors.neutral[400],
     fontWeight: theme.fontWeight.normal,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: theme.spacing.sm,
+  },
+  backText: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[600],
+    marginLeft: theme.spacing.xs,
+  },
+  saveButtonText: {
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.primary[600],
+  },
+                       proFeatureRow: {
+         flexDirection: 'row',
+         justifyContent: 'space-between',
+         alignItems: 'center',
+         marginTop: theme.spacing.lg,
+         paddingHorizontal: theme.spacing.lg,
+         paddingVertical: theme.spacing.lg,
+         backgroundColor: theme.colors.neutral[50],
+         borderRadius: theme.borderRadius.md,
+       },
+  proFeatureInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  proFeatureText: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[600],
+    marginLeft: theme.spacing.sm,
+  },
+  proBadge: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xs,
+    marginLeft: 'auto',
+    marginRight: theme.spacing.lg,
+    fontSize: theme.fontSize.sm,
+    fontWeight: '600',
+    color: '#22C55E',
+    letterSpacing: 0.3,
+  },
+  
+     dateInputContainer: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     borderWidth: 1,
+     borderColor: theme.colors.neutral[200],
+     borderRadius: theme.borderRadius.md,
+     paddingHorizontal: theme.spacing.lg,
+     paddingVertical: theme.spacing.lg,
+     backgroundColor: theme.colors.white,
+     shadowColor: theme.colors.neutral[900],
+     shadowOffset: { width: 0, height: 1 },
+     shadowOpacity: 0.06,
+     shadowRadius: 4,
+     elevation: 2,
+   },
+  dateInput: {
+    flex: 1,
+    paddingRight: theme.spacing.sm,
+  },
+  proBadgeText: {
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.white,
   },
 });

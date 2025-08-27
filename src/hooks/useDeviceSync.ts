@@ -48,15 +48,7 @@ export const useDeviceSync = () => {
     }
   }, []);
 
-  const forceClearAndRetry = useCallback(async (): Promise<void> => {
-    try {
-      console.log('Force clearing localStorage...');
-      await DeviceLocalStorage.clearAll();
-      console.log('localStorage cleared, ready for retry');
-    } catch (error) {
-      console.error('Error force clearing localStorage:', error);
-    }
-  }, []);
+
 
   // 2. Main functions that use the utilities above
   const addDevice = useCallback(async (formData: DeviceFormData): Promise<{
@@ -169,6 +161,5 @@ export const useDeviceSync = () => {
     
     // Utility
     clearLocalData,
-    forceClearAndRetry,
   };
 };

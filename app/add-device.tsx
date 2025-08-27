@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function AddDeviceScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { addDevice, isStoring, forceClearAndRetry } = useDeviceSync();
+  const { addDevice, isStoring } = useDeviceSync();
   
   // Get the previous route from navigation state
   const getPreviousRoute = () => {
@@ -162,9 +162,30 @@ export default function AddDeviceScreen() {
       // Use the sync system to add device
       const result = await addDevice(formData);
       
+      console.log('Add device result:', result);
+      
       if (result.success) {
         console.log('Device stored locally with ID:', result.localId);
+        console.log('Navigation: About to navigate to dashboard');
         setCompressionStatus('Device saved!');
+        
+        // Show success message briefly, then navigate
+        setTimeout(() => {
+          console.log('Navigation: Auto-navigating to dashboard after delay');
+          try {
+            router.push('/');
+            console.log('Navigation: router.push(/) called successfully');
+          } catch (navError) {
+            console.error('Navigation error:', navError);
+            // Fallback navigation
+            try {
+              router.replace('/');
+              console.log('Navigation: router.replace(/) called as fallback');
+            } catch (replaceError) {
+              console.error('Replace navigation error:', replaceError);
+            }
+          }
+        }, 1000); // 1 second delay
         
         Alert.alert(
           'Success!',
@@ -172,7 +193,22 @@ export default function AddDeviceScreen() {
           [
             {
               text: 'OK',
-              onPress: () => router.back()
+              onPress: () => {
+                console.log('Navigation: OK button pressed, navigating to dashboard');
+                try {
+                  router.push('/');
+                  console.log('Navigation: OK button router.push(/) called successfully');
+                } catch (navError) {
+                  console.error('OK button navigation error:', navError);
+                  // Fallback navigation
+                  try {
+                    router.replace('/');
+                    console.log('Navigation: OK button router.replace(/) called as fallback');
+                  } catch (replaceError) {
+                    console.error('OK button replace navigation error:', replaceError);
+                  }
+                }
+              }
             }
           ]
         );
@@ -307,12 +343,7 @@ export default function AddDeviceScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
 
         
-        {/* Compression Info */}
-        <View style={styles.compressionInfoContainer}>
-          <Text style={styles.compressionInfo}>
-            📸 Images are automatically compressed to reduce storage and improve performance
-          </Text>
-        </View>
+
         
         {/* Compression Status */}
         {compressionStatus && (
@@ -544,32 +575,7 @@ export default function AddDeviceScreen() {
           )}
         </Pressable>
 
-        {/* Debug: Clear Storage Button */}
-        <Pressable
-          style={styles.debugButton}
-          onPress={forceClearAndRetry}
-        >
-          <Text style={styles.debugButtonText}>Clear Storage (Debug)</Text>
-        </Pressable>
 
-        {/* Debug: Test Storage Button */}
-        <Pressable
-          style={[styles.debugButton, { backgroundColor: theme.colors.warning[500] }]}
-          onPress={async () => {
-            try {
-              const testData = { test: 'data', timestamp: Date.now() };
-              await AsyncStorage.setItem('test_key', JSON.stringify(testData));
-              const retrieved = await AsyncStorage.getItem('test_key');
-              console.log('Storage test successful:', retrieved);
-              Alert.alert('Success', 'Storage test successful!');
-            } catch (error) {
-              console.error('Storage test failed:', error);
-              Alert.alert('Error', 'Storage test failed: ' + error);
-            }
-          }}
-        >
-          <Text style={styles.debugButtonText}>Test Storage (Debug)</Text>
-        </Pressable>
 
                  <View style={styles.bottomSpacing} />
          
@@ -1349,22 +1355,7 @@ const styles = StyleSheet.create({
       fontWeight: theme.fontWeight.medium,
     },
 
-    // Debug button styles
-    debugButton: {
-      backgroundColor: theme.colors.error[500],
-      paddingVertical: theme.spacing.sm,
-      paddingHorizontal: theme.spacing.md,
-      borderRadius: theme.borderRadius.md,
-      marginHorizontal: theme.spacing.lg,
-      marginTop: theme.spacing.sm,
-      marginBottom: theme.spacing.md,
-    },
-    debugButtonText: {
-      color: theme.colors.white,
-      textAlign: 'center',
-      fontSize: theme.fontSize.sm,
-      fontWeight: theme.fontWeight.medium,
-    },
+
 
  
   });

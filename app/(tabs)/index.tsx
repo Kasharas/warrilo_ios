@@ -6,58 +6,52 @@ import { FabButton } from '@/src/components/FabButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDeviceSync } from '@/src/hooks/useDeviceSync';
+import { LocalDevice } from '@/src/lib/localStorage';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { getLocalDevices } = useDeviceSync();
   const [loading, setLoading] = useState(false);
-  
-  // Mock data - replace with real data later
-  const [devices] = useState<any[]>([
-    {
-      id: '1',
-      name: 'iPhone 15 Pro',
-      status: 'Active',
-      statusColor: 'success',
-      iconName: 'Smartphone',
-      iconColor: '#8B5CF6'
-    },
-    {
-      id: '2',
-      name: 'MacBook Pro',
-      status: 'Expiring',
-      statusColor: 'warning',
-      iconName: 'Laptop',
-      iconColor: '#06B6D4'
-    },
-    {
-      id: '3',
-      name: 'Apple Watch',
-      status: 'Active',
-      statusColor: 'success',
-      iconName: 'Watch',
-      iconColor: '#8B5CF6'
-    },
-    {
-      id: '4',
-      name: 'AirPods Pro',
-      status: 'Active',
-      statusColor: 'success',
-      iconName: 'Headphones',
-      iconColor: '#10B981'
-    }
-  ]);
-  const [totalValue] = useState(4250);
-  const [deviceCount] = useState(7);
+  const [devices, setDevices] = useState<LocalDevice[]>([]);
+  const [totalValue, setTotalValue] = useState(0);
+  const [deviceCount, setDeviceCount] = useState(0);
 
   const handleDevicePress = (deviceId: string) => {
     router.push(`/device-details?id=${deviceId}`);
   };
 
+  // Load devices from local storage
+  useEffect(() => {
+    loadDevices();
+  }, []);
+
+
+
+  const loadDevices = async () => {
+    try {
+      setLoading(true);
+      const localDevices = await getLocalDevices();
+      console.log('Loaded devices:', localDevices);
+      console.log('Device count:', localDevices.length);
+      
+      setDevices(localDevices);
+      setDeviceCount(localDevices.length);
+      
+      // Calculate total warranty value (mock calculation for now)
+      // In a real app, you'd sum up actual purchase prices
+      const mockTotalValue = localDevices.length * 500; // $500 per device average
+      setTotalValue(mockTotalValue);
+    } catch (error) {
+      console.error('Error loading devices:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRefresh = () => {
-    setLoading(true);
-    // Simulate refresh delay
-    setTimeout(() => setLoading(false), 1000);
+    loadDevices();
   };
 
   const getStatusColor = (statusColor: string) => {
@@ -129,39 +123,92 @@ export default function DashboardScreen() {
         </View>
 
         {/* Recent Devices Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Devices</Text>
-          <Pressable onPress={() => router.push('/devices')}>
-            <Text style={styles.viewAllText}>View All</Text>
-          </Pressable>
-        </View>
-        
-        <View style={styles.deviceGrid}>
-          {devices.map((device) => {
-            const getIconComponent = (iconName: string) => {
-              switch (iconName) {
-                case 'Smartphone': return Smartphone;
-                case 'Laptop': return Laptop;
-                case 'Watch': return Watch;
-                case 'Headphones': return Headphones;
-                default: return Smartphone;
-              }
-            };
+        {devices.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Devices</Text>
+              <Pressable onPress={() => router.push('/devices')}>
+                <Text style={styles.viewAllText}>View All</Text>
+              </Pressable>
+            </View>
             
-            const IconComponent = getIconComponent(device.iconName);
-            return (
-              <View key={device.id} style={styles.deviceCard}>
-                <View style={styles.deviceIconContainer}>
-                  <IconComponent size={24} color={device.iconColor} />
-                </View>
-                <Text style={styles.deviceName}>{device.name}</Text>
-                <Text style={[styles.deviceStatus, { color: getStatusColor(device.statusColor) }]}>
-                  {device.status}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
+            <View style={styles.deviceGrid}>
+              {devices.slice(0, 4).filter(device => device && device.name).map((device) => {
+                const getIconComponent = (category?: string) => {
+                  switch (category?.toLowerCase()) {
+                    case 'electronics': return Smartphone;
+                    case 'automotive': return Laptop;
+                    case 'clothing':
+                    case 'cloth': return Watch;
+                    default: return Smartphone;
+                  }
+                };
+                
+                const getStatusColor = (device: LocalDevice) => {
+                  if (!device.warranty_end_date) return 'neutral';
+                  
+                  const endDate = new Date(device.warranty_end_date);
+                  const today = new Date();
+                  const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  if (daysUntilExpiry < 0) return 'error'; // Expired
+                  if (daysUntilExpiry <= 30) return 'warning'; // Expiring soon
+                  return 'success'; // Active
+                };
+                
+                const getStatusText = (device: LocalDevice) => {
+                  if (!device.warranty_end_date) return 'Unknown';
+                  
+                  const endDate = new Date(device.warranty_end_date);
+                  const today = new Date();
+                  const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  if (daysUntilExpiry < 0) return 'Expired';
+                  if (daysUntilExpiry <= 30) return 'Expiring';
+                  return 'Active';
+                };
+                
+                const IconComponent = getIconComponent(device.category);
+                const statusColor = getStatusColor(device);
+                const statusText = getStatusText(device);
+                
+                // Map status color to theme color
+                const getThemeColor = (status: string) => {
+                  switch (status) {
+                    case 'success': return theme.colors.success[600];
+                    case 'warning': return theme.colors.warning[600];
+                    case 'error': return theme.colors.error[600];
+                    default: return theme.colors.neutral[600];
+                  }
+                };
+                
+                return (
+                  <Pressable 
+                    key={device.local_id || device.id || `device-${Math.random()}`} 
+                    style={styles.deviceCard}
+                    onPress={() => handleDevicePress(device.local_id || device.id)}
+                  >
+                    <View style={styles.deviceIconContainer}>
+                      <IconComponent size={24} color={theme.colors.primary[500]} />
+                    </View>
+                    <Text style={styles.deviceName}>{device.name}</Text>
+                    <Text style={[styles.deviceStatus, { color: getThemeColor(statusColor) }]}>
+                      {statusText}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </>
+        )}
+        
+        {/* Empty State */}
+        {devices.length === 0 && !loading && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateTitle}>No devices yet</Text>
+            <Text style={styles.emptyStateSubtitle}>Add your first device to get started</Text>
+          </View>
+        )}
       </ScrollView>
 
       <FabButton onPress={() => router.push('/add-device')} />
@@ -333,5 +380,22 @@ const styles = StyleSheet.create({
   deviceStatus: {
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: theme.spacing['3xl'],
+    marginBottom: 120, // Space for FAB and tab bar
+  },
+  emptyStateTitle: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.neutral[700],
+    marginBottom: theme.spacing.sm,
+  },
+  emptyStateSubtitle: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[500],
+    textAlign: 'center',
   },
 });

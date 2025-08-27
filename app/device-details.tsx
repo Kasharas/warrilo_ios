@@ -25,7 +25,7 @@ export default function DeviceDetailsScreen() {
         id: id,
         name: 'Sample Device',
         brand: 'Sample Brand',
-        model: 'Sample Model',
+    
         category: 'Electronics',
         purchase_price: 999.99,
         purchase_date: '2024-01-15',
@@ -172,17 +172,7 @@ export default function DeviceDetailsScreen() {
             </View>
           )}
 
-          {device.model && (
-            <View style={styles.infoRow}>
-              <View style={styles.infoIcon}>
-                <Shield size={20} color={theme.colors.warning[600]} />
-              </View>
-              <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Model</Text>
-                <Text style={styles.infoValue}>{device.model}</Text>
-              </View>
-            </View>
-          )}
+
 
           <View style={styles.infoRow}>
             <View style={styles.infoIcon}>

@@ -9,7 +9,7 @@ interface Device {
   id: string;
   name: string;
   brand?: string;
-  model?: string; // Added model field
+
   category?: string;
   purchase_price?: number;
   image_url?: string; // Direct URL to device image
@@ -187,11 +187,7 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
             </Text>
           )}
           
-          {device.model && (
-            <Text style={styles.deviceModel} numberOfLines={1}>
-              Model: {device.model}
-            </Text>
-          )}
+
           
           <View style={styles.deviceMeta}>
             <Text style={styles.devicePrice}>
@@ -287,10 +283,7 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral?.[600] || '#4b5563',
     marginBottom: theme.spacing.xs,
   },
-  deviceModel: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.neutral?.[500] || '#6b7280',
-  },
+
   deviceMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -2,7 +2,7 @@ export interface Device {
   id: string;
   name: string;
   brand: string;
-  model?: string;
+
   emoji: string;
   category: 'Electronics' | 'Appliances' | 'Home & Garden' | 'Other';
   purchasePrice: number;
@@ -19,7 +19,7 @@ export const mockDevices: Device[] = [
     id: '1',
     name: 'iPhone 15 Pro',
     brand: 'Apple',
-    model: 'A3108',
+
     emoji: '📱',
     category: 'Electronics',
     purchasePrice: 1199,
@@ -34,7 +34,7 @@ export const mockDevices: Device[] = [
     id: '2',
     name: 'MacBook Pro 16"',
     brand: 'Apple',
-    model: 'M3 Max',
+
     emoji: '💻',
     category: 'Electronics',
     purchasePrice: 2499,
@@ -49,7 +49,7 @@ export const mockDevices: Device[] = [
     id: '3',
     name: 'Apple Watch Series 9',
     brand: 'Apple',
-    model: '45mm',
+
     emoji: '⌚',
     category: 'Electronics',
     purchasePrice: 429,
@@ -64,7 +64,7 @@ export const mockDevices: Device[] = [
     id: '4',
     name: 'AirPods Pro',
     brand: 'Apple',
-    model: '2nd Generation',
+
     emoji: '🎧',
     category: 'Electronics',
     purchasePrice: 249,
@@ -79,7 +79,7 @@ export const mockDevices: Device[] = [
     id: '5',
     name: 'iPad Air',
     brand: 'Apple',
-    model: '5th Generation',
+
     emoji: '📱',
     category: 'Electronics',
     purchasePrice: 599,
@@ -94,7 +94,7 @@ export const mockDevices: Device[] = [
     id: '6',
     name: 'Samsung TV 65"',
     brand: 'Samsung',
-    model: 'QN65QN90C',
+
     emoji: '📺',
     category: 'Electronics',
     purchasePrice: 1799,
@@ -109,7 +109,7 @@ export const mockDevices: Device[] = [
     id: '7',
     name: 'Dyson V15 Vacuum',
     brand: 'Dyson',
-    model: 'V15 Detect',
+
     emoji: '🧹',
     category: 'Appliances',
     purchasePrice: 749,
@@ -124,7 +124,7 @@ export const mockDevices: Device[] = [
     id: '8',
     name: 'KitchenAid Mixer',
     brand: 'KitchenAid',
-    model: 'Professional 600',
+
     emoji: '🍳',
     category: 'Appliances',
     purchasePrice: 399,
@@ -139,7 +139,7 @@ export const mockDevices: Device[] = [
     id: '9',
     name: 'Sony WH-1000XM5',
     brand: 'Sony',
-    model: 'WH-1000XM5',
+
     emoji: '🎧',
     category: 'Electronics',
     purchasePrice: 399,
@@ -154,7 +154,7 @@ export const mockDevices: Device[] = [
     id: '10',
     name: 'Nintendo Switch OLED',
     brand: 'Nintendo',
-    model: 'OLED Model',
+
     emoji: '🎮',
     category: 'Electronics',
     purchasePrice: 349,
@@ -169,7 +169,7 @@ export const mockDevices: Device[] = [
     id: '11',
     name: 'Instant Pot Duo',
     brand: 'Instant Pot',
-    model: 'Duo 7-in-1',
+
     emoji: '🍲',
     category: 'Appliances',
     purchasePrice: 99,
@@ -184,7 +184,7 @@ export const mockDevices: Device[] = [
     id: '12',
     name: 'Dell Monitor 27"',
     brand: 'Dell',
-    model: 'S2722DZ',
+
     emoji: '🖥️',
     category: 'Electronics',
     purchasePrice: 329,

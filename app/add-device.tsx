@@ -7,11 +7,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+import { useDeviceSync } from '@/src/hooks/useDeviceSync';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function AddDeviceScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { addDevice, isStoring, forceClearAndRetry } = useDeviceSync();
   
   // Get the previous route from navigation state
   const getPreviousRoute = () => {
@@ -26,7 +29,7 @@ export default function AddDeviceScreen() {
   // Form state
   const [deviceName, setDeviceName] = useState('');
   const [brand, setBrand] = useState('');
-  const [modelNumber, setModelNumber] = useState('');
+
   const [serialNumber, setSerialNumber] = useState('');
   const [category, setCategory] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
@@ -43,8 +46,11 @@ export default function AddDeviceScreen() {
   // Feature toggles
   const [autoReceiptExtraction, setAutoReceiptExtraction] = useState(false);
   
-  // Loading state
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Loading state - now managed by sync system
+  const isSubmitting = isStoring;
+  
+  // Compression status state
+  const [compressionStatus, setCompressionStatus] = useState('');
 
   // UI state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -100,52 +106,96 @@ export default function AddDeviceScreen() {
   };
 
   const handleSubmit = async () => {
+    console.log('handleSubmit called');
+    console.log('Form values:', {
+      deviceName: deviceName.trim(),
+      selectedDate,
+      warrantyDuration,
+      receiptImage,
+      deviceImage,
+      serialNumber: serialNumber.trim(),
+      storeName: storeName.trim()
+    });
+
     if (!deviceName.trim()) {
+      console.log('Validation failed: Device name is empty');
       Alert.alert('Error', 'Device name is required');
       return;
     }
 
-    setIsSubmitting(true);
+    if (!selectedDate) {
+      console.log('Validation failed: Purchase date is not selected');
+      Alert.alert('Error', 'Purchase date is required');
+      return;
+    }
+
+    if (!warrantyDuration) {
+      console.log('Validation failed: Warranty duration is empty');
+      Alert.alert('Error', 'Warranty duration is required');
+      return;
+    }
+
+    if (!receiptImage) {
+      console.log('Validation failed: Receipt image is not selected');
+      Alert.alert('Error', 'Receipt is required');
+      return;
+    }
+
+    console.log('All validations passed, proceeding with submission...');
 
     try {
-      // Mock device creation
-             const newDevice = {
-         id: Date.now().toString(),
-         name: deviceName,
-         brand: brand || null,
-         modelNumber: modelNumber || null,
-         serialNumber: serialNumber || null,
-         category: selectedCategory || 'Other',
-         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
-                 purchase_date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
-        store_name: storeName || null,
-                 warranty_duration: warrantyDuration ? parseInt(warrantyDuration) : null,
-        warranty_end_date: warrantyExpiryDate || null,
-        notes: notes || null,
-        image_url: deviceImage,
-        receipt_url: receiptImage,
-        auto_receipt_extraction: autoReceiptExtraction,
-        user_id: user?.id,
-        created_at: new Date().toISOString(),
+      setCompressionStatus('Preparing images...');
+      
+      // Prepare form data for sync system
+      const formData = {
+        name: deviceName.trim(),
+        purchaseDate: selectedDate,
+        warrantyMonths: warrantyDuration,
+        receipt: { uri: receiptImage, type: 'library' as const },
+        serialNumber: serialNumber.trim(),
+        storeName: storeName.trim(),
+        devicePhoto: { uri: deviceImage, type: 'library' as const },
       };
 
-      console.log('Device created (mock):', newDevice);
+      console.log('Submitting form data:', formData);
+
+      // Use the sync system to add device
+      const result = await addDevice(formData);
       
-      Alert.alert(
-        'Success!',
-        'Device added successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.back()
-          }
-        ]
-      );
+      if (result.success) {
+        console.log('Device stored locally with ID:', result.localId);
+        setCompressionStatus('Device saved!');
+        
+        Alert.alert(
+          'Success!',
+          result.message,
+          [
+            {
+              text: 'OK',
+              onPress: () => router.back()
+            }
+          ]
+        );
+      } else {
+        console.error('Add device failed:', result.message);
+        setCompressionStatus('');
+        Alert.alert('Error', result.message);
+      }
     } catch (error) {
       console.error('Error adding device:', error);
-      Alert.alert('Error', 'Failed to add device. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      setCompressionStatus('');
+      
+      // Handle specific error types
+      let errorMessage = 'Failed to add device. Please try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('quota')) {
+          errorMessage = 'Storage is full. Please try again or contact support.';
+        } else if (error.message.includes('Failed to store device locally')) {
+          errorMessage = 'Unable to save device locally. Please try again.';
+        }
+      }
+      
+      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -255,7 +305,24 @@ export default function AddDeviceScreen() {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                          {/* Device Photo Section */}
+
+        
+        {/* Compression Info */}
+        <View style={styles.compressionInfoContainer}>
+          <Text style={styles.compressionInfo}>
+            📸 Images are automatically compressed to reduce storage and improve performance
+          </Text>
+        </View>
+        
+        {/* Compression Status */}
+        {compressionStatus && (
+          <View style={styles.compressionStatus}>
+            <ActivityIndicator size="small" color={theme.colors.primary[600]} />
+            <Text style={styles.compressionStatusText}>{compressionStatus}</Text>
+          </View>
+        )}
+        
+        {/* Device Photo Section */}
          <View style={styles.section}>
            <Text style={styles.sectionTitle}>Device Photo</Text>
                        {deviceImage ? (
@@ -361,15 +428,7 @@ export default function AddDeviceScreen() {
               />
            </View>
 
-           <View style={styles.inputGroup}>
-                          <TextInput
-                style={styles.textInput}
-                value={modelNumber}
-                onChangeText={setModelNumber}
-                placeholder="Enter model number"
-                placeholderTextColor="#8E8E93"
-              />
-           </View>
+
 
            <View style={styles.inputGroup}>
                          <TextInput
@@ -466,13 +525,9 @@ export default function AddDeviceScreen() {
            </View>
 
                      <View style={styles.warrantyExpiryInfo}>
-                           <Text style={styles.warrantyExpiryLabel}>Active </Text>
-             <Text style={[
-               styles.warrantyExpiryDate,
-               !warrantyExpiryDate && styles.warrantyExpiryPlaceholder
-             ]}>
-               {warrantyExpiryDate || 'Select purchase date and duration'}
-             </Text>
+                           <Text style={styles.warrantyExpiryLabel}>
+                             Active {warrantyExpiryDate || 'Select purchase date and duration'}
+                           </Text>
            </View>
         </View>
 
@@ -487,6 +542,33 @@ export default function AddDeviceScreen() {
           ) : (
             <Text style={styles.submitButtonText}>Add Device</Text>
           )}
+        </Pressable>
+
+        {/* Debug: Clear Storage Button */}
+        <Pressable
+          style={styles.debugButton}
+          onPress={forceClearAndRetry}
+        >
+          <Text style={styles.debugButtonText}>Clear Storage (Debug)</Text>
+        </Pressable>
+
+        {/* Debug: Test Storage Button */}
+        <Pressable
+          style={[styles.debugButton, { backgroundColor: theme.colors.warning[500] }]}
+          onPress={async () => {
+            try {
+              const testData = { test: 'data', timestamp: Date.now() };
+              await AsyncStorage.setItem('test_key', JSON.stringify(testData));
+              const retrieved = await AsyncStorage.getItem('test_key');
+              console.log('Storage test successful:', retrieved);
+              Alert.alert('Success', 'Storage test successful!');
+            } catch (error) {
+              console.error('Storage test failed:', error);
+              Alert.alert('Error', 'Storage test failed: ' + error);
+            }
+          }}
+        >
+          <Text style={styles.debugButtonText}>Test Storage (Debug)</Text>
         </Pressable>
 
                  <View style={styles.bottomSpacing} />
@@ -999,17 +1081,7 @@ const styles = StyleSheet.create({
       fontSize: iosFonts.body,
       fontWeight: iosFonts.medium,
       color: iosColors.systemGreen,
-      marginRight: iosSpacing.xs,
     },
-       warrantyExpiryDate: {
-      fontSize: iosFonts.body,
-      fontWeight: iosFonts.semibold,
-      color: iosColors.systemGreen,
-    },
-     warrantyExpiryPlaceholder: {
-     color: iosColors.placeholderText,
-     fontWeight: iosFonts.regular,
-   },
      backButton: {
      flexDirection: 'row',
      alignItems: 'center',
@@ -1239,6 +1311,60 @@ const styles = StyleSheet.create({
       fontWeight: iosFonts.semibold,
     },
 
+
+
+    // Compression styles
+    compressionInfoContainer: {
+      backgroundColor: theme.colors.secondary[50],
+      borderWidth: 1,
+      borderColor: theme.colors.secondary[200],
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginHorizontal: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
+    },
+    compressionInfo: {
+      fontSize: theme.fontSize.sm,
+      color: theme.colors.secondary[700],
+      textAlign: 'center',
+      fontWeight: theme.fontWeight.medium,
+      lineHeight: 20,
+    },
+    compressionStatus: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.success[50],
+      borderWidth: 1,
+      borderColor: theme.colors.success[200],
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginHorizontal: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
+      gap: theme.spacing.sm,
+    },
+    compressionStatusText: {
+      fontSize: theme.fontSize.sm,
+      color: theme.colors.success[700],
+      fontWeight: theme.fontWeight.medium,
+    },
+
+    // Debug button styles
+    debugButton: {
+      backgroundColor: theme.colors.error[500],
+      paddingVertical: theme.spacing.sm,
+      paddingHorizontal: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      marginHorizontal: theme.spacing.lg,
+      marginTop: theme.spacing.sm,
+      marginBottom: theme.spacing.md,
+    },
+    debugButtonText: {
+      color: theme.colors.white,
+      textAlign: 'center',
+      fontSize: theme.fontSize.sm,
+      fontWeight: theme.fontWeight.medium,
+    },
 
  
   });

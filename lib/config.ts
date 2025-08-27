@@ -13,3 +13,4 @@ export const SUPABASE_CONFIG = {
 // 5. Replace the values above
 
 
+

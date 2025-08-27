@@ -173,10 +173,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    paddingHorizontal: theme.spacing.lg,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: theme.spacing.lg,
   },
   header: {
     flexDirection: 'row',
@@ -197,15 +197,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary[600],
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3,
   },
   menuLine: {
-    width: 16,
+    width: 20,
     height: 2,
     backgroundColor: theme.colors.white,
     borderRadius: 1,
     marginVertical: 1,
-    opacity: 0.9,
   },
   warrantyValueCard: {
     backgroundColor: theme.colors.primary[600],

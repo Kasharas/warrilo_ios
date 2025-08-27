@@ -88,8 +88,14 @@ export default function ProfileScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
-          <Pressable style={styles.editButton} onPress={() => router.push('/settings?section=personal')}>
-            <Edit size={20} color={theme.colors.primary[600]} />
+          <Pressable style={styles.menuButton} onPress={() => router.push({
+            pathname: '/settings',
+            params: { fromScreen: 'profile' }
+          })}>
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
           </Pressable>
         </View>
 
@@ -194,13 +200,20 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
     color: theme.colors.neutral[900],
   },
-  editButton: {
-    width: 40,
-    height: 40,
+  menuButton: {
+    width: 32,
+    height: 32,
     borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.primary[100],
+    backgroundColor: theme.colors.primary[600],
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  menuLine: {
+    width: 20,
+    height: 2,
+    backgroundColor: theme.colors.white,
+    borderRadius: 1,
+    marginVertical: 1,
   },
   userCard: {
     backgroundColor: theme.colors.white,

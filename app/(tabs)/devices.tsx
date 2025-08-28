@@ -8,12 +8,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DeviceCard } from '@/src/components/DeviceCard';
 import { FabButton } from '@/src/components/FabButton';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
+import { useDeviceOperations } from '@/src/hooks/useDeviceOperations';
 import { LocalDevice } from '@/src/lib/localStorage';
 
 export default function DeviceListScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { getLocalDevices } = useDeviceSync();
+  const { deleteDevice } = useDeviceOperations();
   
   // Real device data from local storage
   const [devices, setDevices] = useState<LocalDevice[]>([]);
@@ -24,6 +26,7 @@ export default function DeviceListScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deviceToDelete, setDeviceToDelete] = useState<string | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Load devices from local storage
   const loadDevices = async () => {
@@ -110,22 +113,46 @@ export default function DeviceListScreen() {
   const confirmDelete = async () => {
     if (!deviceToDelete) return;
     
-    console.log('User confirmed deletion');
+    console.log('🎯 Devices Screen: User confirmed deletion for device:', deviceToDelete);
+    setDeleting(true);
+    
     try {
-      // Mock deletion - just remove from local state
+      // Find the device to delete
+      const deviceToDeleteObj = devices.find(d => d.id === deviceToDelete);
+      if (!deviceToDeleteObj) {
+        throw new Error('Device not found');
+      }
+      
+      console.log('🗑️ Devices Screen: Starting deletion process for:', deviceToDeleteObj.name);
+      
+      // Call the proper delete hook
+      await deleteDevice(deviceToDeleteObj);
+      
+      console.log('✅ Devices Screen: Device deleted successfully, updating local state');
+      
+      // Remove from local state
       setDevices(devices.filter(d => d.id !== deviceToDelete));
+      
+      // Show success message
       Alert.alert('Success', 'Item deleted successfully!');
+      
     } catch (error) {
-      console.error('Error deleting item:', error);
+      console.error('❌ Devices Screen: Error deleting device:', error);
       Alert.alert('Error', 'Failed to delete item. Please try again.');
     } finally {
+      setDeleting(false);
       setShowDeleteModal(false);
       setDeviceToDelete(null);
     }
   };
 
   const cancelDelete = () => {
-    console.log('User chose to keep the item');
+    if (deleting) {
+      console.log('Devices Screen: Cannot cancel during deletion');
+      return;
+    }
+    
+    console.log('Devices Screen: User chose to keep the item');
     setShowDeleteModal(false);
     setDeviceToDelete(null);
   };
@@ -200,13 +227,16 @@ export default function DeviceListScreen() {
               <Text style={[
                 styles.filterChipText,
                 selectedFilter === item.label && styles.filterChipTextActive
-              ]}>
+              ]} numberOfLines={1}>
                 {item.label} ({item.count})
               </Text>
             </Pressable>
           )}
           keyExtractor={(item) => item.label}
           contentContainerStyle={styles.filtersContent}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          bounces={false}
         />
       </View>
 
@@ -261,7 +291,11 @@ export default function DeviceListScreen() {
         visible={showDeleteModal}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowDeleteModal(false)}
+        onRequestClose={() => {
+          if (!deleting) {
+            setShowDeleteModal(false);
+          }
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -270,11 +304,30 @@ export default function DeviceListScreen() {
               Are you absolutely sure you want to delete this item? This action cannot be undone and all warranty information will be permanently lost.
             </Text>
             <View style={styles.modalButtons}>
-              <Pressable style={[styles.modalButton, styles.modalButtonCancel]} onPress={cancelDelete}>
+              <Pressable 
+                style={[styles.modalButton, styles.modalButtonCancel]} 
+                onPress={cancelDelete}
+                disabled={deleting}
+              >
                 <Text style={[styles.modalButtonText, { color: theme.colors.neutral[700] }]}>No, Keep It</Text>
               </Pressable>
-              <Pressable style={[styles.modalButton, styles.modalButtonConfirm]} onPress={confirmDelete}>
-                <Text style={styles.modalButtonText}>Yes, Delete It</Text>
+              <Pressable 
+                style={[
+                  styles.modalButton, 
+                  styles.modalButtonConfirm,
+                  deleting && styles.modalButtonDisabled
+                ]} 
+                onPress={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <View style={styles.loadingButtonContent}>
+                    <ActivityIndicator size="small" color={theme.colors.white} />
+                    <Text style={[styles.modalButtonText, { marginLeft: 8 }]}>Deleting...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.modalButtonText}>Yes, Delete It</Text>
+                )}
               </Pressable>
             </View>
           </View>
@@ -288,7 +341,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    paddingHorizontal: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg, // This creates the left/right boundaries
     height: '100%', // Ensure container takes full height
   },
   header: {
@@ -309,7 +362,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
     borderRadius: 12,
     marginBottom: theme.spacing.md,
-    marginHorizontal: 0,
+    // No horizontal margins - let it fill the full container width
     borderWidth: 1,
     borderColor: theme.colors.neutral[200],
     ...theme.shadows.sm,
@@ -333,25 +386,31 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     marginBottom: theme.spacing.lg,
-    paddingHorizontal: 0,
     marginTop: -4,
-    marginLeft: 0,
+    height: 40, // Fixed height for consistent layout
+    justifyContent: 'center', // Center filters vertically
+    // No padding or margins - let it fill the full container width
   },
   filtersContent: {
-    gap: theme.spacing.sm,
-    paddingHorizontal: 0,
+    gap: 6, // Fixed small gap between filters (6px)
+    // No padding - let it fill the full width naturally
   },
   filterChip: {
     backgroundColor: theme.colors.neutral[100],
-    borderRadius: 18,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: 8,
-    height: 36,
+    borderRadius: 16, // Slightly smaller radius
+    paddingHorizontal: theme.spacing.xs, // Further reduced horizontal padding
+    paddingVertical: 6, // Reduced vertical padding
+    height: 32, // Reduced height for more compact look
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    minWidth: 70, // Reduced minimum width
+    maxWidth: 100, // Reduced maximum width
+    justifyContent: 'center', // Center content
+    alignItems: 'center', // Center content
+    flexShrink: 0, // Prevent shrinking
   },
   filterChipActive: {
     backgroundColor: '#007AFF',
@@ -362,9 +421,11 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   filterChipText: {
-    fontSize: 13,
+    fontSize: 11, // Even smaller font size for better fit
     color: '#8E8E93',
     fontWeight: '500',
+    textAlign: 'center', // Ensure text is centered
+    numberOfLines: 1, // Prevent text wrapping
   },
   filterChipTextActive: {
     color: '#FFFFFF',
@@ -467,6 +528,15 @@ const styles = StyleSheet.create({
   },
   modalButtonConfirm: {
     backgroundColor: theme.colors.error[500],
+  },
+  modalButtonDisabled: {
+    backgroundColor: theme.colors.neutral[400],
+    opacity: 0.6,
+  },
+  loadingButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   menuButton: {
     width: 32,

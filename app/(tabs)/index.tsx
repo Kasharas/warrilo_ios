@@ -372,8 +372,8 @@ const styles = StyleSheet.create({
     fontFamily: iosFonts.system,
   },
   menuButton: {
-    width: iosSpacing.minTouch,
-    height: iosSpacing.minTouch,
+    width: 32,
+    height: 32,
     borderRadius: iosRadius.md,
     backgroundColor: iosColors.systemBlue,
     justifyContent: 'center',

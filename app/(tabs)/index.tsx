@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl, Image } from 'react-native';
 import { Plus, Eye, Clock, Smartphone, Laptop, Watch, Headphones, AlertTriangle } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
+import { iosFonts, iosColors, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { FabButton } from '@/src/components/FabButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -76,8 +77,8 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={loading}
             onRefresh={handleRefresh}
-            colors={[theme.colors.primary[600]]}
-            tintColor={theme.colors.primary[600]}
+            colors={[iosColors.systemBlue]}
+            tintColor={iosColors.systemBlue}
           />
         }
       >
@@ -172,13 +173,13 @@ export default function DashboardScreen() {
                 const statusColor = getStatusColor(device);
                 const statusText = getStatusText(device);
                 
-                // Map status color to theme color
+                // Map status color to iOS system colors
                 const getThemeColor = (status: string) => {
                   switch (status) {
-                    case 'success': return theme.colors.success[600];
-                    case 'warning': return theme.colors.warning[600];
-                    case 'error': return theme.colors.error[600];
-                    default: return theme.colors.neutral[600];
+                    case 'success': return iosColors.systemGreen;
+                    case 'warning': return iosColors.systemOrange;
+                    case 'error': return iosColors.systemRed;
+                    default: return iosColors.systemGray;
                   }
                 };
                 
@@ -199,7 +200,7 @@ export default function DashboardScreen() {
                       </View>
                     ) : (
                       <View style={styles.deviceIconContainer}>
-                        <IconComponent size={24} color={theme.colors.primary[500]} />
+                        <IconComponent size={24} color={iosColors.systemBlue} />
                       </View>
                     )}
                     
@@ -231,8 +232,8 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: theme.spacing.lg,
+    backgroundColor: iosColors.systemBackground,
+    paddingHorizontal: iosSpacing.lg,
   },
   scrollView: {
     flex: 1,
@@ -241,192 +242,215 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing['2xl'],
-    marginTop: theme.spacing.lg,
+    marginBottom: iosSpacing.xxxl,
+    marginTop: iosSpacing.lg,
   },
   headerTitle: {
-    fontSize: theme.fontSize['2xl'],
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.neutral[900],
+    fontSize: iosFonts.largeTitle,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
+    fontFamily: iosFonts.system,
   },
   menuButton: {
-    width: 32,
-    height: 32,
-    borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.primary[600],
+    width: iosSpacing.minTouch,
+    height: iosSpacing.minTouch,
+    borderRadius: iosRadius.md,
+    backgroundColor: iosColors.systemBlue,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
     width: 20,
     height: 2,
-    backgroundColor: theme.colors.white,
+    backgroundColor: iosColors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
   },
   warrantyValueCard: {
-    backgroundColor: theme.colors.primary[600],
-    borderRadius: theme.borderRadius.xl,
-    padding: theme.spacing['2xl'],
-    marginBottom: theme.spacing.lg,
+    backgroundColor: iosColors.systemBlue,
+    borderRadius: iosRadius.xl,
+    padding: iosSpacing.xxxl,
+    marginBottom: iosSpacing.lg,
     elevation: 3,
+    shadowColor: iosColors.label,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   warrantyValueTitle: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.white,
+    fontSize: iosFonts.callout,
+    color: iosColors.systemBackground,
     opacity: 0.9,
-    marginBottom: theme.spacing.sm,
+    marginBottom: iosSpacing.sm,
+    fontFamily: iosFonts.system,
+    fontWeight: iosFonts.medium,
   },
   warrantyValueAmount: {
-    fontSize: theme.fontSize['4xl'],
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.white,
-    marginBottom: theme.spacing.xs,
+    fontSize: iosFonts.largeTitle,
+    fontWeight: iosFonts.bold,
+    color: iosColors.systemBackground,
+    marginBottom: iosSpacing.xs,
+    fontFamily: iosFonts.system,
   },
   warrantyValueSubtitle: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.white,
+    fontSize: iosFonts.footnote,
+    color: iosColors.systemBackground,
     opacity: 0.8,
+    fontFamily: iosFonts.system,
+    fontWeight: iosFonts.regular,
   },
   alertCard: {
-    backgroundColor: '#fef3c7',
-    borderColor: theme.colors.warning[500],
+    backgroundColor: iosColors.systemYellow,
+    borderColor: iosColors.systemOrange,
     borderWidth: 1,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
+    borderRadius: iosRadius.md,
+    padding: iosSpacing.lg,
+    marginBottom: iosSpacing.lg,
     elevation: 3,
+    shadowColor: iosColors.label,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   alertHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: iosSpacing.sm,
   },
   alertTitle: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.semibold,
-    color: '#92400e',
-    marginLeft: theme.spacing.sm,
+    fontSize: iosFonts.callout,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.systemOrange,
+    marginLeft: iosSpacing.sm,
+    fontFamily: iosFonts.system,
   },
   alertMessage: {
-    fontSize: theme.fontSize.sm,
-    color: '#92400e',
-    marginBottom: theme.spacing.md,
+    fontSize: iosFonts.footnote,
+    color: iosColors.systemOrange,
+    marginBottom: iosSpacing.md,
+    fontFamily: iosFonts.system,
+    fontWeight: iosFonts.regular,
   },
   alertActions: {
     flexDirection: 'row',
-    gap: theme.spacing.sm,
+    gap: iosSpacing.sm,
   },
   alertButton: {
-    backgroundColor: theme.colors.warning[500],
+    backgroundColor: iosColors.systemOrange,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.borderRadius.sm,
-    gap: theme.spacing.xs,
+    paddingHorizontal: iosSpacing.lg,
+    paddingVertical: iosSpacing.sm,
+    borderRadius: iosRadius.sm,
+    gap: iosSpacing.xs,
+    minHeight: iosSpacing.minTouch,
   },
   alertButtonSecondary: {
     backgroundColor: 'transparent',
   },
   alertButtonText: {
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.white,
+    fontSize: iosFonts.footnote,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemBackground,
+    fontFamily: iosFonts.system,
   },
   alertButtonSecondaryText: {
-    color: theme.colors.warning[600],
+    color: iosColors.systemOrange,
+    fontFamily: iosFonts.system,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: iosSpacing.lg,
   },
   sectionTitle: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral[900],
+    fontSize: iosFonts.title3,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.label,
+    fontFamily: iosFonts.system,
   },
   viewAllText: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.primary[600],
-    fontWeight: theme.fontWeight.medium,
+    fontSize: iosFonts.footnote,
+    color: iosColors.systemBlue,
+    fontWeight: iosFonts.medium,
+    fontFamily: iosFonts.system,
   },
   deviceGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.md,
+    gap: iosSpacing.md,
     justifyContent: 'space-between',
     marginBottom: 120, // Space for FAB and tab bar
-    paddingBottom: theme.spacing.xl,
+    paddingBottom: iosSpacing.xl,
   },
   deviceCard: {
     width: '48%',
-    backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
+    backgroundColor: iosColors.systemBackground,
+    borderRadius: iosRadius.lg,
+    padding: iosSpacing.lg,
     alignItems: 'center',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: iosColors.label,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    minHeight: 140, // Ensure consistent card height
+    shadowRadius: 8,
+    minHeight: 160, // Ensure consistent card height
   },
   deviceIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: theme.colors.neutral[100],
+    backgroundColor: iosColors.systemGray6,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: iosSpacing.md,
   },
   deviceImageContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: iosRadius.md,
     overflow: 'hidden',
-    marginBottom: theme.spacing.md,
-    backgroundColor: theme.colors.neutral[100],
+    marginBottom: iosSpacing.md,
+    backgroundColor: iosColors.systemGray6,
   },
   deviceImage: {
     width: '100%',
     height: '100%',
   },
   deviceName: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral[900],
+    fontSize: iosFonts.headline,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.label,
     textAlign: 'center',
-    marginBottom: theme.spacing.xs,
+    marginBottom: iosSpacing.xs,
+    fontFamily: iosFonts.system,
   },
   deviceStatus: {
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
-    marginBottom: theme.spacing.xs,
+    fontSize: iosFonts.footnote,
+    fontWeight: iosFonts.medium,
+    marginBottom: iosSpacing.xs,
+    fontFamily: iosFonts.system,
   },
-  deviceInfo: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.neutral[500],
-    textAlign: 'center',
-  },
+
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: theme.spacing['3xl'],
+    paddingVertical: iosSpacing.xxxl,
     marginBottom: 120, // Space for FAB and tab bar
   },
   emptyStateTitle: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral[700],
-    marginBottom: theme.spacing.sm,
+    fontSize: iosFonts.title3,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.secondaryLabel,
+    marginBottom: iosSpacing.sm,
+    fontFamily: iosFonts.system,
   },
   emptyStateSubtitle: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[500],
+    fontSize: iosFonts.callout,
+    color: iosColors.placeholderText,
     textAlign: 'center',
+    fontFamily: iosFonts.system,
+    fontWeight: iosFonts.regular,
   },
 });

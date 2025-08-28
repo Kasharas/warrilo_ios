@@ -43,6 +43,25 @@ export interface SyncStatus {
 export class DeviceLocalStorage {
   
   /**
+   * Save multiple devices to local storage (overwrites existing)
+   */
+  static async saveDevices(devices: LocalDevice[]): Promise<void> {
+    try {
+      const dataToStore = JSON.stringify(devices);
+      if (dataToStore.length > 5000000) { // 5MB limit
+        console.warn('Data too large, clearing old devices');
+        await this.clearAll();
+      }
+      await AsyncStorage.setItem(STORAGE_KEYS.DEVICES, dataToStore);
+      await this.updateSyncStatus();
+      console.log('Devices saved locally:', devices.length);
+    } catch (error) {
+      console.error('Error saving devices locally:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Store a new device locally
    */
   static async storeDevice(device: Omit<LocalDevice, 'sync_status' | 'local_id'>): Promise<string> {

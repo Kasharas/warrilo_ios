@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, signInWithGoogle as supabaseSignInWithGoogle } from '../lib/supabaseClient';
 
@@ -30,8 +30,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [syncReady, setSyncReady] = useState<boolean>(false); // NEW: Sync readiness state
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null); // NEW: Last sync timestamp
+  const isInitialized = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple initializations
+    if (isInitialized.current) {
+      console.log('=== AUTH CONTEXT: Already initialized, skipping ===');
+      return;
+    }
+    
     console.log('=== AUTH CONTEXT useEffect TRIGGERED ===');
     console.log('0a. useEffect dependency array changed');
     console.log('0b. Current window.location.href:', window.location.href);
@@ -219,21 +226,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('DEBUG: Full new session:', session);
         console.log('DEBUG: Event type:', event);
         
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+        // Only update state if there's an actual change
+        const currentUserId = user?.id;
+        const newUserId = session?.user?.id;
+        
+        if (currentUserId !== newUserId || event === 'SIGNED_OUT') {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
 
-        // NEW: Update sync readiness based on auth state
-        if (session?.user?.id) {
-          setSyncReady(true);
-          console.log('DEBUG: Sync marked as ready for user:', session.user.id);
+          // NEW: Update sync readiness based on auth state
+          if (session?.user?.id) {
+            setSyncReady(true);
+            console.log('DEBUG: Sync marked as ready for user:', session.user.id);
+          } else {
+            setSyncReady(false);
+            console.log('DEBUG: Sync marked as not ready - no user session');
+          }
         } else {
-          setSyncReady(false);
-          console.log('DEBUG: Sync marked as not ready - no user session');
+          console.log('DEBUG: No user change detected, skipping state update');
         }
 
         // Handle user preferences creation
-        if (event === 'SIGNED_IN' && session?.user) {
+        if (event === 'SIGNED_IN' && session?.user && !loading) {
           console.log('DEBUG: User signed in, creating preferences for:', session.user.id);
           await createUserPreferencesIfNeeded(session.user.id);
         }
@@ -250,6 +265,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
+    // Mark as initialized to prevent re-runs
+    isInitialized.current = true;
+    
     return () => subscription.unsubscribe();
   }, []);
 

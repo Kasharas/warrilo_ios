@@ -8,16 +8,20 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import { LocalDevice } from '@/src/lib/localStorage';
+import { useDeviceOperations } from '@/src/hooks/useDeviceOperations';
 
 export default function DeviceDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
   const { getLocalDevices } = useDeviceSync();
+  const { deleteDevice } = useDeviceOperations();
   
   // Real device data
   const [device, setDevice] = useState<LocalDevice | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDeviceData();
@@ -55,17 +59,17 @@ export default function DeviceDetailsScreen() {
   };
 
   const handleDeleteDevice = () => {
-    Alert.alert(
-      'Delete Device',
-      'Are you sure you want to delete this device? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          console.log('Device deleted (mock)');
-          router.back();
-        }}
-      ]
-    );
+    if (device) {
+      console.log('🎯 FLOW TEST: Delete button pressed for device:', device?.name);
+      console.log('🎯 FLOW TEST: Current navigation stack depth:', router.canGoBack());
+      
+      setDeleting(true);
+      setError(null); // Clear any previous errors
+      deleteDevice(device).catch((err) => {
+        setError(err.message || 'Failed to delete device');
+        setDeleting(false);
+      });
+    }
   };
 
 
@@ -305,9 +309,30 @@ export default function DeviceDetailsScreen() {
 
         <View style={styles.bottomSpacing} />
         
+        {/* Error Display */}
+        {error && (
+          <View style={[styles.section, { 
+            backgroundColor: '#fee2e2', 
+            borderColor: '#ef4444', 
+            borderWidth: 1
+          }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ 
+                color: '#dc2626', 
+                fontSize: 14,
+                flex: 1
+              }}>{error}</Text>
+            </View>
+          </View>
+        )}
+        
         {/* Delete Button */}
         <View style={styles.deleteButtonContainer}>
-          <Pressable style={styles.deleteButton} onPress={handleDeleteDevice}>
+          <Pressable 
+            style={styles.deleteButton} 
+            onPress={handleDeleteDevice}
+            disabled={deleting}
+          >
             <Text style={styles.deleteButtonText}>Delete Item</Text>
           </Pressable>
         </View>
@@ -487,9 +512,8 @@ const styles = StyleSheet.create({
     color: iosColors.systemBackground,
   },
   deleteButtonContainer: {
-    marginTop: iosSpacing.lg,
-    marginBottom: iosSpacing.xl,
     marginTop: -30, // Move button 30px up
+    marginBottom: iosSpacing.xl,
   },
   deleteButton: {
     backgroundColor: iosColors.systemRed,

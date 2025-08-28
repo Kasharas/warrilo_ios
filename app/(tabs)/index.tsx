@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl, Image } from 'react-native';
 import { Plus, Eye, Clock, Smartphone, Laptop, Watch, Headphones, AlertTriangle } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
@@ -20,6 +21,7 @@ export default function DashboardScreen() {
   const [devices, setDevices] = useState<LocalDevice[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [deviceCount, setDeviceCount] = useState(0);
+  const [isFocusRefresh, setIsFocusRefresh] = useState(false);
 
   const handleDevicePress = (deviceId: string) => {
     router.push(`/device-details?id=${deviceId}`);
@@ -48,10 +50,28 @@ export default function DashboardScreen() {
     }
   }, [syncStatus.status, syncStatus.operationsCompleted]);
 
+  // Safe focus refresh strategy
+  useFocusEffect(
+    React.useCallback(() => {
+      // Only refresh if we're coming back from another screen
+      if (isFocusRefresh) {
+        console.log('🔄 Dashboard: Focus refresh triggered');
+        console.log('🔍 FOCUS VERIFICATION: Dashboard screen gained focus, refresh triggered');
+        console.log('🎯 FLOW TEST: Dashboard focus detected - should refresh after delete');
+        loadDevices();
+      } else {
+        console.log('ℹ️ Dashboard: Initial focus, skipping refresh');
+        setIsFocusRefresh(true);
+      }
+    }, [isFocusRefresh])
+  );
+
 
 
   const loadDevices = async () => {
     try {
+      console.log('📱 Dashboard: Loading devices from storage...');
+      console.log('🎯 FLOW TEST: Dashboard data reload - checking for deleted device');
       setLoading(true);
       const localDevices = await getLocalDevices();
       console.log('Loaded devices:', localDevices);
@@ -59,6 +79,16 @@ export default function DashboardScreen() {
       
       setDevices(localDevices);
       setDeviceCount(localDevices.length);
+      
+      console.log(`✅ Dashboard: Loaded ${localDevices.length} devices`);
+      
+      // Verification: Check state update and device details
+      console.log('🔍 DASHBOARD VERIFICATION: State updated with', localDevices.length, 'devices');
+      if (localDevices.length === 0) {
+        console.log('ℹ️ DASHBOARD VERIFICATION: No devices found - showing empty state');
+      } else {
+        console.log('📋 DASHBOARD VERIFICATION: Device names:', localDevices.map(d => d.name));
+      }
       
       // Calculate total warranty value (mock calculation for now)
       // In a real app, you'd sum up actual purchase prices

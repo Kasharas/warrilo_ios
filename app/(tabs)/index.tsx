@@ -21,6 +21,7 @@ export default function DashboardScreen() {
   const [devices, setDevices] = useState<LocalDevice[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [deviceCount, setDeviceCount] = useState(0);
+  const [devicesWithPrices, setDevicesWithPrices] = useState<LocalDevice[]>([]);
   const [isFocusRefresh, setIsFocusRefresh] = useState(false);
   
   // Get navigation parameters to detect device addition
@@ -117,10 +118,22 @@ export default function DashboardScreen() {
         console.log('📋 DASHBOARD VERIFICATION: Device names:', localDevices.map(d => d.name));
       }
       
-      // Calculate total warranty value (mock calculation for now)
-      // In a real app, you'd sum up actual purchase prices
-      const mockTotalValue = localDevices.length * 500; // $500 per device average
-      setTotalValue(mockTotalValue);
+      // Calculate total purchase value from actual device purchase prices
+      const devicesWithValidPrices = localDevices.filter(device => 
+        device.purchase_price && typeof device.purchase_price === 'number' && device.purchase_price > 0
+      );
+      
+      const totalPurchaseValue = devicesWithValidPrices.reduce((total, device) => {
+        return total + (device.purchase_price || 0);
+      }, 0);
+      
+      console.log('🔍 DASHBOARD VERIFICATION: Total devices:', localDevices.length);
+      console.log('🔍 DASHBOARD VERIFICATION: Devices with valid prices:', devicesWithValidPrices.length);
+      console.log('🔍 DASHBOARD VERIFICATION: Purchase prices found:', devicesWithValidPrices.map(d => ({ name: d.name, price: d.purchase_price })));
+      console.log('🔍 DASHBOARD VERIFICATION: Total purchase value calculated:', totalPurchaseValue);
+      
+      setTotalValue(totalPurchaseValue);
+      setDevicesWithPrices(devicesWithValidPrices);
     } catch (error) {
       console.error('Error loading devices:', error);
     } finally {
@@ -190,11 +203,16 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Total Warranty Value Card */}
+        {/* Total Purchase Value Card */}
         <View style={styles.warrantyValueCard}>
-          <Text style={styles.warrantyValueTitle}>Total Warranty Value</Text>
-          <Text style={styles.warrantyValueAmount}>${totalValue.toLocaleString()}</Text>
-          <Text style={styles.warrantyValueSubtitle}>{deviceCount} active warranties</Text>
+          <Text style={styles.warrantyValueTitle}>Total Purchase Value</Text>
+          <Text style={styles.warrantyValueAmount}>
+            {totalValue > 0 ? `$${totalValue.toLocaleString()}` : 'No prices set'}
+          </Text>
+          <Text style={styles.warrantyValueSubtitle}>
+            {deviceCount} devices
+            {devicesWithPrices.length !== deviceCount && ` (${devicesWithPrices.length} with prices)`}
+          </Text>
         </View>
         
         {/* Warranty Alert */}

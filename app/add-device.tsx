@@ -239,7 +239,7 @@ export default function AddDeviceScreen() {
   };
 
   // New upload handler using the upload service
-  const handleSaveDevice = async () => {
+  const handleSaveDevice = () => {
     console.log('=== ADD DEVICE BUTTON PRESSED ===');
     console.log('User ID:', user?.id);
     
@@ -249,13 +249,40 @@ export default function AddDeviceScreen() {
       return;
     }
     
-    console.log('Starting device upload process...');
-
+    // Validate required fields before proceeding
+    if (!deviceName.trim()) {
+      Alert.alert('Error', 'Device name is required');
+      return;
+    }
+    
+    if (!selectedDate) {
+      Alert.alert('Error', 'Purchase date is required');
+      return;
+    }
+    
+    if (!warrantyDuration) {
+      Alert.alert('Error', 'Warranty duration is required');
+      return;
+    }
+    
+    if (!receiptImage) {
+      Alert.alert('Error', 'Receipt is required');
+      return;
+    }
+    
+    console.log('Validation passed, navigating to dashboard immediately...');
+    
+    // Navigate to dashboard immediately
+    router.push('/');
+    
+    // Continue with upload in background
+    console.log('Starting background device upload process...');
+    
     // Prepare form data from your existing state
     const formData: AddDeviceFormData = {
       deviceName: deviceName || '',
       brand: brand || '',
-      serialNumber: serialNumber || undefined,
+      serialNumber: serialNumber || '',
       category: selectedCategory || '',
       purchaseDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
       purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
@@ -283,33 +310,17 @@ export default function AddDeviceScreen() {
     
     console.log('File data prepared:', fileData);
 
-    // Upload the device
-    console.log('Calling uploadDevice function...');
-    const result = await uploadDevice(formData, fileData);
-    console.log('Upload result:', result);
-
-    if (result.success) {
-      Alert.alert('Success', 'Device added successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Navigate to device details or back to device list
-            router.push('/devices');
-          }
-        }
-      ]);
-    } else {
-      console.log('Upload failed:', result);
-      if (result.validationErrors) {
-        // Handle validation errors - show first error
-        const firstError = Object.values(result.validationErrors)[0];
-        console.log('Validation errors:', result.validationErrors);
-        Alert.alert('Validation Error', firstError);
-      } else {
-        console.log('Upload error:', result.error);
-        Alert.alert('Upload Failed', result.error || 'Unknown error occurred');
+    // Upload the device in background (no await)
+    uploadDevice(formData, fileData).then(result => {
+      console.log('Background upload result:', result);
+      if (!result.success) {
+        console.log('Background upload failed:', result);
+        // Could show a toast notification here instead of blocking the UI
       }
-    }
+    }).catch(error => {
+      console.error('Background upload error:', error);
+      // Could show a toast notification here instead of blocking the UI
+    });
   };
 
            // Calculate warranty expiry date when purchase date or warranty duration changes

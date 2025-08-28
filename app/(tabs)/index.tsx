@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl, Image } from 'react-native';
 import { Plus, Eye, Clock, Smartphone, Laptop, Watch, Headphones, AlertTriangle } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
@@ -22,6 +22,9 @@ export default function DashboardScreen() {
   const [totalValue, setTotalValue] = useState(0);
   const [deviceCount, setDeviceCount] = useState(0);
   const [isFocusRefresh, setIsFocusRefresh] = useState(false);
+  
+  // Get navigation parameters to detect device addition
+  const params = useLocalSearchParams();
 
   const handleDevicePress = (deviceId: string) => {
     router.push(`/device-details?id=${deviceId}`);
@@ -31,6 +34,27 @@ export default function DashboardScreen() {
   useEffect(() => {
     loadDevices();
   }, []);
+
+  // Additional refresh on mount to catch any new devices
+  useEffect(() => {
+    const refreshOnMount = async () => {
+      console.log('🔄 Dashboard: Mount refresh - checking for new devices');
+      await loadDevices();
+    };
+    refreshOnMount();
+  }, []);
+
+  // Detect navigation parameters indicating device addition
+  useEffect(() => {
+    console.log('🔍 Dashboard: Checking navigation parameters:', params);
+    if (params.refresh === 'true') {
+      console.log('🔄 Dashboard: Refresh parameter detected - device was added, refreshing immediately');
+      console.log('🎯 FLOW TEST: Navigation parameter refresh triggered - should show new device');
+      forceRefresh();
+      // Clear the parameter to prevent repeated refreshes
+      router.setParams({ refresh: undefined, timestamp: undefined });
+    }
+  }, [params.refresh, params.timestamp]);
 
   // Phase 2: Trigger sync when ready
   useEffect(() => {
@@ -50,20 +74,23 @@ export default function DashboardScreen() {
     }
   }, [syncStatus.status, syncStatus.operationsCompleted]);
 
-  // Safe focus refresh strategy
+  // Enhanced refresh: Also reload when sync status changes to catch new devices
+  useEffect(() => {
+    if (syncStatus.status === 'idle' && syncStatus.lastSyncTime) {
+      console.log('🔄 Dashboard: Sync completed, refreshing devices to catch new additions');
+      loadDevices();
+    }
+  }, [syncStatus.status, syncStatus.lastSyncTime]);
+
+  // Enhanced focus refresh strategy with immediate refresh detection
   useFocusEffect(
     React.useCallback(() => {
-      // Only refresh if we're coming back from another screen
-      if (isFocusRefresh) {
-        console.log('🔄 Dashboard: Focus refresh triggered');
-        console.log('🔍 FOCUS VERIFICATION: Dashboard screen gained focus, refresh triggered');
-        console.log('🎯 FLOW TEST: Dashboard focus detected - should refresh after delete');
-        loadDevices();
-      } else {
-        console.log('ℹ️ Dashboard: Initial focus, skipping refresh');
-        setIsFocusRefresh(true);
-      }
-    }, [isFocusRefresh])
+      // Always refresh when gaining focus to catch new devices
+      console.log('🔄 Dashboard: Focus detected - refreshing devices');
+      console.log('🔍 FOCUS VERIFICATION: Dashboard screen gained focus, refresh triggered');
+      console.log('🎯 FLOW TEST: Dashboard focus detected - should refresh after device addition');
+      loadDevices();
+    }, [])
   );
 
 
@@ -99,6 +126,14 @@ export default function DashboardScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Force refresh function for immediate updates
+  const forceRefresh = async () => {
+    console.log('🔄 Dashboard: Force refresh triggered');
+    console.log('🎯 FLOW TEST: Force refresh executing - should load new device from local storage');
+    await loadDevices();
+    console.log('✅ Dashboard: Force refresh completed');
   };
 
   const handleRefresh = () => {

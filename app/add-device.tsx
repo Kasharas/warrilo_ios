@@ -177,14 +177,21 @@ export default function AddDeviceScreen() {
         setTimeout(() => {
           console.log('Navigation: Auto-navigating to dashboard after delay');
           try {
-            router.push('/');
-            console.log('Navigation: router.push(/) called successfully');
+            // Navigate with refresh parameter to trigger dashboard refresh
+            router.push({
+              pathname: '/',
+              params: { refresh: 'true', timestamp: Date.now().toString() }
+            });
+            console.log('Navigation: router.push(/) with refresh params called successfully');
           } catch (navError) {
             console.error('Navigation error:', navError);
             // Fallback navigation
             try {
-              router.replace('/');
-              console.log('Navigation: router.replace(/) called as fallback');
+              router.replace({
+                pathname: '/',
+                params: { refresh: 'true', timestamp: Date.now().toString() }
+              });
+              console.log('Navigation: router.replace(/) with refresh params called as fallback');
             } catch (replaceError) {
               console.error('Replace navigation error:', replaceError);
             }
@@ -200,14 +207,21 @@ export default function AddDeviceScreen() {
               onPress: () => {
                 console.log('Navigation: OK button pressed, navigating to dashboard');
                 try {
-                  router.push('/');
-                  console.log('Navigation: OK button router.push(/) called successfully');
+                  // Navigate with refresh parameter to trigger dashboard refresh
+                  router.push({
+                    pathname: '/',
+                    params: { refresh: 'true', timestamp: Date.now().toString() }
+                  });
+                  console.log('Navigation: OK button router.push(/) with refresh params called successfully');
                 } catch (navError) {
                   console.error('OK button navigation error:', navError);
                   // Fallback navigation
                   try {
-                    router.replace('/');
-                    console.log('Navigation: OK button router.replace(/) called as fallback');
+                    router.replace({
+                      pathname: '/',
+                      params: { refresh: 'true', timestamp: Date.now().toString() }
+                    });
+                    console.log('Navigation: OK button router.replace(/) with refresh params called successfully');
                   } catch (replaceError) {
                     console.error('OK button replace navigation error:', replaceError);
                   }
@@ -239,8 +253,8 @@ export default function AddDeviceScreen() {
     }
   };
 
-  // New upload handler using the upload service
-  const handleSaveDevice = () => {
+  // New upload handler using the upload service with immediate local storage
+  const handleSaveDevice = async () => {
     console.log('=== ADD DEVICE BUTTON PRESSED ===');
     console.log('User ID:', user?.id);
     
@@ -262,7 +276,7 @@ export default function AddDeviceScreen() {
     }
     
     if (!warrantyDuration) {
-      Alert.alert('Error', 'Warranty duration is required');
+      Alert.alert('Error', 'Warranty duration is empty');
       return;
     }
     
@@ -271,57 +285,99 @@ export default function AddDeviceScreen() {
       return;
     }
     
-    console.log('Validation passed, navigating to dashboard immediately...');
+    console.log('Validation passed, storing device locally first...');
     
-    // Navigate to dashboard immediately
-    router.push('/');
-    
-    // Continue with upload in background
-    console.log('Starting background device upload process...');
-    
-    // Prepare form data from your existing state
-    const formData: AddDeviceFormData = {
-      deviceName: deviceName || '',
-      brand: brand || '',
-      serialNumber: serialNumber || '',
-      category: selectedCategory || '',
-      purchaseDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-      purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
-      store: storeName || '',
-      warrantyMonths: warrantyDuration ? parseInt(warrantyDuration) : 0,
-      notes: notes || undefined,
-    };
-    
-    console.log('Form data prepared:', formData);
+    try {
+      // Step 1: Store device locally immediately for instant UI update
+      const localDeviceData = {
+        id: `temp_${Date.now()}`, // Temporary ID until Supabase sync
+        user_id: user.id,
+        name: deviceName.trim(),
+        supplier: storeName.trim(),
+        category: selectedCategory || '',
+        purchase_date: selectedDate.toISOString().split('T')[0],
+        warranty_months: parseInt(warrantyDuration),
+        warranty_end_date: new Date(selectedDate.getTime() + (parseInt(warrantyDuration) * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+        purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
+        location: null,
+        photo_irl: deviceImage || null,
+        notes: notes || null,
+        invoice_url: receiptImage || null,
+        identifiers: serialNumber.trim() || null,
+        created_at: new Date().toISOString(),
+        sync_status: 'pending' as const,
+        local_id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      console.log('Storing device locally:', localDeviceData);
+      
+      // Import and use DeviceLocalStorage to store immediately
+      const { DeviceLocalStorage } = await import('@/src/lib/localStorage');
+      await DeviceLocalStorage.storeDevice(localDeviceData);
+      
+      console.log('✅ Device stored locally successfully');
+      
+      // Step 2: Navigate to dashboard with refresh parameter
+      console.log('Navigating to dashboard with refresh parameter...');
+      router.push({
+        pathname: '/',
+        params: { refresh: 'true', timestamp: Date.now().toString() }
+      });
+      
+      // Step 3: Continue with background upload
+      console.log('Starting background device upload process...');
+      
+      // Prepare form data for background upload
+      const formData: AddDeviceFormData = {
+        deviceName: deviceName || '',
+        brand: brand || '',
+        serialNumber: serialNumber || '',
+        category: selectedCategory || '',
+        purchaseDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
+        purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
+        store: storeName || '',
+        warrantyMonths: warrantyDuration ? parseInt(warrantyDuration) : 0,
+        notes: notes || undefined,
+      };
+      
+      console.log('Form data prepared for background upload:', formData);
 
-    // Prepare file data from your existing state
-    const fileData: DeviceFileData = {
-      devicePhoto: deviceImage ? {
-        uri: deviceImage,
-        name: 'device-photo.jpg',
-        type: 'image/jpeg'
+      // Prepare file data for background upload
+      const fileData: DeviceFileData = {
+        devicePhoto: deviceImage ? {
+          uri: deviceImage,
+          name: 'device-photo.jpg',
+          type: 'image/jpeg'
       } : undefined,
-      receiptPhoto: receiptImage ? {
-        uri: receiptImage,
-        name: 'receipt-photo.jpg',
-        type: 'image/jpeg'
-      } : undefined,
-      additionalPhotos: undefined, // No additional photos in current implementation
-    };
-    
-    console.log('File data prepared:', fileData);
+        receiptPhoto: receiptImage ? {
+          uri: receiptImage,
+          name: 'receipt-photo.jpg',
+          type: 'image/jpeg'
+        } : undefined,
+        additionalPhotos: undefined,
+      };
+      
+      console.log('File data prepared for background upload:', fileData);
 
-    // Upload the device in background (no await)
-    uploadDevice(formData, fileData).then(result => {
-      console.log('Background upload result:', result);
-      if (!result.success) {
-        console.log('Background upload failed:', result);
-        // Could show a toast notification here instead of blocking the UI
-      }
-    }).catch(error => {
-      console.error('Background upload error:', error);
-      // Could show a toast notification here instead of blocking the UI
-    });
+      // Upload the device in background (no await)
+      uploadDevice(formData, fileData).then(result => {
+        console.log('Background upload result:', result);
+        if (result.success) {
+          console.log('✅ Background upload completed successfully');
+          // Could show a success toast notification here
+        } else {
+          console.log('❌ Background upload failed:', result.error);
+          // Could show an error toast notification here
+        }
+      }).catch(error => {
+        console.error('Background upload error:', error);
+        // Could show an error toast notification here
+      });
+      
+    } catch (error) {
+      console.error('Error storing device locally:', error);
+      Alert.alert('Error', 'Failed to store device locally. Please try again.');
+    }
   };
 
            // Calculate warranty expiry date when purchase date or warranty duration changes

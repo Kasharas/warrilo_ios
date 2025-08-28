@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator, RefreshControl } from 'react-native';
-import { ArrowLeft, Trash2, Edit, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
+import { ArrowLeft, Edit, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { iosFonts, iosColors, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -68,6 +68,8 @@ export default function DeviceDetailsScreen() {
     );
   };
 
+
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -80,6 +82,39 @@ export default function DeviceDetailsScreen() {
   const formatPrice = (price?: number) => {
     if (!price) return 'N/A';
     return `$${price.toLocaleString()}`;
+  };
+
+  const extractSerialNumber = (identifiers?: string | null) => {
+    if (!identifiers) return null;
+    
+    try {
+      // Try to parse as JSON first
+      const parsed = JSON.parse(identifiers);
+      
+      // If it's an object, look for common serial number keys
+      if (typeof parsed === 'object' && parsed !== null) {
+        // Check for common serial number field names
+        const serialKeys = ['serial', 'serialNumber', 'serial_number', 'id', 'identifier'];
+        for (const key of serialKeys) {
+          if (parsed[key] && typeof parsed[key] === 'string') {
+            return parsed[key];
+          }
+        }
+        
+        // If no specific key found, return the first string value
+        const values = Object.values(parsed);
+        const firstString = values.find(val => typeof val === 'string');
+        if (firstString) {
+          return firstString;
+        }
+      }
+      
+      // If parsing failed or it's not an object, return as is
+      return identifiers;
+    } catch (error) {
+      // If it's not JSON, return the original string
+      return identifiers;
+    }
   };
 
 
@@ -126,9 +161,6 @@ export default function DeviceDetailsScreen() {
         <View style={styles.headerActions}>
           <Pressable style={styles.actionButton} onPress={handleEditDevice}>
             <Edit size={20} color={iosColors.systemBlue} />
-          </Pressable>
-          <Pressable style={styles.actionButton} onPress={handleDeleteDevice}>
-            <Trash2 size={20} color={iosColors.systemRed} />
           </Pressable>
         </View>
       </View>
@@ -206,7 +238,7 @@ export default function DeviceDetailsScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
-              {device.identifiers || 'No identifiers'}
+              {extractSerialNumber(device.identifiers) || 'No serial number'}
             </Text>
           </View>
 
@@ -272,6 +304,13 @@ export default function DeviceDetailsScreen() {
         </View>
 
         <View style={styles.bottomSpacing} />
+        
+        {/* Delete Button */}
+        <View style={styles.deleteButtonContainer}>
+          <Pressable style={styles.deleteButton} onPress={handleDeleteDevice}>
+            <Text style={styles.deleteButtonText}>Delete Item</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -281,6 +320,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: iosColors.systemBackground,
+    paddingHorizontal: iosSpacing.lg,
   },
   header: {
     flexDirection: 'row',
@@ -303,7 +343,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: iosSpacing.lg,
   },
   section: {
     backgroundColor: iosColors.systemBackground,
@@ -323,11 +362,11 @@ const styles = StyleSheet.create({
     marginBottom: iosSpacing.lg,
   },
   uploadRow: {
-    flexDirection: 'row',
-    gap: iosSpacing.md,
+    flexDirection: 'column',
+    gap: iosSpacing.lg,
   },
   uploadZone: {
-    flex: 1,
+    width: '100%',
     backgroundColor: iosColors.systemGray6,
     borderRadius: iosRadius.md,
     padding: iosSpacing.lg,
@@ -335,7 +374,7 @@ const styles = StyleSheet.create({
     borderColor: iosColors.systemGray5,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 120,
+    minHeight: 140,
     shadowColor: iosColors.label,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -345,7 +384,8 @@ const styles = StyleSheet.create({
   imagePreviewContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 120,
+    minHeight: 140,
+    width: '100%',
     shadowColor: iosColors.label,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -354,7 +394,7 @@ const styles = StyleSheet.create({
   },
   imagePreview: {
     width: '100%',
-    height: 200,
+    height: 180,
     borderRadius: iosRadius.md,
   },
   uploadContent: {
@@ -442,6 +482,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   retryButtonText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.systemBackground,
+  },
+  deleteButtonContainer: {
+    marginTop: iosSpacing.lg,
+    marginBottom: iosSpacing.xl,
+    marginTop: -30, // Move button 30px up
+  },
+  deleteButton: {
+    backgroundColor: iosColors.systemRed,
+    borderRadius: iosRadius.md,
+    paddingVertical: iosSpacing.md,
+    alignItems: 'center',
+    shadowColor: iosColors.systemRed,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  deleteButtonText: {
     fontSize: iosFonts.body,
     fontWeight: iosFonts.semibold,
     color: iosColors.systemBackground,

@@ -4,17 +4,17 @@ export interface SupabaseDevice {
   id: string
   user_id: string
   name: string
-  brand_name?: string
-  category?: string
+  supplier?: string | null
+  category?: string | null
   purchase_date?: string
-  purchase_price?: number
-  store_name?: string
+  purchase_price?: number | null
+  location?: string | null
+  photo_irl?: string | null
+  notes?: string | null
+  invoice_url?: string
+  identifiers?: string | null
   warranty_months?: number
   warranty_end_date?: string
-  photo_irl?: string
-  invoice_url?: string
-  identifiers?: string
-  notes?: string
   created_at: string
 }
 

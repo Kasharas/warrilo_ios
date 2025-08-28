@@ -157,6 +157,7 @@ export default function AddDeviceScreen() {
         receipt: { uri: receiptImage, type: 'library' as const },
         serialNumber: serialNumber.trim(),
         storeName: storeName.trim(),
+        category: selectedCategory || '', // Add category field
         devicePhoto: { uri: deviceImage, type: 'library' as const },
       };
 

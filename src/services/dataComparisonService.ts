@@ -83,8 +83,8 @@ class DataComparisonService {
   private needsUpdate(localDevice: SyncLocalDevice, supabaseDevice: SupabaseDevice): boolean {
     // Compare key fields to determine if update is needed
     const fieldsToCompare = [
-      'name', 'brand_name', 'category', 'purchase_date', 
-      'purchase_price', 'store_name', 'warranty_months', 
+      'name', 'supplier', 'category', 'purchase_date', 
+      'purchase_price', 'location', 'warranty_months', 
       'warranty_end_date', 'photo_irl', 'invoice_url', 
       'identifiers', 'notes'
     ]

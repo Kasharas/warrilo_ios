@@ -13,6 +13,7 @@ export interface LocalDevice {
   user_id: string;
   name: string;
   supplier: string | null;
+  category: string | null; // Add category field
   purchase_date: string;
   warranty_months: number;
   warranty_end_date: string;

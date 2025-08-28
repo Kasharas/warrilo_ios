@@ -14,6 +14,7 @@ export interface DeviceFormData {
   // Optional fields (user can leave blank, but fields stay visible)
   serialNumber: string;
   storeName: string;
+  category: string; // Add category field
   devicePhoto: { uri: string | null; type: 'camera' | 'library' | null };
 }
 
@@ -113,6 +114,7 @@ export const useDeviceSync = () => {
         user_id: user.id,
         name: formData.name.trim(),
         supplier: formData.storeName.trim() || null,
+        category: formData.category.trim() || null, // Add category field
         purchase_date: purchaseDate.toISOString().split('T')[0], // YYYY-MM-DD format
         warranty_months: warrantyMonths,
         warranty_end_date: warrantyEndDate.toISOString().split('T')[0],

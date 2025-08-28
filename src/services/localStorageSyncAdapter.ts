@@ -1,24 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 // Use the existing storage key from your current implementation
-const DEVICES_STORAGE_KEY = 'devices'
+const DEVICES_STORAGE_KEY = 'warrilo_devices'
 
 export interface SyncLocalDevice {
   id: string
   user_id: string
   name: string
-  brand_name?: string
-  category?: string
+  supplier?: string | null
+  category?: string | null
   purchase_date?: string
-  purchase_price?: number
-  store_name?: string
-  warranty_months?: number
-  warranty_end_date?: string
-  photo_irl?: string
+  purchase_price?: number | null
+  location?: string | null
+  photo_irl?: string | null
+  notes?: string | null
   invoice_url?: string
-  identifiers?: string
-  notes?: string
+  identifiers?: string | null
   created_at: string
+  sync_status?: 'pending' | 'syncing' | 'synced' | 'failed'
+  local_id?: string
   // Keep existing local storage fields your app already uses
   [key: string]: any
 }

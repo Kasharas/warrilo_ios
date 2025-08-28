@@ -1,43 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator, RefreshControl } from 'react-native';
 import { ArrowLeft, Trash2, Edit, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { iosFonts, iosColors, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDeviceSync } from '@/src/hooks/useDeviceSync';
+import { LocalDevice } from '@/src/lib/localStorage';
 
 export default function DeviceDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
+  const { getLocalDevices } = useDeviceSync();
   
-  // Mock data - no more Supabase fetching
-  const [device, setDevice] = useState<any>(null);
+  // Real device data
+  const [device, setDevice] = useState<LocalDevice | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading and mock data
-    setTimeout(() => {
-      setDevice({
-        id: id,
-        name: 'Sample Device',
-        brand: 'Sample Brand',
-        serialNumber: 'SN123456789',
-        category: 'Electronics',
-        purchase_price: 999.99,
-        purchase_date: '2024-01-15',
-        store_name: 'Sample Store',
-        warranty_duration: 36,
-        notes: 'This is a sample device for demonstration purposes.',
-        photo_irl: null,
-        receipt_url: null,
-        created_at: '2024-01-15T00:00:00Z'
-      });
-      
-      setLoading(false);
-    }, 1000);
+    loadDeviceData();
   }, [id]);
+
+  const loadDeviceData = async () => {
+    try {
+      setLoading(true);
+      const devices = await getLocalDevices();
+      const foundDevice = devices.find(d => d.local_id === id || d.id === id);
+      
+      if (foundDevice) {
+        setDevice(foundDevice);
+      } else {
+        console.error('Device not found with ID:', id);
+      }
+    } catch (error) {
+      console.error('Error loading device data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    loadDeviceData();
+  };
 
   const handleBackPress = () => {
     router.back();
@@ -76,16 +82,7 @@ export default function DeviceDetailsScreen() {
     return `$${price.toLocaleString()}`;
   };
 
-  const calculateWarrantyExpiry = (purchaseDate: string, warrantyMonths: number) => {
-    const purchase = new Date(purchaseDate);
-    const expiry = new Date(purchase);
-    expiry.setMonth(expiry.getMonth() + warrantyMonths);
-    return expiry.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+
 
   if (loading) {
     return (
@@ -101,8 +98,18 @@ export default function DeviceDetailsScreen() {
   if (!device) {
     return (
       <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={handleBackPress}>
+            <ArrowLeft size={24} color={iosColors.label} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Item Details</Text>
+        </View>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Device not found</Text>
+          <Text style={styles.errorSubtext}>The device you're looking for doesn't exist or has been removed.</Text>
+          <Pressable style={styles.retryButton} onPress={handleRefresh}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );
@@ -126,7 +133,18 @@ export default function DeviceDetailsScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            colors={[iosColors.systemBlue]}
+            tintColor={iosColors.systemBlue}
+          />
+        }
+      >
         {/* Images Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Images</Text>
@@ -152,10 +170,10 @@ export default function DeviceDetailsScreen() {
             
             {/* Receipt Image */}
             <View style={styles.uploadZone}>
-              {device.receipt_url ? (
+              {device.invoice_url ? (
                 <View style={styles.imagePreviewContainer}>
                   <Image 
-                    source={{ uri: device.receipt_url }} 
+                    source={{ uri: device.invoice_url }} 
                     style={styles.imagePreview}
                     resizeMode="cover"
                   />
@@ -172,7 +190,7 @@ export default function DeviceDetailsScreen() {
 
         {/* Device Information Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Device Information</Text>
+          <Text style={styles.sectionTitle}>Device Details</Text>
           
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
@@ -182,13 +200,13 @@ export default function DeviceDetailsScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
-              {device.brand || 'No brand name'}
+              {device.supplier || 'No supplier'}
             </Text>
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
-              {device.serialNumber || 'No serial number'}
+              {device.identifiers || 'No identifiers'}
             </Text>
           </View>
 
@@ -201,7 +219,7 @@ export default function DeviceDetailsScreen() {
 
         {/* Purchase Details Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Purchase Details</Text>
+          <Text style={styles.sectionTitle}>Purchase & Creation Details</Text>
           
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
@@ -217,7 +235,7 @@ export default function DeviceDetailsScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
-              {device.store_name || 'No store name'}
+              {device.created_at ? formatDate(device.created_at) : 'No creation date'}
             </Text>
           </View>
         </View>
@@ -228,15 +246,15 @@ export default function DeviceDetailsScreen() {
           
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
-              {device.warranty_duration ? `${device.warranty_duration} months` : 'No warranty duration'}
+              {device.warranty_months ? `${device.warranty_months} months` : 'No warranty duration'}
             </Text>
           </View>
 
           <View style={styles.warrantyExpiryInfo}>
             <Text style={styles.warrantyExpiryLabel}>
-              {device.purchase_date && device.warranty_duration 
-                ? `Active until ${calculateWarrantyExpiry(device.purchase_date, device.warranty_duration)}`
-                : 'Select purchase date and duration'
+              {device.warranty_end_date 
+                ? `Active until ${formatDate(device.warranty_end_date)}`
+                : 'No warranty end date'
               }
             </Text>
           </View>
@@ -402,11 +420,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: iosSpacing.lg,
+    paddingVertical: iosSpacing.xxxl,
   },
   errorText: {
     fontSize: iosFonts.title2,
     fontWeight: iosFonts.bold,
     color: iosColors.label,
     marginBottom: iosSpacing.md,
+  },
+  errorSubtext: {
+    fontSize: iosFonts.callout,
+    color: iosColors.secondaryLabel,
+    textAlign: 'center',
+    marginBottom: iosSpacing.lg,
+  },
+  retryButton: {
+    backgroundColor: iosColors.systemBlue,
+    borderRadius: iosRadius.md,
+    paddingVertical: iosSpacing.md,
+    paddingHorizontal: iosSpacing.lg,
+    alignItems: 'center',
+  },
+  retryButtonText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.systemBackground,
   },
 });

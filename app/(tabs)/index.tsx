@@ -7,12 +7,14 @@ import { FabButton } from '@/src/components/FabButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSync } from '@/contexts/SyncContext';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import { LocalDevice } from '@/src/lib/localStorage';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, syncReady } = useAuth();
+  const { syncStatus, triggerSync } = useSync(); // NEW: Use sync context instead of local state
   const { getLocalDevices } = useDeviceSync();
   const [loading, setLoading] = useState(false);
   const [devices, setDevices] = useState<LocalDevice[]>([]);
@@ -23,10 +25,28 @@ export default function DashboardScreen() {
     router.push(`/device-details?id=${deviceId}`);
   };
 
-  // Load devices from local storage
+  // Phase 1: Load local data first (fast UI)
   useEffect(() => {
     loadDevices();
   }, []);
+
+  // Phase 2: Trigger sync when ready
+  useEffect(() => {
+    if (user && syncReady && syncStatus.status === 'idle') {
+      console.log('=== PHASE 2: SYNC READY ===');
+      console.log('User:', user.id, 'SyncReady:', syncReady, 'Status:', syncStatus.status);
+      triggerSync();
+    }
+  }, [user, syncReady, syncStatus.status, triggerSync]);
+
+  // Phase 3: Reload devices after successful sync
+  useEffect(() => {
+    if (syncStatus.status === 'success' && syncStatus.operationsCompleted > 0) {
+      console.log('=== PHASE 3: SYNC SUCCESS ===');
+      console.log('Operations completed:', syncStatus.operationsCompleted);
+      loadDevices(); // Reload to show updated data
+    }
+  }, [syncStatus.status, syncStatus.operationsCompleted]);
 
 
 
@@ -54,6 +74,8 @@ export default function DashboardScreen() {
   const handleRefresh = () => {
     loadDevices();
   };
+
+
 
   const getStatusColor = (statusColor: string) => {
     switch (statusColor) {
@@ -85,12 +107,22 @@ export default function DashboardScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dashboard</Text>
-          <Pressable style={styles.menuButton} onPress={() => router.push('/settings')}>
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-          </Pressable>
+          <View style={styles.headerRight}>
+            {/* NEW: Sync Status Indicator */}
+            <View style={[styles.syncIndicator, styles[`sync${syncStatus.status.charAt(0).toUpperCase() + syncStatus.status.slice(1)}`]]}>
+              <Text style={styles.syncStatusText}>
+                {syncStatus.status === 'syncing' ? 'Syncing...' : 
+                 syncStatus.status === 'success' ? '✓ Synced' : 
+                 syncStatus.status === 'error' ? '⚠ Error' : 'Ready'}
+              </Text>
+            </View>
+            <Pressable style={styles.menuButton} onPress={() => router.push('/settings')}>
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+            </Pressable>
+          </View>
         </View>
 
         {/* Total Warranty Value Card */}
@@ -245,6 +277,11 @@ const styles = StyleSheet.create({
     marginBottom: iosSpacing.xxxl,
     marginTop: iosSpacing.lg,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: iosSpacing.md,
+  },
   headerTitle: {
     fontSize: iosFonts.largeTitle,
     fontWeight: iosFonts.bold,
@@ -265,6 +302,31 @@ const styles = StyleSheet.create({
     backgroundColor: iosColors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
+  },
+  syncIndicator: {
+    paddingHorizontal: iosSpacing.sm,
+    paddingVertical: iosSpacing.xs,
+    borderRadius: iosRadius.sm,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  syncIdle: {
+    backgroundColor: iosColors.systemGray5,
+  },
+  syncSyncing: {
+    backgroundColor: iosColors.systemBlue,
+  },
+  syncSuccess: {
+    backgroundColor: iosColors.systemGreen,
+  },
+  syncError: {
+    backgroundColor: iosColors.systemRed,
+  },
+  syncStatusText: {
+    fontSize: iosFonts.caption2,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemBackground,
+    fontFamily: iosFonts.system,
   },
   warrantyValueCard: {
     backgroundColor: iosColors.systemBlue,

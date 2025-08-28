@@ -6,6 +6,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  syncReady: boolean; // NEW: Indicates when sync can safely run
+  lastSyncTime: Date | null; // NEW: Track sync status
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: (options?: { redirectTo?: string }) => Promise<{ error: any }>;
@@ -26,6 +28,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [syncReady, setSyncReady] = useState<boolean>(false); // NEW: Sync readiness state
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null); // NEW: Last sync timestamp
 
   useEffect(() => {
     console.log('=== AUTH CONTEXT useEffect TRIGGERED ===');
@@ -52,13 +56,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (error) {
               console.error('3b. OAuth callback error:', error);
             }
-            if (data.session) {
-              console.log('3c. OAuth session established:', data.session.user.id);
-              setSession(data.session);
-              setUser(data.session.user);
-              setLoading(false);
-              return;
-            }
+                    if (data.session) {
+          console.log('3c. OAuth session established:', data.session.user.id);
+          setSession(data.session);
+          setUser(data.session.user);
+          setLoading(false);
+          setSyncReady(true); // NEW: Mark sync as ready after OAuth success
+          return;
+        }
           }
           
           // NEW: Also check for OAuth code in query parameters
@@ -91,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   setSession(data.session);
                   setUser(data.session.user);
                   setLoading(false);
+                  setSyncReady(true); // NEW: Mark sync as ready after OAuth success
                   
                   // Clean up URL by removing the code parameter
                   window.history.replaceState({}, '', window.location.origin);
@@ -110,6 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setSession(refreshData.session);
                 setUser(refreshData.session.user);
                 setLoading(false);
+                setSyncReady(true); // NEW: Mark sync as ready after OAuth success
                 
                 // Clean up URL by removing the code parameter
                 window.history.replaceState({}, '', window.location.origin);
@@ -142,14 +149,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   console.log('3o. Manual session set result:', { data: manualData, error: manualError });
                   
                   if (manualData?.session) {
-                    console.log('3p. Manual method successful - OAuth session established:', manualData.session.user.id);
-                    setSession(manualData.session);
-                    setUser(manualData.session.user);
-                    setLoading(false);
-                    
-                    // Clean up URL by removing the code parameter
-                    window.history.replaceState({}, '', window.location.origin);
-                    return;
+                                      console.log('3p. Manual method successful - OAuth session established:', manualData.session.user.id);
+                  setSession(manualData.session);
+                  setUser(manualData.session.user);
+                  setLoading(false);
+                  setSyncReady(true); // NEW: Mark sync as ready after OAuth success
+                  
+                  // Clean up URL by removing the code parameter
+                  window.history.replaceState({}, '', window.location.origin);
+                  return;
                   }
                 }
               } catch (apiError) {
@@ -178,6 +186,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // NEW: Mark sync as ready if we have a valid session
+        if (session?.user?.id) {
+          setSyncReady(true);
+          console.log('5a. Sync marked as ready for user:', session.user.id);
+        }
         
         console.log('5. Initial session set, user:', session?.user?.id || 'No user');
       };
@@ -209,6 +223,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         setLoading(false);
 
+        // NEW: Update sync readiness based on auth state
+        if (session?.user?.id) {
+          setSyncReady(true);
+          console.log('DEBUG: Sync marked as ready for user:', session.user.id);
+        } else {
+          setSyncReady(false);
+          console.log('DEBUG: Sync marked as not ready - no user session');
+        }
+
         // Handle user preferences creation
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('DEBUG: User signed in, creating preferences for:', session.user.id);
@@ -221,6 +244,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (event === 'SIGNED_OUT') {
           console.log('DEBUG: User signed out');
+          setSyncReady(false); // NEW: Reset sync readiness on sign out
+          setLastSyncTime(null); // NEW: Clear last sync time on sign out
         }
       }
     );
@@ -279,6 +304,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     loading,
+    syncReady, // NEW: Include sync readiness in context
+    lastSyncTime, // NEW: Include last sync time in context
     signIn,
     signUp,
     signInWithGoogle,

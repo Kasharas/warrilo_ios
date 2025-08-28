@@ -3,17 +3,20 @@ import { View, Text, StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, 
 import { Plus, Search, Filter, Shield } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { DeviceCard } from '@/src/components/DeviceCard';
 import { FabButton } from '@/src/components/FabButton';
+import { useDeviceSync } from '@/src/hooks/useDeviceSync';
+import { LocalDevice } from '@/src/lib/localStorage';
 
 export default function DeviceListScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { getLocalDevices } = useDeviceSync();
   
-  // Mock data - no more Supabase fetching
-  const [devices, setDevices] = useState<any[]>([]);
+  // Real device data from local storage
+  const [devices, setDevices] = useState<LocalDevice[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,10 +25,48 @@ export default function DeviceListScreen() {
   const [deviceToDelete, setDeviceToDelete] = useState<string | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
+  // Load devices from local storage
+  const loadDevices = async () => {
+    try {
+      console.log('📱 Devices Screen: Loading devices from local storage...');
+      setLoading(true);
+      setError(null);
+      
+      const localDevices = await getLocalDevices();
+      console.log('📱 Devices Screen: Loaded devices:', localDevices.length);
+      
+      setDevices(localDevices);
+      
+      console.log('✅ Devices Screen: Devices loaded successfully');
+    } catch (error) {
+      console.error('❌ Devices Screen: Error loading devices:', error);
+      setError('Failed to load devices. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load devices on component mount
+  useEffect(() => {
+    if (user) {
+      console.log('🔄 Devices Screen: Component mounted, loading devices...');
+      loadDevices();
+    }
+  }, [user]);
+
+  // Refresh devices when screen gains focus (e.g., returning from add-device)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        console.log('🔄 Devices Screen: Screen focused, refreshing devices...');
+        loadDevices();
+      }
+    }, [user])
+  );
+
   const handleRefresh = async () => {
-    setLoading(true);
-    // Simulate refresh delay
-    setTimeout(() => setLoading(false), 1000);
+    console.log('🔄 Devices Screen: Manual refresh triggered');
+    await loadDevices();
   };
 
   const filters = [
@@ -42,6 +83,17 @@ export default function DeviceListScreen() {
     const matchesFilter = selectedFilter === 'All' || device.category === selectedFilter;
     return matchesSearch && matchesFilter;
   });
+
+  // Debug logging for device filtering
+  useEffect(() => {
+    console.log('🔍 Devices Screen: Filtering results:', {
+      totalDevices: devices.length,
+      searchQuery,
+      selectedFilter,
+      filteredCount: filteredDevices.length,
+      deviceNames: filteredDevices.map(d => d.name)
+    });
+  }, [devices, searchQuery, selectedFilter, filteredDevices]);
 
   const handleDevicePress = (deviceId: string) => {
     router.push(`/device-details?id=${deviceId}`);
@@ -166,7 +218,9 @@ export default function DeviceListScreen() {
           <Text style={styles.emptySubtext}>
             {searchQuery || selectedFilter !== 'All' 
               ? 'Try adjusting your search or filters' 
-              : 'Add your first item to get started'}
+              : devices.length === 0 
+                ? 'Add your first item to get started'
+                : `No devices match your current filters (${devices.length} total devices available)`}
           </Text>
         </View>
       ) : (

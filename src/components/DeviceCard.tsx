@@ -1,18 +1,14 @@
 import React, { memo, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Platform } from 'react-native';
-import { MoreVertical } from 'lucide-react-native';
 import { theme } from '../styles/theme';
-import { WarrantyBadge } from './WarrantyBadge';
 
-// Define interface for real device data from Supabase
+// Define interface for real device data from local storage
 interface Device {
   id: string;
   name: string;
   brand?: string;
-
   category?: string;
-  purchase_price?: number;
-  image_url?: string; // Direct URL to device image
+  photo_irl?: string | null; // Device photo URL from local storage
   created_at: string;
 }
 
@@ -25,9 +21,6 @@ interface DeviceCardProps {
 
 export function DeviceCard({ device, onPress, onDelete, compact = false }: DeviceCardProps) {
   console.log('DeviceCard rendered with onDelete:', !!onDelete);
-  
-  // Mock warranty data - no more Supabase fetching
-  const [warrantyData] = useState<any>(null);
   
   // Helper function to check if image URL is valid
   const isValidImageUrl = (url?: string) => {
@@ -61,12 +54,12 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
     setImageLoadError(false);
     
     // Test if the image URL is actually accessible
-    if (device.image_url && isValidImageUrl(device.image_url)) {
+    if (device.photo_irl && isValidImageUrl(device.photo_irl)) {
       console.log('=== TESTING IMAGE ACCESSIBILITY ===');
-      console.log('Testing URL:', device.image_url);
+      console.log('Testing URL:', device.photo_irl);
       
       // Test fetch to see if image is accessible
-      fetch(device.image_url)
+      fetch(device.photo_irl)
         .then(response => {
           console.log('Image fetch response status:', response.status);
           console.log('Image fetch response ok:', response.ok);
@@ -80,21 +73,9 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
           setImageLoadError(true);
         });
     }
-  }, [device.image_url]);
+  }, [device.photo_irl]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
-  const formatPrice = (price?: number) => {
-    if (!price) return 'N/A';
-    return `$${price.toLocaleString()}`;
-  };
 
   const getCategoryColor = (category?: string) => {
     switch (category?.toLowerCase()) {
@@ -137,10 +118,7 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
             </Text>
           </View>
           <View style={styles.compactCardRight}>
-            <Text style={styles.compactDevicePrice}>
-              {formatPrice(device.purchase_price)}
-            </Text>
-            <WarrantyBadge warranty={warrantyData} compact />
+            {/* Compact view - no additional info needed */}
           </View>
         </View>
       </Pressable>
@@ -152,9 +130,9 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
       <Pressable style={styles.cardContent} onPress={onPress}>
         {/* Device Image */}
         <View style={styles.imageContainer}>
-          {device.image_url && isValidImageUrl(device.image_url) && !imageLoadError ? (
+          {device.photo_irl && isValidImageUrl(device.photo_irl) && !imageLoadError ? (
             <Image
-              source={getImageSource(device.image_url)!}
+              source={getImageSource(device.photo_irl)!}
               style={styles.deviceImage}
               resizeMode="cover"
               onError={() => setImageLoadError(true)}
@@ -186,23 +164,9 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
               {device.brand}
             </Text>
           )}
-          
-
-          
-          <View style={styles.deviceMeta}>
-            <Text style={styles.devicePrice}>
-              {formatPrice(device.purchase_price)}
-            </Text>
-            <Text style={styles.deviceDate}>
-              {formatDate(device.created_at)}
-            </Text>
-          </View>
         </View>
 
-        {/* Warranty Badge */}
-        <View style={styles.warrantyContainer}>
-          <WarrantyBadge warranty={warrantyData} />
-        </View>
+
       </Pressable>
 
       {/* Action Buttons */}
@@ -284,24 +248,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
 
-  deviceMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: theme.spacing.xs,
-  },
-  devicePrice: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral?.[900] || '#111827',
-  },
-  deviceDate: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.neutral?.[500] || '#6b7280',
-  },
-  warrantyContainer: {
-    marginTop: theme.spacing.md,
-  },
+
+
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -366,9 +314,5 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
     color: theme.colors.neutral?.[600] || '#4b5563',
   },
-  compactDevicePrice: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral?.[900] || '#111827',
-  },
+
 });

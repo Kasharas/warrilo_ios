@@ -166,17 +166,15 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
           )}
         </View>
 
-
+        {/* Delete Button - Now positioned in the same row */}
+        {onDelete && (
+          <View style={styles.deleteButtonContainer}>
+            <Pressable style={styles.deleteButton} onPress={onDelete}>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </Pressable>
+          </View>
+        )}
       </Pressable>
-
-      {/* Action Buttons */}
-      {onDelete && (
-        <View style={styles.actionButtons}>
-          <Pressable style={styles.deleteButton} onPress={onDelete}>
-            <Text style={styles.deleteButtonText}>Delete</Text>
-          </Pressable>
-        </View>
-      )}
     </View>
   );
 }
@@ -187,6 +185,8 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.lg,
     marginBottom: theme.spacing.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.neutral?.[200] || '#e5e7eb',
     ...theme.shadows?.sm,
   },
   cardContent: {
@@ -248,13 +248,12 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
 
-
-
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: theme.spacing.md,
+  deleteButtonContainer: {
+    marginLeft: 'auto', // Push to the right
+    alignSelf: 'center', // Center vertically
   },
+
+
   deleteButton: {
     backgroundColor: theme.colors.error?.[500] || '#ef4444', // Fallback to hex color
     borderRadius: theme.borderRadius.md,
@@ -290,6 +289,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '48%',
     minHeight: 120, // Ensure consistent height for all compact cards
+    borderWidth: 1,
+    borderColor: theme.colors.neutral?.[200] || '#e5e7eb',
     ...theme.shadows?.sm,
   },
   compactCardContent: {

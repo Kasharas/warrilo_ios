@@ -22,6 +22,11 @@ export const useDeviceOperations = () => {
       console.log('🎯 FLOW TEST: === DELETE FLOW STARTED ===');
       console.log('🎯 FLOW TEST: Target device:', { id: device.id, name: device.name });
       console.log('🎯 FLOW TEST: User ID:', user?.id);
+      
+      // Debug: Show all available photo-related fields
+      console.log('🔍 DEBUG: Device photo fields - photo_irl:', device.photo_irl);
+      console.log('🔍 DEBUG: Device photo fields - invoice_url:', device.invoice_url);
+      console.log('🔍 DEBUG: Complete device object keys:', Object.keys(device));
       const startTime = Date.now();
       
       console.log('🗑️ DELETE STARTED:', device.id, device.name);
@@ -125,6 +130,51 @@ export const useDeviceOperations = () => {
             console.log('ℹ️ Additional photo cleanup skipped:', error.message);
           }
           
+          // Clean up receipt photos from device-invoices storage bucket
+          console.log('🧹 Phase 4b: Cleaning up receipt photos...');
+          console.log('🔍 DEBUG: Checking invoice_url field:', device.invoice_url);
+          try {
+            if (device.invoice_url) {
+              // Extract file path from invoice_url
+              const urlParts = device.invoice_url.split('/');
+              const filePath = urlParts.slice(-2).join('/'); // Gets "userId/filename.ext"
+              
+              console.log('🔍 DEBUG: Extracted file path for receipt photo:', filePath);
+              
+              const { error: receiptPhotoError } = await supabase.storage
+                .from('device-invoices')
+                .remove([filePath]);
+                
+              if (receiptPhotoError) {
+                console.error('❌ Failed to delete receipt photo:', receiptPhotoError);
+              } else {
+                console.log('✅ Receipt photo deleted from device-invoices storage');
+              }
+            } else {
+              console.log('ℹ️ No receipt photo found to clean up (invoice_url is null/undefined)');
+            }
+            
+            // Clean up any additional receipt photos from device-invoices bucket
+            try {
+              const additionalReceiptPath = `${user.id}/${device.id}/`;
+              console.log('🔍 DEBUG: Attempting to clean up additional receipt photos from path:', additionalReceiptPath);
+              
+              const { error: additionalReceiptPhotosError } = await supabase.storage
+                .from('device-invoices')
+                .remove([additionalReceiptPath]);
+                
+              if (additionalReceiptPhotosError) {
+                console.log('ℹ️ No additional receipt photos found or cleanup not needed:', additionalReceiptPhotosError.message);
+              } else {
+                console.log('✅ Additional receipt photos cleaned up from device-invoices');
+              }
+            } catch (error) {
+              console.log('ℹ️ Additional receipt photo cleanup skipped:', error.message);
+            }
+          } catch (error) {
+            console.error('❌ Receipt photo cleanup error:', error);
+          }
+          
           // Phase 5: Trigger sync after Supabase delete completes
           console.log('🔄 Phase 5: Triggering sync after cloud delete...');
           
@@ -158,7 +208,7 @@ export const useDeviceOperations = () => {
           console.log('🔍 VERIFICATION: Delete operation verification completed');
           
           console.log('🧪 COMPLETE FLOW TEST: === DELETE VERIFICATION COMPLETED ===');
-          console.log('🧪 FLOW TEST: Expected result: 1 device removed, photos cleaned, no sync restoration');
+          console.log('🧪 FLOW TEST: Expected result: 1 device removed, device photos cleaned, receipt photos cleaned, no sync restoration');
           console.log('🧪 FLOW TEST: Actual result logged above in verification section');
         }
       } else {

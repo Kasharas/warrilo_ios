@@ -8,6 +8,7 @@ export interface DeviceFormData {
   name: string;
   purchaseDate: Date | null;
   warrantyMonths: string;
+  purchasePrice: string;
   receipt: { uri: string | null; type: 'camera' | 'library' | null };
   
   // Optional fields (user can leave blank, but fields stay visible)
@@ -115,6 +116,7 @@ export const useDeviceSync = () => {
         purchase_date: purchaseDate.toISOString().split('T')[0], // YYYY-MM-DD format
         warranty_months: warrantyMonths,
         warranty_end_date: warrantyEndDate.toISOString().split('T')[0],
+        purchase_price: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
         location: null, // Not used
         photo_irl: compressedPhoto, // Store compressed image
         notes: null, // Not used

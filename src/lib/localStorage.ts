@@ -16,6 +16,7 @@ export interface LocalDevice {
   purchase_date: string;
   warranty_months: number;
   warranty_end_date: string;
+  purchase_price: number | null; // Purchase price field
   location: string | null;
   photo_irl: string | null;
   notes: string | null;

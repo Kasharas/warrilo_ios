@@ -9,12 +9,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDeviceUpload } from '@/src/hooks/useDeviceUpload';
+import { AddDeviceFormData, DeviceFileData } from '@/src/types/device';
 
 
 export default function AddDeviceScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { addDevice, isStoring } = useDeviceSync();
+  const { isUploading, uploadDevice } = useDeviceUpload(user?.id || '');
   
   // Get the previous route from navigation state
   const getPreviousRoute = () => {
@@ -29,7 +32,6 @@ export default function AddDeviceScreen() {
   // Form state
   const [deviceName, setDeviceName] = useState('');
   const [brand, setBrand] = useState('');
-
   const [serialNumber, setSerialNumber] = useState('');
   const [category, setCategory] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
@@ -151,6 +153,7 @@ export default function AddDeviceScreen() {
         name: deviceName.trim(),
         purchaseDate: selectedDate,
         warrantyMonths: warrantyDuration,
+        purchasePrice: purchasePrice.trim(),
         receipt: { uri: receiptImage, type: 'library' as const },
         serialNumber: serialNumber.trim(),
         storeName: storeName.trim(),
@@ -232,6 +235,80 @@ export default function AddDeviceScreen() {
       }
       
       Alert.alert('Error', errorMessage);
+    }
+  };
+
+  // New upload handler using the upload service
+  const handleSaveDevice = async () => {
+    console.log('=== ADD DEVICE BUTTON PRESSED ===');
+    console.log('User ID:', user?.id);
+    
+    if (!user?.id) {
+      console.log('ERROR: No user ID found');
+      Alert.alert('Error', 'You must be logged in to add a device');
+      return;
+    }
+    
+    console.log('Starting device upload process...');
+
+    // Prepare form data from your existing state
+    const formData: AddDeviceFormData = {
+      deviceName: deviceName || '',
+      brand: brand || '',
+      serialNumber: serialNumber || undefined,
+      category: selectedCategory || '',
+      purchaseDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
+      purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
+      store: storeName || '',
+      warrantyMonths: warrantyDuration ? parseInt(warrantyDuration) : 0,
+      notes: notes || undefined,
+    };
+    
+    console.log('Form data prepared:', formData);
+
+    // Prepare file data from your existing state
+    const fileData: DeviceFileData = {
+      devicePhoto: deviceImage ? {
+        uri: deviceImage,
+        name: 'device-photo.jpg',
+        type: 'image/jpeg'
+      } : undefined,
+      receiptPhoto: receiptImage ? {
+        uri: receiptImage,
+        name: 'receipt-photo.jpg',
+        type: 'image/jpeg'
+      } : undefined,
+      additionalPhotos: undefined, // No additional photos in current implementation
+    };
+    
+    console.log('File data prepared:', fileData);
+
+    // Upload the device
+    console.log('Calling uploadDevice function...');
+    const result = await uploadDevice(formData, fileData);
+    console.log('Upload result:', result);
+
+    if (result.success) {
+      Alert.alert('Success', 'Device added successfully!', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Navigate to device details or back to device list
+            router.push('/devices');
+          }
+        }
+      ]);
+    } else {
+      console.log('Upload failed:', result);
+      if (result.validationErrors) {
+        // Handle validation errors - show first error
+        const firstError = Object.values(result.validationErrors)[0];
+        console.log('Validation errors:', result.validationErrors);
+        Alert.alert('Validation Error', firstError);
+      } else {
+        console.log('Upload error:', result.error);
+        Alert.alert('Upload Failed', result.error || 'Unknown error occurred');
+      }
     }
   };
 
@@ -459,9 +536,7 @@ export default function AddDeviceScreen() {
               />
            </View>
 
-
-
-           <View style={styles.inputGroup}>
+                      <View style={styles.inputGroup}>
                          <TextInput
                style={styles.textInput}
                value={serialNumber}
@@ -562,22 +637,37 @@ export default function AddDeviceScreen() {
            </View>
         </View>
 
+        {/* Notes Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Additional Notes</Text>
+          
+          <View style={styles.inputGroup}>
+            <TextInput
+              style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Add any additional notes about the device..."
+              placeholderTextColor="#8E8E93"
+              multiline
+            />
+          </View>
+        </View>
+
         {/* Submit Button */}
         <Pressable
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
+          style={[styles.submitButton, (isSubmitting || isUploading) && styles.submitButtonDisabled]}
+          onPress={handleSaveDevice}
+          disabled={isSubmitting || isUploading}
         >
-          {isSubmitting ? (
+          {(isSubmitting || isUploading) ? (
             <ActivityIndicator color={theme.colors.white} />
           ) : (
             <Text style={styles.submitButtonText}>Add Device</Text>
           )}
         </Pressable>
 
-
-
-                 <View style={styles.bottomSpacing} />
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
          
          {/* Category Picker Modal */}
          <Modal
@@ -797,10 +887,9 @@ export default function AddDeviceScreen() {
              </View>
            </View>
          </Modal>
-       </ScrollView>
-     </SafeAreaView>
-   );
- }
+       </SafeAreaView>
+     );
+   }
 
 const styles = StyleSheet.create({
   container: {

@@ -122,7 +122,7 @@ export default function DeviceDetailsScreen() {
         <Pressable onPress={handleBackPress}>
           <ArrowLeft size={24} color={theme.colors.neutral[900]} />
         </Pressable>
-        <Text style={styles.headerTitle}>Device Details</Text>
+        <Text style={styles.headerTitle}>Item Details</Text>
         <View style={styles.headerActions}>
           <Pressable style={styles.actionButton} onPress={handleEditDevice}>
             <Edit size={20} color={theme.colors.primary[600]} />
@@ -134,21 +134,48 @@ export default function DeviceDetailsScreen() {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Device Image */}
+        {/* Item Image */}
         <View style={styles.imageSection}>
-          {device.image_url ? (
-            <Image source={{ uri: device.image_url }} style={styles.deviceImage} />
-          ) : (
-            <View style={styles.placeholderImage}>
-              <Shield size={48} color={theme.colors.neutral[400]} />
-              <Text style={styles.placeholderText}>No Image</Text>
-            </View>
-          )}
+          {(() => {
+            // Helper function to check if image URL is valid (same as dashboard)
+            const isValidImageUrl = (url?: string) => {
+              if (!url) return false;
+              return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://');
+            };
+            
+            // Helper function to get image source (same as dashboard)
+            const getImageSource = (imageUrl?: string) => {
+              if (!imageUrl) return null;
+              
+              if (imageUrl.startsWith('data:')) {
+                return { uri: imageUrl };
+              }
+              
+              if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+                return { uri: imageUrl };
+              }
+              
+              return null;
+            };
+            
+            return device.photo_irl && isValidImageUrl(device.photo_irl) ? (
+              <Image 
+                source={getImageSource(device.photo_irl)!}
+                style={styles.deviceImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Shield size={48} color={theme.colors.neutral[400]} />
+                <Text style={styles.placeholderText}>No Image</Text>
+              </View>
+            );
+          })()}
         </View>
 
-        {/* Device Information */}
+        {/* Item Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Device Information</Text>
+          <Text style={styles.sectionTitle}>Item Information</Text>
           
           <View style={styles.infoRow}>
             <View style={styles.infoIcon}>

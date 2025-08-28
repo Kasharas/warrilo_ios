@@ -3,6 +3,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { theme } from '@/src/styles/theme';
+// import { useStartupSync } from '@/src/hooks/useStartupSync';
 
 export default function RootLayout() {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,6 +16,19 @@ export default function RootLayout() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Initialize automatic background sync
+  // Temporarily commented out to debug Metro bundler issue
+  // useStartupSync({
+  //   enableAutoSync: true,
+  //   syncOnAppResume: true,
+  //   syncIntervalMinutes: 30,
+  //   retryOnFailure: true,
+  //   maxRetries: 3
+  // });
+
+  // Optional: Add debug logging (remove in production)
+  // console.log('App initialized with background sync enabled');
 
   if (isLoading) {
     return (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl, Image } from 'react-native';
 import { Plus, Eye, Clock, Smartphone, Laptop, Watch, Headphones, AlertTriangle } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { FabButton } from '@/src/components/FabButton';
@@ -122,18 +122,18 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Recent Devices Section */}
+        {/* All Devices Section */}
         {devices.length > 0 && (
           <>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Devices</Text>
+              <Text style={styles.sectionTitle}>All Devices ({devices.length})</Text>
               <Pressable onPress={() => router.push('/devices')}>
                 <Text style={styles.viewAllText}>View All</Text>
               </Pressable>
             </View>
             
             <View style={styles.deviceGrid}>
-              {devices.slice(0, 4).filter(device => device && device.name).map((device) => {
+              {devices.filter(device => device && device.name).map((device) => {
                 const getIconComponent = (category?: string) => {
                   switch (category?.toLowerCase()) {
                     case 'electronics': return Smartphone;
@@ -188,9 +188,21 @@ export default function DashboardScreen() {
                     style={styles.deviceCard}
                     onPress={() => handleDevicePress(device.local_id || device.id)}
                   >
-                    <View style={styles.deviceIconContainer}>
-                      <IconComponent size={24} color={theme.colors.primary[500]} />
-                    </View>
+                    {/* Device Image or Icon */}
+                    {device.photo_irl ? (
+                      <View style={styles.deviceImageContainer}>
+                        <Image 
+                          source={{ uri: device.photo_irl }} 
+                          style={styles.deviceImage}
+                          resizeMode="cover"
+                        />
+                      </View>
+                    ) : (
+                      <View style={styles.deviceIconContainer}>
+                        <IconComponent size={24} color={theme.colors.primary[500]} />
+                      </View>
+                    )}
+                    
                     <Text style={styles.deviceName}>{device.name}</Text>
                     <Text style={[styles.deviceStatus, { color: getThemeColor(statusColor) }]}>
                       {statusText}
@@ -360,6 +372,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    minHeight: 140, // Ensure consistent card height
   },
   deviceIconContainer: {
     width: 48,
@@ -369,6 +382,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: theme.spacing.md,
+  },
+  deviceImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: theme.spacing.md,
+    backgroundColor: theme.colors.neutral[100],
+  },
+  deviceImage: {
+    width: '100%',
+    height: '100%',
   },
   deviceName: {
     fontSize: theme.fontSize.base,
@@ -380,6 +405,12 @@ const styles = StyleSheet.create({
   deviceStatus: {
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium,
+    marginBottom: theme.spacing.xs,
+  },
+  deviceInfo: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.neutral[500],
+    textAlign: 'center',
   },
   emptyState: {
     alignItems: 'center',

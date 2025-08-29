@@ -186,14 +186,6 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dashboard</Text>
           <View style={styles.headerRight}>
-            {/* NEW: Sync Status Indicator */}
-            <View style={[styles.syncIndicator, styles[`sync${syncStatus.status.charAt(0).toUpperCase() + syncStatus.status.slice(1)}`]]}>
-              <Text style={styles.syncStatusText}>
-                {syncStatus.status === 'syncing' ? 'Syncing...' : 
-                 syncStatus.status === 'success' ? '✓ Synced' : 
-                 syncStatus.status === 'error' ? '⚠ Error' : 'Ready'}
-              </Text>
-            </View>
             <Pressable style={styles.menuButton} onPress={() => router.push('/settings')}>
               <View style={styles.menuLine} />
               <View style={styles.menuLine} />
@@ -205,35 +197,51 @@ export default function DashboardScreen() {
 
         {/* Total Purchase Value Card */}
         <View style={styles.warrantyValueCard}>
-          <Text style={styles.warrantyValueTitle}>Total Purchase Value</Text>
+          <View style={styles.warrantyValueHeader}>
+            <View style={styles.warrantyValueIconContainer}>
+              <Text style={styles.warrantyValueIcon}>💰</Text>
+            </View>
+            <Text style={styles.warrantyValueTitle}>Total Purchase Value</Text>
+          </View>
           <Text style={styles.warrantyValueAmount}>
             {totalValue > 0 ? `$${totalValue.toLocaleString()}` : 'No prices set'}
           </Text>
-          <Text style={styles.warrantyValueSubtitle}>
-            {deviceCount} devices
-            {devicesWithPrices.length !== deviceCount && ` (${devicesWithPrices.length} with prices)`}
-          </Text>
+          <View style={styles.warrantyValueFooter}>
+            <View style={styles.deviceCountBadge}>
+              <Text style={styles.deviceCountText}>{deviceCount} devices</Text>
+            </View>
+            {devicesWithPrices.length !== deviceCount && (
+              <View style={styles.priceCountBadge}>
+                <Text style={styles.priceCountText}>{devicesWithPrices.length} with prices</Text>
+              </View>
+            )}
+          </View>
         </View>
         
         {/* Warranty Alert */}
         <View style={styles.alertCard}>
           <View style={styles.alertHeader}>
-            <AlertTriangle size={20} color={theme.colors.warning[600]} />
-            <Text style={styles.alertTitle}>Warranty Expiring Soon</Text>
+            <View style={styles.alertIconContainer}>
+              <AlertTriangle size={24} color="#FF9500" />
+            </View>
+            <View style={styles.alertTitleContainer}>
+              <Text style={styles.alertTitle}>Warranty Expiring Soon</Text>
+              <Text style={styles.alertSubtitle}>Action Required</Text>
+            </View>
           </View>
-          <Text style={styles.alertMessage}>
-            Your MacBook Pro warranty expires in 15 days
-          </Text>
+          <View style={styles.alertContent}>
+            <Text style={styles.alertMessage}>
+              Your MacBook Pro warranty expires in 15 days
+            </Text>
+          </View>
           <View style={styles.alertActions}>
             <Pressable style={styles.alertButton}>
-              <Eye size={16} color={theme.colors.white} />
+              <Eye size={18} color="#FFFFFF" />
               <Text style={styles.alertButtonText}>View Details</Text>
             </Pressable>
-            <Pressable style={[styles.alertButton, styles.alertButtonSecondary]}>
-              <Clock size={16} color={theme.colors.warning[600]} />
-              <Text style={[styles.alertButtonText, styles.alertButtonSecondaryText]}>
-                Remind Later
-              </Text>
+            <Pressable style={styles.alertButtonSecondary}>
+              <Clock size={18} color="#FF9500" />
+              <Text style={styles.alertButtonSecondaryText}>Remind Later</Text>
             </Pressable>
           </View>
         </View>
@@ -412,96 +420,211 @@ const styles = StyleSheet.create({
     fontFamily: iosFonts.system,
   },
   warrantyValueCard: {
-    backgroundColor: iosColors.systemBlue,
-    borderRadius: iosRadius.xl,
-    padding: iosSpacing.xxxl,
+    backgroundColor: '#007AFF',
+    borderRadius: 20,
+    padding: 24,
     marginBottom: iosSpacing.lg,
-    elevation: 3,
-    shadowColor: iosColors.label,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    elevation: 12,
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  warrantyValueHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  warrantyValueIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  warrantyValueIcon: {
+    fontSize: 18,
   },
   warrantyValueTitle: {
-    fontSize: iosFonts.callout,
-    color: iosColors.systemBackground,
-    opacity: 0.9,
-    marginBottom: iosSpacing.sm,
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
     fontFamily: iosFonts.system,
     fontWeight: iosFonts.medium,
+    letterSpacing: 0.5,
   },
   warrantyValueAmount: {
-    fontSize: iosFonts.largeTitle,
-    fontWeight: iosFonts.bold,
-    color: iosColors.systemBackground,
-    marginBottom: iosSpacing.xs,
+    fontSize: 42,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 20,
+    fontFamily: iosFonts.system,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  warrantyValueFooter: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  deviceCountBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  deviceCountText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '600',
     fontFamily: iosFonts.system,
   },
-  warrantyValueSubtitle: {
-    fontSize: iosFonts.footnote,
-    color: iosColors.systemBackground,
-    opacity: 0.8,
+  priceCountBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  priceCountText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '500',
     fontFamily: iosFonts.system,
-    fontWeight: iosFonts.regular,
   },
   alertCard: {
-    backgroundColor: iosColors.systemYellow,
-    borderColor: iosColors.systemOrange,
+    backgroundColor: '#FFF9E6',
+    borderColor: '#FFE5B3',
     borderWidth: 1,
-    borderRadius: iosRadius.md,
-    padding: iosSpacing.lg,
+    borderRadius: 20,
+    padding: 24,
     marginBottom: iosSpacing.lg,
-    elevation: 3,
-    shadowColor: iosColors.label,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    elevation: 12,
+    shadowColor: '#FF9500',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
   },
   alertHeader: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  alertIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FF9500',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: iosSpacing.sm,
+    marginRight: 16,
+    shadowColor: '#FF9500',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  alertTitleContainer: {
+    flex: 1,
   },
   alertTitle: {
-    fontSize: iosFonts.callout,
-    fontWeight: iosFonts.semibold,
-    color: iosColors.systemOrange,
-    marginLeft: iosSpacing.sm,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FF9500',
+    marginBottom: 4,
     fontFamily: iosFonts.system,
+    letterSpacing: 0.3,
+  },
+  alertSubtitle: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#FF9500',
+    opacity: 0.8,
+    fontFamily: iosFonts.system,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  alertContent: {
+    marginBottom: 20,
   },
   alertMessage: {
-    fontSize: iosFonts.footnote,
-    color: iosColors.systemOrange,
-    marginBottom: iosSpacing.md,
+    fontSize: 15,
+    color: '#8B4513',
+    marginBottom: 16,
     fontFamily: iosFonts.system,
-    fontWeight: iosFonts.regular,
+    fontWeight: '500',
+    lineHeight: 22,
+  },
+  alertUrgencyBadge: {
+    backgroundColor: '#FF9500',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    shadowColor: '#FF9500',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  alertUrgencyText: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontFamily: iosFonts.system,
+    letterSpacing: 0.5,
   },
   alertActions: {
     flexDirection: 'row',
-    gap: iosSpacing.sm,
+    gap: 12,
   },
   alertButton: {
-    backgroundColor: iosColors.systemOrange,
+    backgroundColor: '#FF9500',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: iosSpacing.lg,
-    paddingVertical: iosSpacing.sm,
-    borderRadius: iosRadius.sm,
-    gap: iosSpacing.xs,
-    minHeight: iosSpacing.minTouch,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+    gap: 8,
+    minHeight: 44,
+    shadowColor: '#FF9500',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   alertButtonSecondary: {
     backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#FF9500',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+    gap: 8,
+    minHeight: 44,
   },
   alertButtonText: {
-    fontSize: iosFonts.footnote,
-    fontWeight: iosFonts.medium,
-    color: iosColors.systemBackground,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
     fontFamily: iosFonts.system,
+    letterSpacing: 0.3,
   },
   alertButtonSecondaryText: {
-    color: iosColors.systemOrange,
+    color: '#FF9500',
+    fontSize: 15,
+    fontWeight: '600',
     fontFamily: iosFonts.system,
+    letterSpacing: 0.3,
   },
   sectionHeader: {
     flexDirection: 'row',

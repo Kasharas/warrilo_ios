@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform, Modal } from 'react-native';
 import { User, Settings, Bell, Shield, CreditCard, HelpCircle, LogOut, ChevronRight, Edit } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
@@ -14,64 +14,26 @@ export default function ProfileScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-
-  // Add useEffect to watch for authentication state changes
-  useEffect(() => {
-    console.log('🔍 Profile: useEffect triggered, user:', user ? 'logged in' : 'not logged in');
-    if (!user) {
-      console.log('🚪 Profile: User signed out, navigating to welcome screen');
-      // User has signed out, navigate to welcome screen
-      router.replace('/welcome');
-    }
-  }, [user, router]);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   const handleSignOut = () => {
     console.log('🔘 Profile: Sign out button clicked');
     
-    // Web-compatible confirmation dialog
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm('Are you sure you want to sign out?');
-      if (confirmed) {
-        console.log('✅ Profile: Web confirmation accepted, proceeding with sign out');
-        performSignOut();
-      } else {
-        console.log('❌ Profile: Web confirmation cancelled');
-      }
-    } else {
-      // Mobile Alert
-      Alert.alert(
-        'Sign Out',
-        'Are you sure you want to sign out?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Sign Out', 
-            style: 'destructive',
-            onPress: () => {
-              console.log('✅ Profile: Mobile confirmation accepted, proceeding with sign out');
-              performSignOut();
-            }
-          }
-        ]
-      );
-    }
+    // Show native iOS-style confirmation modal
+    setShowSignOutModal(true);
   };
 
   const performSignOut = async () => {
     try {
       console.log('🔄 Profile: Starting sign out process...');
       setIsSigningOut(true);
+      setShowSignOutModal(false);
       
       await signOut();
       console.log('✅ Profile: Sign out completed successfully');
       
-      // Force navigation to welcome screen as fallback
-      setTimeout(() => {
-        if (user) {
-          console.log('🔄 Profile: Force navigation to welcome screen');
-          router.replace('/welcome');
-        }
-      }, 1000);
+      // Navigate to welcome screen after successful sign out
+      router.replace('/welcome');
       
     } catch (error) {
       console.error('❌ Profile: Sign out error:', error);
@@ -84,6 +46,11 @@ export default function ProfileScreen() {
         Alert.alert('Error', 'Failed to sign out. Please try again.');
       }
     }
+  };
+
+  const cancelSignOut = () => {
+    console.log('❌ Profile: Sign out cancelled');
+    setShowSignOutModal(false);
   };
 
   const profileSections = [
@@ -245,6 +212,29 @@ export default function ProfileScreen() {
           <Text style={styles.versionText}>Warrilo v1.0.0</Text>
         </View>
       </ScrollView>
+
+      {/* Native iOS-style confirmation modal */}
+      <Modal
+        visible={showSignOutModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={cancelSignOut}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Sign Out</Text>
+            <Text style={styles.modalMessage}>Are you sure you want to sign out?</Text>
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalButton} onPress={cancelSignOut}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.modalButton} onPress={performSignOut}>
+                <Text style={styles.modalButtonText}>Sign Out</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -415,5 +405,49 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.neutral[400],
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: theme.colors.white,
+    borderRadius: iosRadius.lg,
+    padding: iosSpacing.lg,
+    width: '80%',
+    alignItems: 'center',
+    ...theme.shadows.lg,
+  },
+  modalTitle: {
+    fontSize: iosFonts.title2,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
+    marginBottom: iosSpacing.sm,
+  },
+  modalMessage: {
+    fontSize: iosFonts.body,
+    color: iosColors.label,
+    textAlign: 'center',
+    marginBottom: iosSpacing.lg,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  modalButton: {
+    paddingVertical: iosSpacing.md,
+    paddingHorizontal: iosSpacing.lg,
+    borderRadius: iosRadius.md,
+    backgroundColor: iosColors.systemBlue,
+    width: '45%',
+  },
+  modalButtonText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemBackground,
+    textAlign: 'center',
   },
 });

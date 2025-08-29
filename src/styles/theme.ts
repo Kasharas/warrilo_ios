@@ -72,7 +72,7 @@ export const theme = {
       800: '#1f2937',
       900: '#111827',
     },
-    background: '#f9fafb',
+    background: '#ffffff',
     white: '#ffffff',
     black: '#000000',
   },

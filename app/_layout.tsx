@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { theme } from '@/src/styles/theme';
 import { useStartupSync } from '@/src/hooks/useStartupSync';
+import { StatusBar } from 'expo-status-bar';
 
 // Main app content component that can use auth context
 function AppContent() {
@@ -21,7 +22,10 @@ function AppContent() {
 
   return (
     <Stack
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ 
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.colors.white }
+      }}
       initialRouteName="index"
     >
       <Stack.Screen name="index" />
@@ -61,10 +65,13 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <SyncProvider>
-        <AppContent />
-      </SyncProvider>
-    </AuthProvider>
+    <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+      <StatusBar backgroundColor="#ffffff" style="dark" barStyle="dark-content" />
+      <AuthProvider>
+        <SyncProvider>
+          <AppContent />
+        </SyncProvider>
+      </AuthProvider>
+    </View>
   );
 }

@@ -142,6 +142,9 @@ export default function AlertsScreen() {
           )}
           keyExtractor={(item) => item.label}
           contentContainerStyle={styles.filtersContent}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          bounces={false}
         />
       </View>
 
@@ -244,25 +247,26 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     marginBottom: theme.spacing.lg,
-    paddingHorizontal: 0,
     marginTop: -4,
-    marginLeft: 0,
+    height: 40, // Fixed height for consistent layout
+    justifyContent: 'center', // Center filters vertically
+    // No padding or margins - let it fill the full container width
   },
   filtersContent: {
     gap: theme.spacing.sm,
     paddingHorizontal: 0,
   },
   filterChip: {
-    backgroundColor: theme.colors.neutral[100],
+    backgroundColor: 'white',
     borderRadius: 18,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: 8,
     height: 36,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   filterChipActive: {
     backgroundColor: '#007AFF',

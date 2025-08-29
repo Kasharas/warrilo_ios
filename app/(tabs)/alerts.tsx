@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, TextInput, RefreshControl } from 'react-native';
 import { Search, Bell, Filter, AlertTriangle, CheckCircle, Clock } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
+import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -89,15 +90,17 @@ export default function AlertsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Alerts & Notifications</Text>
-        <Pressable style={styles.menuButton} onPress={() => router.push({
-          pathname: '/settings',
-          params: { fromScreen: 'alerts' }
-        })}>
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-        </Pressable>
+        <View style={styles.headerRight}>
+          <Pressable style={styles.menuButton} onPress={() => router.push({
+            pathname: '/settings',
+            params: { fromScreen: 'alerts' }
+          })}>
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+          </Pressable>
+        </View>
       </View>
 
       {/* Search Bar */}
@@ -209,13 +212,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-    marginTop: theme.spacing.lg,
+    marginBottom: iosSpacing.xxxl,
+    marginTop: iosSpacing.lg,
   },
   headerTitle: {
-    fontSize: theme.fontSize['2xl'],
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.neutral[900],
+    fontSize: iosFonts.largeTitle,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
+    fontFamily: iosFonts.system,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: iosSpacing.md,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -368,15 +377,15 @@ const styles = StyleSheet.create({
   menuButton: {
     width: 32,
     height: 32,
-    borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.primary[600],
+    borderRadius: iosRadius.md,
+    backgroundColor: iosColors.systemBlue,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
     width: 20,
     height: 2,
-    backgroundColor: theme.colors.white,
+    backgroundColor: iosColors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
   },

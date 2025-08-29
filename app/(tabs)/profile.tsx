@@ -53,12 +53,14 @@ export default function ProfileScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
-          <Pressable style={styles.menuButton} onPress={() => router.push('/settings')}>
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-          </Pressable>
+          <View style={styles.headerRight}>
+            <Pressable style={styles.menuButton} onPress={() => router.push('/settings')}>
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+            </Pressable>
+          </View>
         </View>
         
         {/* User Info Section - Centered */}
@@ -183,39 +185,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+    paddingHorizontal: theme.spacing.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
-    paddingHorizontal: 20,
+    marginBottom: iosSpacing.xxxl,
+    marginTop: iosSpacing.lg,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: iosFonts.largeTitle,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
+    fontFamily: iosFonts.system,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: iosSpacing.md,
   },
   menuButton: {
     width: 32,
     height: 32,
-    backgroundColor: '#2563eb',
-    borderRadius: 12,
+    backgroundColor: iosColors.systemBlue,
+    borderRadius: iosRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
-    position: 'absolute',
-    width: 16,
+    width: 20,
     height: 2,
-    backgroundColor: 'white',
+    backgroundColor: iosColors.systemBackground,
     borderRadius: 1,
-    opacity: 0.9,
+    marginVertical: 1,
   },
   userSection: {
     alignItems: 'center',
     marginBottom: 32,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
   },
   avatar: {
     width: 100,

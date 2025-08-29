@@ -182,15 +182,17 @@ export default function DeviceListScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Items</Text>
-        <Pressable style={styles.menuButton} onPress={() => router.push({
-          pathname: '/settings',
-          params: { fromScreen: 'devices' }
-        })}>
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-        </Pressable>
+        <View style={styles.headerRight}>
+          <Pressable style={styles.menuButton} onPress={() => router.push({
+            pathname: '/settings',
+            params: { fromScreen: 'devices' }
+          })}>
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+          </Pressable>
+        </View>
       </View>
 
       {/* Search Bar */}
@@ -349,14 +351,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-    marginTop: theme.spacing.lg,
+    marginBottom: iosSpacing.xxxl,
+    marginTop: iosSpacing.lg,
   },
   headerTitle: {
-    fontSize: iosFonts.title2,
+    fontSize: iosFonts.largeTitle,
     fontWeight: iosFonts.bold,
     color: iosColors.label,
     fontFamily: iosFonts.system,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: iosSpacing.md,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -551,7 +558,7 @@ const styles = StyleSheet.create({
   menuLine: {
     width: 20,
     height: 2,
-    backgroundColor: theme.colors.white,
+    backgroundColor: iosColors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
   },

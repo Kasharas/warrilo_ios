@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform, Modal } from 'react-native';
-import { User, Settings, Bell, Shield, CreditCard, HelpCircle, LogOut, ChevronRight, Edit, Users, Calendar, Package, DollarSign } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal } from 'react-native';
+import { LogOut, Users } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,14 +11,11 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
   
-
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   const handleSignOut = () => {
     console.log('🔘 Profile: Sign out button clicked');
-    
-    // Show native iOS-style confirmation modal
     setShowSignOutModal(true);
   };
 
@@ -31,14 +28,12 @@ export default function ProfileScreen() {
       await signOut();
       console.log('✅ Profile: Sign out completed successfully');
       
-      // Navigate to welcome screen after successful sign out
       router.replace('/welcome');
       
     } catch (error) {
       console.error('❌ Profile: Sign out error:', error);
       setIsSigningOut(false);
       
-      // Show error message
       if (Platform.OS === 'web') {
         alert('Failed to sign out. Please try again.');
       } else {
@@ -52,89 +47,62 @@ export default function ProfileScreen() {
     setShowSignOutModal(false);
   };
 
-  const profileSections = [
-    {
-      title: 'Support',
-      items: [
-        { 
-          icon: <HelpCircle size={20} color={theme.colors.primary[600]} />, 
-          title: 'Help & Support', 
-          subtitle: 'Get help and contact support',
-          onPress: () => router.push('/settings?section=support')
-        }
-      ]
-    }
-  ];
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
-          <Pressable style={styles.menuButton} onPress={() => router.push({
-            pathname: '/settings',
-            params: { fromScreen: 'profile' }
-          })}>
+          <Pressable style={styles.menuButton} onPress={() => router.push('/settings')}>
             <View style={styles.menuLine} />
             <View style={styles.menuLine} />
             <View style={styles.menuLine} />
             <View style={styles.menuLine} />
           </Pressable>
         </View>
-
-        {/* User Info Card - iOS Native Style */}
-        <View style={styles.userCard}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {user?.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 
-                 user?.email?.split('@')[0].substring(0, 2).toUpperCase() || 'U'}
-              </Text>
+        
+        {/* User Info Section - Centered */}
+        <View style={styles.userSection}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {user?.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 
+               user?.email?.split('@')[0].substring(0, 2).toUpperCase() || 'U'}
+            </Text>
+          </View>
+          <Text style={styles.userName}>{user?.user_metadata?.full_name || user?.email || 'User'}</Text>
+          <Text style={styles.userEmail}>{user?.email}</Text>
+          <View style={styles.planContainer}>
+            <View style={styles.planBadge}>
+              <Text style={styles.planText}>PRO PLAN</Text>
             </View>
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>{user?.user_metadata?.full_name || user?.email || 'User'}</Text>
-              <Text style={styles.userEmail}>{user?.email}</Text>
-              <View style={styles.planBadge}>
-                <Text style={styles.planText}>PRO PLAN</Text>
-                <Text style={styles.planPrice}>€1.99/month</Text>
-              </View>
-            </View>
+            <Text style={styles.planPrice}>€1.99/month</Text>
           </View>
           <Pressable style={styles.editProfileButton}>
             <Text style={styles.editProfileText}>Edit Profile</Text>
           </Pressable>
         </View>
-
+        
         {/* Account Overview Card */}
         <View style={styles.overviewCard}>
           <Text style={styles.cardTitle}>Account Overview</Text>
           <View style={styles.overviewRow}>
-            <View style={styles.overviewItem}>
-              <Calendar size={16} color={iosColors.systemGray} />
-              <Text style={styles.overviewLabel}>Member Since</Text>
-              <Text style={styles.overviewValue}>August 2025</Text>
-            </View>
-            <View style={styles.overviewItem}>
-              <Package size={16} color={iosColors.systemGray} />
-              <Text style={styles.overviewLabel}>Total Devices</Text>
-              <Text style={styles.overviewValue}>12 devices</Text>
-            </View>
+            <Text style={styles.overviewLabel}>Member Since</Text>
+            <Text style={styles.overviewValue}>August 2025</Text>
           </View>
           <View style={styles.overviewRow}>
-            <View style={styles.overviewItem}>
-              <Shield size={16} color={iosColors.systemGreen} />
-              <Text style={styles.overviewLabel}>Active Warranties</Text>
-              <Text style={[styles.overviewValue, { color: iosColors.systemGreen }]}>7 active</Text>
-            </View>
-            <View style={styles.overviewItem}>
-              <DollarSign size={16} color={iosColors.systemBlue} />
-              <Text style={styles.overviewLabel}>Total Value Protected</Text>
-              <Text style={[styles.overviewValue, { color: iosColors.systemBlue }]}>$4,250</Text>
-            </View>
+            <Text style={styles.overviewLabel}>Total Devices</Text>
+            <Text style={styles.overviewValue}>12 devices</Text>
+          </View>
+          <View style={styles.overviewRow}>
+            <Text style={styles.overviewLabel}>Active Warranties</Text>
+            <Text style={[styles.overviewValue, { color: iosColors.systemGreen }]}>7 active</Text>
+          </View>
+          <View style={styles.overviewRow}>
+            <Text style={styles.overviewLabel}>Total Value Protected</Text>
+            <Text style={[styles.overviewValue, { color: iosColors.systemBlue }]}>$4,250</Text>
           </View>
         </View>
-
+        
         {/* Family Sharing Card */}
         <View style={styles.familyCard}>
           <Text style={styles.cardTitle}>Family Sharing</Text>
@@ -161,31 +129,6 @@ export default function ProfileScreen() {
             <Text style={styles.inviteButtonText}>Invite Family Member</Text>
           </Pressable>
         </View>
-
-
-
-        {/* Profile Sections */}
-        {profileSections.map((section, sectionIndex) => (
-          <View key={sectionIndex} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            {section.items.map((item, itemIndex) => (
-              <Pressable
-                key={itemIndex}
-                style={styles.menuItem}
-                onPress={item.onPress}
-              >
-                <View style={styles.menuItemLeft}>
-                  {item.icon}
-                  <View style={styles.menuItemText}>
-                    <Text style={styles.menuItemTitle}>{item.title}</Text>
-                    <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
-                  </View>
-                </View>
-                <ChevronRight size={20} color={iosColors.systemGray} />
-              </Pressable>
-            ))}
-          </View>
-        ))}
 
         {/* Sign Out Button */}
         <View style={styles.signOutSection}>
@@ -239,286 +182,222 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: theme.spacing.lg,
+    backgroundColor: '#f3f4f6',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-    marginTop: theme.spacing.lg,
+    marginBottom: 24,
+    paddingHorizontal: 20,
   },
   headerTitle: {
-    fontSize: iosFonts.title2,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
-    fontFamily: iosFonts.system,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
   },
   menuButton: {
     width: 32,
     height: 32,
-    borderRadius: iosRadius.md,
-    backgroundColor: iosColors.systemBlue,
+    backgroundColor: '#2563eb',
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
-    width: 20,
+    position: 'absolute',
+    width: 16,
     height: 2,
-    backgroundColor: iosColors.systemBackground,
+    backgroundColor: 'white',
     borderRadius: 1,
-    marginVertical: 1,
+    opacity: 0.9,
   },
-  userCard: {
-    backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.md,
-  },
-  avatarContainer: {
-    flexDirection: 'row',
+  userSection: {
     alignItems: 'center',
+    marginBottom: 32,
+    paddingHorizontal: 20,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: theme.colors.primary[600],
+    width: 100,
+    height: 100,
+    backgroundColor: '#2563eb',
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: theme.spacing.lg,
+    marginBottom: 20,
   },
   avatarText: {
-    fontSize: iosFonts.title2,
-    fontWeight: iosFonts.bold,
-    color: iosColors.systemBackground,
-  },
-  userInfo: {
-    flex: 1,
+    fontSize: 36,
+    fontWeight: '600',
+    color: 'white',
   },
   userName: {
-    fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.neutral[900],
-    marginBottom: theme.spacing.xs,
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#111827',
   },
   userEmail: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[600],
-    marginBottom: theme.spacing.xs,
+    color: '#6b7280',
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  planContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 24,
   },
   planBadge: {
-    backgroundColor: iosColors.systemGray + '10', // 10% opacity
-    borderRadius: iosRadius.sm,
-    paddingVertical: iosSpacing.xs,
-    paddingHorizontal: iosSpacing.sm,
-    alignSelf: 'flex-start',
+    backgroundColor: '#10b981',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
   },
   planText: {
-    fontSize: iosFonts.caption,
-    fontWeight: iosFonts.medium,
-    color: iosColors.systemGray,
-    fontFamily: iosFonts.system,
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
   },
   planPrice: {
-    fontSize: iosFonts.title3,
-    fontWeight: iosFonts.bold,
-    color: iosColors.systemGray,
-    fontFamily: iosFonts.system,
+    color: '#6b7280',
+    fontSize: 14,
   },
   editProfileButton: {
-    backgroundColor: iosColors.systemBlue + '10', // 10% opacity
-    paddingVertical: iosSpacing.md,
-    paddingHorizontal: iosSpacing.lg,
-    borderRadius: iosRadius.md,
-    alignSelf: 'flex-start',
-    marginTop: iosSpacing.sm,
+    backgroundColor: '#f9fafb',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2563eb',
   },
   editProfileText: {
-    fontSize: iosFonts.body,
-    fontWeight: iosFonts.medium,
-    color: iosColors.systemBlue,
-    fontFamily: iosFonts.system,
+    color: '#2563eb',
+    fontSize: 14,
+    fontWeight: '500',
   },
   overviewCard: {
-    backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.sm,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    marginHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardTitle: {
-    fontSize: iosFonts.title3,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
-    marginBottom: iosSpacing.sm,
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 20,
+    color: '#111827',
   },
   overviewRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: iosSpacing.sm,
-  },
-  overviewItem: {
-    alignItems: 'center',
+    marginBottom: 16,
   },
   overviewLabel: {
-    fontSize: iosFonts.caption,
-    color: iosColors.systemGray,
-    marginTop: iosSpacing.xs,
+    color: '#6b7280',
+    fontSize: 16,
   },
   overviewValue: {
-    fontSize: iosFonts.title3,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
+    fontWeight: '500',
+    fontSize: 16,
+    color: '#111827',
   },
   familyCard: {
-    backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.sm,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    marginHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   familyMember: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: iosSpacing.sm,
+    gap: 16,
+    marginBottom: 16,
   },
   familyAvatar: {
     width: 40,
     height: 40,
+    backgroundColor: '#f9fafb',
     borderRadius: 20,
-    backgroundColor: iosColors.systemGray + '20', // 20% opacity
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: iosSpacing.sm,
   },
   familyAvatarText: {
-    fontSize: iosFonts.body,
-    fontWeight: iosFonts.medium,
-    color: iosColors.systemGray,
+    color: '#6b7280',
+    fontSize: 16,
+    fontWeight: '600',
   },
   familyInfo: {
     flex: 1,
   },
   familyName: {
-    fontSize: iosFonts.body,
-    fontWeight: iosFonts.medium,
-    color: iosColors.label,
+    fontWeight: '500',
+    marginBottom: 2,
+    fontSize: 16,
+    color: '#111827',
   },
   familyEmail: {
-    fontSize: iosFonts.caption,
-    color: iosColors.systemGray,
+    fontSize: 14,
+    color: '#6b7280',
   },
   inviteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: iosColors.systemBlue + '10', // 10% opacity
-    paddingVertical: iosSpacing.md,
-    paddingHorizontal: iosSpacing.lg,
-    borderRadius: iosRadius.md,
-    alignSelf: 'flex-start',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#2563eb',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    gap: 8,
   },
   inviteButtonText: {
-    fontSize: iosFonts.body,
-    fontWeight: iosFonts.medium,
-    color: iosColors.systemBlue,
-    marginLeft: iosSpacing.sm,
-  },
-  quickSettings: {
-    backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.sm,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: theme.spacing.sm,
-  },
-  settingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-  },
-  settingText: {
-    fontSize: theme.fontSize.base,
-    color: theme.colors.neutral[700],
-    fontWeight: theme.fontWeight.medium,
-  },
-  section: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.neutral[800],
-    marginBottom: theme.spacing.md,
-    paddingHorizontal: theme.spacing.sm,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.colors.white,
-    padding: theme.spacing.lg,
-    borderRadius: theme.borderRadius.md,
-    marginBottom: theme.spacing.sm,
-    ...theme.shadows.sm,
-  },
-  menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    flex: 1,
-  },
-  menuItemText: {
-    flex: 1,
-  },
-  menuItemTitle: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.neutral[900],
-    marginBottom: theme.spacing.xs,
-  },
-  menuItemSubtitle: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.neutral[500],
+    color: '#2563eb',
+    fontSize: 16,
+    fontWeight: '600',
   },
   signOutSection: {
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.xl,
+    marginTop: 16,
+    marginBottom: 32,
+    paddingHorizontal: 20,
   },
   signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: iosColors.systemRed + '10', // 10% opacity
-    padding: iosSpacing.lg,
-    borderRadius: iosRadius.md,
-    borderWidth: 1,
-    borderColor: iosColors.systemRed + '30', // 30% opacity
-    gap: iosSpacing.sm,
+    backgroundColor: '#ef4444',
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
   },
   signOutButtonDisabled: {
     opacity: 0.7,
   },
   signOutText: {
-    fontSize: iosFonts.body,
-    fontWeight: iosFonts.medium,
-    color: iosColors.systemRed,
-    fontFamily: iosFonts.system,
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
   },
   versionContainer: {
     alignItems: 'center',
-    paddingVertical: theme.spacing.lg,
+    paddingVertical: 20,
   },
   versionText: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.neutral[400],
+    fontSize: 14,
+    color: '#6b7280',
   },
   modalOverlay: {
     flex: 1,
@@ -527,24 +406,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: theme.colors.white,
-    borderRadius: iosRadius.lg,
-    padding: iosSpacing.lg,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
     width: '80%',
     alignItems: 'center',
-    ...theme.shadows.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 30,
+    elevation: 5,
   },
   modalTitle: {
-    fontSize: iosFonts.title2,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
-    marginBottom: iosSpacing.sm,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 8,
   },
   modalMessage: {
-    fontSize: iosFonts.body,
-    color: iosColors.label,
+    fontSize: 16,
+    color: '#6b7280',
     textAlign: 'center',
-    marginBottom: iosSpacing.lg,
+    marginBottom: 20,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -552,16 +435,16 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modalButton: {
-    paddingVertical: iosSpacing.md,
-    paddingHorizontal: iosSpacing.lg,
-    borderRadius: iosRadius.md,
-    backgroundColor: iosColors.systemBlue,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    backgroundColor: '#2563eb',
     width: '45%',
   },
   modalButtonText: {
-    fontSize: iosFonts.body,
-    fontWeight: iosFonts.medium,
-    color: iosColors.systemBackground,
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
     textAlign: 'center',
   },
 });

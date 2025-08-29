@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, signInWithGoogle as supabaseSignInWithGoogle } from '../lib/supabaseClient';
+import { DeviceLocalStorage } from '../src/lib/localStorage';
 
 interface AuthContextType {
   user: User | null;
@@ -314,8 +315,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      console.log('🔄 AuthContext: Starting sign out process...');
+      console.log('🔄 AuthContext: Current user ID:', user?.id);
+      console.log('🔄 AuthContext: Current session exists:', !!session);
+      
+      // Clear all local storage data first
+      console.log('🗑️ AuthContext: Clearing local storage data...');
+      try {
+        await DeviceLocalStorage.clearAll();
+        console.log('✅ AuthContext: Local storage cleared successfully');
+      } catch (storageError) {
+        console.warn('⚠️ AuthContext: Local storage clear warning:', storageError);
+        // Continue with sign out even if storage clear fails
+      }
+      
+      // Sign out from Supabase
+      console.log('🔐 AuthContext: Signing out from Supabase...');
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('❌ AuthContext: Supabase sign out error:', error);
+        throw error;
+      }
+      
+      console.log('✅ AuthContext: Supabase sign out completed successfully');
+      
+      // Reset local state
+      console.log('🔄 AuthContext: Resetting local state...');
+      setUser(null);
+      setSession(null);
+      setSyncReady(false);
+      setLastSyncTime(null);
+      
+      console.log('✅ AuthContext: Sign out completed successfully - user state reset');
+      console.log('✅ AuthContext: User is now:', user);
+      console.log('✅ AuthContext: Session is now:', session);
+      
+    } catch (error) {
+      console.error('❌ AuthContext: Error during sign out:', error);
+      // Even if there's an error, try to reset the user state
+      console.log('🔄 AuthContext: Attempting to reset state despite error...');
+      setUser(null);
+      setSession(null);
+      setSyncReady(false);
+      setLastSyncTime(null);
+      throw error;
+    }
   };
 
   const value = {

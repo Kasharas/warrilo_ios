@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform } from 'react-native';
 import { User, Settings, Bell, Shield, CreditCard, HelpCircle, LogOut, ChevronRight, Edit } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
+import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,20 +13,77 @@ export default function ProfileScreen() {
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  // Add useEffect to watch for authentication state changes
+  useEffect(() => {
+    console.log('🔍 Profile: useEffect triggered, user:', user ? 'logged in' : 'not logged in');
+    if (!user) {
+      console.log('🚪 Profile: User signed out, navigating to welcome screen');
+      // User has signed out, navigate to welcome screen
+      router.replace('/welcome');
+    }
+  }, [user, router]);
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
-          style: 'destructive',
-          onPress: () => signOut()
+    console.log('🔘 Profile: Sign out button clicked');
+    
+    // Web-compatible confirmation dialog
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to sign out?');
+      if (confirmed) {
+        console.log('✅ Profile: Web confirmation accepted, proceeding with sign out');
+        performSignOut();
+      } else {
+        console.log('❌ Profile: Web confirmation cancelled');
+      }
+    } else {
+      // Mobile Alert
+      Alert.alert(
+        'Sign Out',
+        'Are you sure you want to sign out?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Sign Out', 
+            style: 'destructive',
+            onPress: () => {
+              console.log('✅ Profile: Mobile confirmation accepted, proceeding with sign out');
+              performSignOut();
+            }
+          }
+        ]
+      );
+    }
+  };
+
+  const performSignOut = async () => {
+    try {
+      console.log('🔄 Profile: Starting sign out process...');
+      setIsSigningOut(true);
+      
+      await signOut();
+      console.log('✅ Profile: Sign out completed successfully');
+      
+      // Force navigation to welcome screen as fallback
+      setTimeout(() => {
+        if (user) {
+          console.log('🔄 Profile: Force navigation to welcome screen');
+          router.replace('/welcome');
         }
-      ]
-    );
+      }, 1000);
+      
+    } catch (error) {
+      console.error('❌ Profile: Sign out error:', error);
+      setIsSigningOut(false);
+      
+      // Show error message
+      if (Platform.OS === 'web') {
+        alert('Failed to sign out. Please try again.');
+      } else {
+        Alert.alert('Error', 'Failed to sign out. Please try again.');
+      }
+    }
   };
 
   const profileSections = [
@@ -167,9 +225,18 @@ export default function ProfileScreen() {
 
         {/* Sign Out Button */}
         <View style={styles.signOutSection}>
-          <Pressable style={styles.signOutButton} onPress={handleSignOut}>
-            <LogOut size={20} color={theme.colors.error[600]} />
-            <Text style={styles.signOutText}>Sign Out</Text>
+          <Pressable 
+            style={[
+              styles.signOutButton, 
+              isSigningOut && styles.signOutButtonDisabled
+            ]} 
+            onPress={handleSignOut} 
+            disabled={isSigningOut}
+          >
+            <LogOut size={20} color={iosColors.systemRed} />
+            <Text style={styles.signOutText}>
+              {isSigningOut ? 'Signing Out...' : 'Sign Out'}
+            </Text>
           </Pressable>
         </View>
 
@@ -196,22 +263,23 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.lg,
   },
   headerTitle: {
-    fontSize: theme.fontSize['2xl'],
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.neutral[900],
+    fontSize: iosFonts.title2,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
+    fontFamily: iosFonts.system,
   },
   menuButton: {
     width: 32,
     height: 32,
-    borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.primary[600],
+    borderRadius: iosRadius.md,
+    backgroundColor: iosColors.systemBlue,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
     width: 20,
     height: 2,
-    backgroundColor: theme.colors.white,
+    backgroundColor: iosColors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
   },
@@ -324,17 +392,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.error[50],
-    padding: theme.spacing.lg,
-    borderRadius: theme.borderRadius.md,
+    backgroundColor: iosColors.systemRed + '10', // 10% opacity
+    padding: iosSpacing.lg,
+    borderRadius: iosRadius.md,
     borderWidth: 1,
-    borderColor: theme.colors.error[200],
-    gap: theme.spacing.sm,
+    borderColor: iosColors.systemRed + '30', // 30% opacity
+    gap: iosSpacing.sm,
+  },
+  signOutButtonDisabled: {
+    opacity: 0.7,
   },
   signOutText: {
-    fontSize: theme.fontSize.base,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.error[600],
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemRed,
+    fontFamily: iosFonts.system,
   },
   versionContainer: {
     alignItems: 'center',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert, Platform, Modal } from 'react-native';
-import { User, Settings, Bell, Shield, CreditCard, HelpCircle, LogOut, ChevronRight, Edit } from 'lucide-react-native';
+import { User, Settings, Bell, Shield, CreditCard, HelpCircle, LogOut, ChevronRight, Edit, Users, Calendar, Package, DollarSign } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,8 +11,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
   
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
+
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
 
@@ -55,46 +54,6 @@ export default function ProfileScreen() {
 
   const profileSections = [
     {
-      title: 'Account',
-      items: [
-        { 
-          icon: <User size={20} color={theme.colors.primary[600]} />, 
-          title: 'Personal Information', 
-          subtitle: 'Update your profile details',
-          onPress: () => router.push('/settings?section=personal')
-        },
-        { 
-          icon: <Shield size={20} color={theme.colors.primary[600]} />, 
-          title: 'Security & Privacy', 
-          subtitle: 'Password, 2FA, and privacy settings',
-          onPress: () => router.push('/settings?section=security')
-        },
-        { 
-          icon: <Bell size={20} color={theme.colors.primary[600]} />, 
-          title: 'Notifications', 
-          subtitle: 'Manage your notification preferences',
-          onPress: () => router.push('/settings?section=notifications')
-        }
-      ]
-    },
-    {
-      title: 'Preferences',
-      items: [
-        { 
-          icon: <Settings size={20} color={theme.colors.primary[600]} />, 
-          title: 'App Settings', 
-          subtitle: 'Language, theme, and display options',
-          onPress: () => router.push('/settings?section=app')
-        },
-        { 
-          icon: <CreditCard size={20} color={theme.colors.primary[600]} />, 
-          title: 'Subscription', 
-          subtitle: 'Manage your plan and billing',
-          onPress: () => router.push('/settings?section=subscription')
-        }
-      ]
-    },
-    {
       title: 'Support',
       items: [
         { 
@@ -124,48 +83,86 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-        {/* User Info Card */}
+        {/* User Info Card - iOS Native Style */}
         <View style={styles.userCard}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <User size={40} color={theme.colors.white} />
+              <Text style={styles.avatarText}>
+                {user?.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 
+                 user?.email?.split('@')[0].substring(0, 2).toUpperCase() || 'U'}
+              </Text>
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{user?.user_metadata?.full_name || user?.email || 'User'}</Text>
               <Text style={styles.userEmail}>{user?.email}</Text>
-              <Text style={styles.userStatus}>Active Account</Text>
+              <View style={styles.planBadge}>
+                <Text style={styles.planText}>PRO PLAN</Text>
+                <Text style={styles.planPrice}>€1.99/month</Text>
+              </View>
+            </View>
+          </View>
+          <Pressable style={styles.editProfileButton}>
+            <Text style={styles.editProfileText}>Edit Profile</Text>
+          </Pressable>
+        </View>
+
+        {/* Account Overview Card */}
+        <View style={styles.overviewCard}>
+          <Text style={styles.cardTitle}>Account Overview</Text>
+          <View style={styles.overviewRow}>
+            <View style={styles.overviewItem}>
+              <Calendar size={16} color={iosColors.systemGray} />
+              <Text style={styles.overviewLabel}>Member Since</Text>
+              <Text style={styles.overviewValue}>August 2025</Text>
+            </View>
+            <View style={styles.overviewItem}>
+              <Package size={16} color={iosColors.systemGray} />
+              <Text style={styles.overviewLabel}>Total Devices</Text>
+              <Text style={styles.overviewValue}>12 devices</Text>
+            </View>
+          </View>
+          <View style={styles.overviewRow}>
+            <View style={styles.overviewItem}>
+              <Shield size={16} color={iosColors.systemGreen} />
+              <Text style={styles.overviewLabel}>Active Warranties</Text>
+              <Text style={[styles.overviewValue, { color: iosColors.systemGreen }]}>7 active</Text>
+            </View>
+            <View style={styles.overviewItem}>
+              <DollarSign size={16} color={iosColors.systemBlue} />
+              <Text style={styles.overviewLabel}>Total Value Protected</Text>
+              <Text style={[styles.overviewValue, { color: iosColors.systemBlue }]}>$4,250</Text>
             </View>
           </View>
         </View>
 
-        {/* Quick Settings */}
-        <View style={styles.quickSettings}>
-          <View style={styles.settingItem}>
-            <View style={styles.settingLeft}>
-              <Bell size={20} color={theme.colors.neutral[600]} />
-              <Text style={styles.settingText}>Push Notifications</Text>
+        {/* Family Sharing Card */}
+        <View style={styles.familyCard}>
+          <Text style={styles.cardTitle}>Family Sharing</Text>
+          <View style={styles.familyMember}>
+            <View style={styles.familyAvatar}>
+              <Text style={styles.familyAvatarText}>SM</Text>
             </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{ false: theme.colors.neutral[200], true: theme.colors.primary[300] }}
-              thumbColor={notificationsEnabled ? theme.colors.primary[600] : theme.colors.neutral[400]}
-            />
-          </View>
-          
-          <View style={styles.settingItem}>
-            <View style={styles.settingLeft}>
-              <Shield size={20} color={theme.colors.neutral[600]} />
-              <Text style={styles.settingText}>Biometric Login</Text>
+            <View style={styles.familyInfo}>
+              <Text style={styles.familyName}>Sarah Miller</Text>
+              <Text style={styles.familyEmail}>sarah.m@email.com</Text>
             </View>
-            <Switch
-              value={biometricEnabled}
-              onValueChange={setBiometricEnabled}
-              trackColor={{ false: theme.colors.neutral[200], true: theme.colors.primary[300] }}
-              thumbColor={biometricEnabled ? theme.colors.primary[600] : theme.colors.neutral[400]}
-            />
           </View>
+          <View style={styles.familyMember}>
+            <View style={styles.familyAvatar}>
+              <Text style={styles.familyAvatarText}>MD</Text>
+            </View>
+            <View style={styles.familyInfo}>
+              <Text style={styles.familyName}>Mike Doe</Text>
+              <Text style={styles.familyEmail}>mike.d@email.com</Text>
+            </View>
+          </View>
+          <Pressable style={styles.inviteButton}>
+            <Users size={16} color={iosColors.systemBlue} />
+            <Text style={styles.inviteButtonText}>Invite Family Member</Text>
+          </Pressable>
         </View>
+
+
 
         {/* Profile Sections */}
         {profileSections.map((section, sectionIndex) => (
@@ -184,7 +181,7 @@ export default function ProfileScreen() {
                     <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
                   </View>
                 </View>
-                <ChevronRight size={20} color={theme.colors.neutral[400]} />
+                <ChevronRight size={20} color={iosColors.systemGray} />
               </Pressable>
             ))}
           </View>
@@ -293,6 +290,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: theme.spacing.lg,
   },
+  avatarText: {
+    fontSize: iosFonts.title2,
+    fontWeight: iosFonts.bold,
+    color: iosColors.systemBackground,
+  },
   userInfo: {
     flex: 1,
   },
@@ -307,10 +309,122 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral[600],
     marginBottom: theme.spacing.xs,
   },
-  userStatus: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.success[600],
-    fontWeight: theme.fontWeight.medium,
+  planBadge: {
+    backgroundColor: iosColors.systemGray + '10', // 10% opacity
+    borderRadius: iosRadius.sm,
+    paddingVertical: iosSpacing.xs,
+    paddingHorizontal: iosSpacing.sm,
+    alignSelf: 'flex-start',
+  },
+  planText: {
+    fontSize: iosFonts.caption,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemGray,
+    fontFamily: iosFonts.system,
+  },
+  planPrice: {
+    fontSize: iosFonts.title3,
+    fontWeight: iosFonts.bold,
+    color: iosColors.systemGray,
+    fontFamily: iosFonts.system,
+  },
+  editProfileButton: {
+    backgroundColor: iosColors.systemBlue + '10', // 10% opacity
+    paddingVertical: iosSpacing.md,
+    paddingHorizontal: iosSpacing.lg,
+    borderRadius: iosRadius.md,
+    alignSelf: 'flex-start',
+    marginTop: iosSpacing.sm,
+  },
+  editProfileText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemBlue,
+    fontFamily: iosFonts.system,
+  },
+  overviewCard: {
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.sm,
+  },
+  cardTitle: {
+    fontSize: iosFonts.title3,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
+    marginBottom: iosSpacing.sm,
+  },
+  overviewRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: iosSpacing.sm,
+  },
+  overviewItem: {
+    alignItems: 'center',
+  },
+  overviewLabel: {
+    fontSize: iosFonts.caption,
+    color: iosColors.systemGray,
+    marginTop: iosSpacing.xs,
+  },
+  overviewValue: {
+    fontSize: iosFonts.title3,
+    fontWeight: iosFonts.bold,
+    color: iosColors.label,
+  },
+  familyCard: {
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.sm,
+  },
+  familyMember: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: iosSpacing.sm,
+  },
+  familyAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: iosColors.systemGray + '20', // 20% opacity
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: iosSpacing.sm,
+  },
+  familyAvatarText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemGray,
+  },
+  familyInfo: {
+    flex: 1,
+  },
+  familyName: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.label,
+  },
+  familyEmail: {
+    fontSize: iosFonts.caption,
+    color: iosColors.systemGray,
+  },
+  inviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: iosColors.systemBlue + '10', // 10% opacity
+    paddingVertical: iosSpacing.md,
+    paddingHorizontal: iosSpacing.lg,
+    borderRadius: iosRadius.md,
+    alignSelf: 'flex-start',
+  },
+  inviteButtonText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.systemBlue,
+    marginLeft: iosSpacing.sm,
   },
   quickSettings: {
     backgroundColor: theme.colors.white,

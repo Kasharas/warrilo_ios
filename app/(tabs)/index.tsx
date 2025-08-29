@@ -299,10 +299,10 @@ export default function DashboardScreen() {
                 // Map status color to iOS system colors
                 const getThemeColor = (status: string) => {
                   switch (status) {
-                    case 'success': return iosColors.systemGreen;
-                    case 'warning': return iosColors.systemOrange;
-                    case 'error': return iosColors.systemRed;
-                    default: return iosColors.systemGray;
+                    case 'success': return '#10b981'; // Same green as DeviceCard
+                    case 'warning': return '#f59e0b'; // Same orange as DeviceCard
+                    case 'error': return '#ef4444'; // Same red as DeviceCard
+                    default: return '#6b7280'; // Same gray as DeviceCard
                   }
                 };
                 
@@ -312,6 +312,11 @@ export default function DashboardScreen() {
                     style={styles.deviceCard}
                     onPress={() => handleDevicePress(device.local_id || device.id)}
                   >
+                    {/* Warranty Status Badge - Top Right Corner */}
+                    <View style={[styles.warrantyBadge, { backgroundColor: getThemeColor(statusColor) }]}>
+                      <Text style={styles.warrantyBadgeText}>{statusText}</Text>
+                    </View>
+
                     {/* Device Image or Icon */}
                     {device.photo_irl ? (
                       <View style={styles.deviceImageContainer}>
@@ -328,9 +333,6 @@ export default function DashboardScreen() {
                     )}
                     
                     <Text style={styles.deviceName}>{device.name}</Text>
-                    <Text style={[styles.deviceStatus, { color: getThemeColor(statusColor) }]}>
-                      {statusText}
-                    </Text>
                   </Pressable>
                 );
               })}
@@ -664,6 +666,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     minHeight: 160, // Ensure consistent card height
+    position: 'relative', // Needed for absolute positioning of the badge
   },
   deviceIconContainer: {
     width: 48,
@@ -698,6 +701,23 @@ const styles = StyleSheet.create({
     fontSize: iosFonts.footnote,
     fontWeight: iosFonts.medium,
     marginBottom: iosSpacing.xs,
+    fontFamily: iosFonts.system,
+  },
+  warrantyBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    borderRadius: 8,
+    minWidth: 60,
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  warrantyBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#FFFFFF',
     fontFamily: iosFonts.system,
   },
 

@@ -10,6 +10,8 @@ interface Device {
   category?: string;
   photo_irl?: string | null; // Device photo URL from local storage
   created_at: string;
+  warranty_end_date?: string; // Add warranty end date
+  warranty_months?: number; // Add warranty months
 }
 
 interface DeviceCardProps {
@@ -75,8 +77,6 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
     }
   }, [device.photo_irl]);
 
-
-
   const getCategoryColor = (category?: string) => {
     switch (category?.toLowerCase()) {
       case 'electronics':
@@ -105,6 +105,23 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
     }
   };
 
+  // Helper function to get warranty status and color
+  const getWarrantyStatus = () => {
+    if (!device.warranty_end_date) return { status: 'No Warranty', color: theme.colors.neutral[500] };
+    
+    const endDate = new Date(device.warranty_end_date);
+    const today = new Date();
+    const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilExpiry < 0) {
+      return { status: 'Expired', color: theme.colors.error[500] };
+    } else if (daysUntilExpiry <= 30) {
+      return { status: 'Expiring', color: theme.colors.warning[500] };
+    } else {
+      return { status: 'Active', color: theme.colors.success[500] };
+    }
+  };
+
   if (compact) {
     return (
       <Pressable style={styles.compactCard} onPress={onPress}>
@@ -125,8 +142,15 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
     );
   }
 
+  const warrantyStatus = getWarrantyStatus();
+
   return (
     <View style={styles.card}>
+      {/* Warranty Status Badge - Top Right Corner of Entire Card */}
+      <View style={[styles.warrantyBadge, { backgroundColor: warrantyStatus.color }]}>
+        <Text style={styles.warrantyBadgeText}>{warrantyStatus.status}</Text>
+      </View>
+
       <Pressable style={styles.cardContent} onPress={onPress}>
         {/* Device Image */}
         <View style={styles.imageContainer}>
@@ -145,7 +169,7 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
             </View>
           )}
           
-          {/* Category Badge */}
+          {/* Category Badge - Top Left of Image */}
           {device.category && (
             <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(device.category) }]}>
               <Text style={styles.categoryBadgeText}>{device.category}</Text>
@@ -165,16 +189,16 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
             </Text>
           )}
         </View>
-
-        {/* Delete Button - Now positioned in the same row */}
-        {onDelete && (
-          <View style={styles.deleteButtonContainer}>
-            <Pressable style={styles.deleteButton} onPress={onDelete}>
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </Pressable>
-          </View>
-        )}
       </Pressable>
+
+      {/* Delete Button - Bottom Right Corner */}
+      {onDelete && (
+        <View style={styles.deleteButtonContainer}>
+          <Pressable style={styles.deleteButton} onPress={onDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -188,6 +212,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.neutral?.[200] || '#e5e7eb',
     ...theme.shadows?.sm,
+    position: 'relative', // Add this for absolute positioning of badges and delete button
   },
   cardContent: {
     flexDirection: 'row',
@@ -233,6 +258,20 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
     fontWeight: theme.fontWeight.medium,
   },
+  warrantyBadge: {
+    position: 'absolute',
+    top: theme.spacing.sm,
+    right: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.sm,
+    borderRadius: theme.borderRadius.sm,
+    zIndex: 1,
+  },
+  warrantyBadgeText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.medium,
+  },
   deviceInfo: {
     flex: 1,
   },
@@ -249,10 +288,10 @@ const styles = StyleSheet.create({
   },
 
   deleteButtonContainer: {
-    marginLeft: 'auto', // Push to the right
-    alignSelf: 'center', // Center vertically
+    position: 'absolute',
+    bottom: theme.spacing.sm,
+    right: theme.spacing.sm,
   },
-
 
   deleteButton: {
     backgroundColor: theme.colors.error?.[500] || '#ef4444', // Fallback to hex color

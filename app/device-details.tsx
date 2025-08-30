@@ -287,12 +287,25 @@ export default function DeviceDetailsScreen() {
           </View>
 
           <View style={styles.warrantyExpiryInfo}>
-            <Text style={styles.warrantyExpiryLabel}>
-              {device.warranty_end_date 
-                ? `Active until ${formatDate(device.warranty_end_date)}`
-                : 'No warranty end date'
-              }
-            </Text>
+            {device.warranty_end_date ? (
+              <View style={styles.warrantyStatusRow}>
+                <View style={[
+                  styles.warrantyBadge,
+                  { backgroundColor: new Date(device.warranty_end_date) < new Date() ? iosColors.systemRed : '#10b981' }
+                ]}>
+                  <Text style={styles.warrantyBadgeText}>
+                    {new Date(device.warranty_end_date) < new Date() ? 'Expired' : 'Active'}
+                  </Text>
+                </View>
+                <Text style={styles.warrantyDateText}>
+                  {formatDate(device.warranty_end_date)}
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.warrantyPlaceholderText}>
+                No warranty end date
+              </Text>
+            )}
           </View>
         </View>
 
@@ -312,7 +325,7 @@ export default function DeviceDetailsScreen() {
         {/* Error Display */}
         {error && (
           <View style={[styles.section, { 
-            backgroundColor: '#fee2e2', 
+            backgroundColor: iosColors.systemBackground, 
             borderColor: '#ef4444', 
             borderWidth: 1
           }]}>
@@ -392,7 +405,7 @@ const styles = StyleSheet.create({
   },
   uploadZone: {
     width: '100%',
-    backgroundColor: iosColors.systemGray6,
+    backgroundColor: iosColors.systemBackground,
     borderRadius: iosRadius.md,
     padding: iosSpacing.lg,
     borderWidth: 1,
@@ -411,6 +424,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 140,
     width: '100%',
+    backgroundColor: iosColors.systemBackground,
+    borderRadius: iosRadius.md,
     shadowColor: iosColors.label,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -440,13 +455,18 @@ const styles = StyleSheet.create({
     borderRadius: iosRadius.md,
     paddingHorizontal: iosSpacing.lg,
     paddingVertical: iosSpacing.lg,
-    backgroundColor: iosColors.systemGray6,
+    backgroundColor: iosColors.systemBackground,
     fontSize: iosFonts.body,
     color: iosColors.label,
     minHeight: 48,
+    shadowColor: iosColors.label,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   warrantyExpiryInfo: {
-    backgroundColor: iosColors.systemGray6,
+    backgroundColor: iosColors.systemBackground,
     borderRadius: iosRadius.md,
     padding: iosSpacing.lg,
     borderWidth: 1,
@@ -465,6 +485,33 @@ const styles = StyleSheet.create({
     fontSize: iosFonts.body,
     fontWeight: iosFonts.medium,
     color: iosColors.systemGreen,
+  },
+  warrantyStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: iosSpacing.md,
+  },
+  warrantyBadge: {
+    paddingHorizontal: iosSpacing.sm,
+    paddingVertical: iosSpacing.xs,
+    borderRadius: iosRadius.sm,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  warrantyBadgeText: {
+    fontSize: iosFonts.footnote,
+    fontWeight: iosFonts.semibold,
+    color: iosColors.systemBackground,
+  },
+  warrantyDateText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.label,
+  },
+  warrantyPlaceholderText: {
+    fontSize: iosFonts.body,
+    fontWeight: iosFonts.medium,
+    color: iosColors.placeholderText,
   },
   bottomSpacing: {
     height: iosSpacing.xxxl,

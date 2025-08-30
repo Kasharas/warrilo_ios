@@ -120,8 +120,8 @@ export default function AddDeviceScreen() {
     });
 
     if (!deviceName.trim()) {
-      console.log('Validation failed: Device name is empty');
-      Alert.alert('Error', 'Device name is required');
+      console.log('Validation failed: Item name is empty');
+      Alert.alert('Error', 'Item name is required');
       return;
     }
 
@@ -240,12 +240,12 @@ export default function AddDeviceScreen() {
       setCompressionStatus('');
       
       // Handle specific error types
-      let errorMessage = 'Failed to add device. Please try again.';
+      let errorMessage = 'Failed to add item. Please try again.';
       if (error instanceof Error) {
         if (error.message.includes('quota')) {
           errorMessage = 'Storage is full. Please try again or contact support.';
         } else if (error.message.includes('Failed to store device locally')) {
-          errorMessage = 'Unable to save device locally. Please try again.';
+          errorMessage = 'Unable to save item locally. Please try again.';
         }
       }
       
@@ -266,7 +266,7 @@ export default function AddDeviceScreen() {
     
     // Validate required fields before proceeding
     if (!deviceName.trim()) {
-      Alert.alert('Error', 'Device name is required');
+      Alert.alert('Error', 'Item name is required');
       return;
     }
     
@@ -376,7 +376,7 @@ export default function AddDeviceScreen() {
       
     } catch (error) {
       console.error('Error storing device locally:', error);
-      Alert.alert('Error', 'Failed to store device locally. Please try again.');
+      Alert.alert('Error', 'Failed to store item locally. Please try again.');
     }
   };
 
@@ -479,10 +479,8 @@ export default function AddDeviceScreen() {
                  >
                    <ArrowLeft size={20} color={theme.colors.neutral[600]} />
                  </Pressable>
-        <Text style={styles.headerTitle}>Add Device</Text>
-        <Pressable style={styles.saveButton}>
-          <Text style={styles.saveButtonText}>Save</Text>
-        </Pressable>
+        <Text style={styles.headerTitle}>Add Item</Text>
+        <View style={styles.headerActions} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -498,9 +496,9 @@ export default function AddDeviceScreen() {
           </View>
         )}
         
-        {/* Device Photo Section */}
+        {/* Item Photo Section */}
          <View style={styles.section}>
-           <Text style={styles.sectionTitle}>Device Photo</Text>
+           <Text style={styles.sectionTitle}>Item Photo</Text>
                        {deviceImage ? (
               <View style={styles.imagePreviewContainer}>
                 <View style={styles.imageWrapper}>
@@ -580,16 +578,16 @@ export default function AddDeviceScreen() {
           </View>
         </View>
 
-        {/* Device Information Section */}
+        {/* Item Information Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Device Information</Text>
+          <Text style={styles.sectionTitle}>Item Information</Text>
           
           <View style={styles.inputGroup}>
                          <TextInput
                style={styles.textInput}
                value={deviceName}
                onChangeText={setDeviceName}
-               placeholder="Enter device name"
+               placeholder="Enter item name"
                placeholderTextColor="#8E8E93"
              />
           </View>
@@ -730,7 +728,7 @@ export default function AddDeviceScreen() {
               style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
               value={notes}
               onChangeText={setNotes}
-              placeholder="Add any additional notes about the device..."
+              placeholder="Add any additional notes about the item..."
               placeholderTextColor="#8E8E93"
               multiline
             />
@@ -746,7 +744,7 @@ export default function AddDeviceScreen() {
           {(isSubmitting || isUploading) ? (
             <ActivityIndicator color={theme.colors.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Add Device</Text>
+            <Text style={styles.submitButtonText}>Add Item</Text>
           )}
         </Pressable>
 
@@ -1029,10 +1027,10 @@ const styles = StyleSheet.create({
       color: iosColors.label,
       backgroundColor: iosColors.systemBackground,
       shadowColor: iosColors.label,
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.06,
-      shadowRadius: 4,
-      elevation: 2,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
     },
   row: {
     flexDirection: 'row',
@@ -1086,10 +1084,10 @@ const styles = StyleSheet.create({
     marginTop: iosSpacing.xl,
     marginBottom: iosSpacing.xxxl,
     shadowColor: iosColors.label,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   submitButtonText: {
     fontSize: iosFonts.body,
@@ -1241,7 +1239,7 @@ const styles = StyleSheet.create({
      textDecorationLine: 'underline',
    },
                        warrantyExpiryInfo: {
-       backgroundColor: iosColors.systemGray6,
+       backgroundColor: iosColors.systemBackground,
        borderRadius: iosRadius.md,
        padding: iosSpacing.lg,
        borderWidth: 1,
@@ -1313,8 +1311,13 @@ const styles = StyleSheet.create({
           marginTop: iosSpacing.lg,
           paddingHorizontal: iosSpacing.lg,
           paddingVertical: iosSpacing.lg,
-          backgroundColor: iosColors.systemGray6,
+          backgroundColor: iosColors.systemBackground,
           borderRadius: iosRadius.md,
+          shadowColor: iosColors.label,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 3,
         },
   proFeatureInfo: {
     flexDirection: 'row',
@@ -1371,10 +1374,10 @@ const styles = StyleSheet.create({
        paddingVertical: iosSpacing.lg,
        backgroundColor: iosColors.systemBackground,
        shadowColor: iosColors.label,
-       shadowOffset: { width: 0, height: 1 },
-       shadowOpacity: 0.06,
-       shadowRadius: 4,
-       elevation: 2,
+       shadowOffset: { width: 0, height: 2 },
+       shadowOpacity: 0.08,
+       shadowRadius: 8,
+       elevation: 3,
      },
        categoryButtonText: {
       fontSize: iosFonts.body,
@@ -1464,10 +1467,10 @@ const styles = StyleSheet.create({
        paddingVertical: iosSpacing.lg,
        backgroundColor: iosColors.systemBackground,
        shadowColor: iosColors.label,
-       shadowOffset: { width: 0, height: 1 },
-       shadowOpacity: 0.06,
-       shadowRadius: 4,
-       elevation: 2,
+       shadowOffset: { width: 0, height: 2 },
+       shadowOpacity: 0.08,
+       shadowRadius: 8,
+       elevation: 3,
      },
        dateButtonText: {
       fontSize: iosFonts.body,

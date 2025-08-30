@@ -169,12 +169,7 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
             </View>
           )}
           
-          {/* Category Badge - Top Left of Image */}
-          {device.category && (
-            <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(device.category) }]}>
-              <Text style={styles.categoryBadgeText}>{device.category}</Text>
-            </View>
-          )}
+
         </View>
 
         {/* Device Info */}
@@ -244,20 +239,7 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 48,
   },
-  categoryBadge: {
-    position: 'absolute',
-    top: theme.spacing.sm,
-    left: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    paddingHorizontal: theme.spacing.sm,
-    borderRadius: theme.borderRadius.sm,
-    zIndex: 1,
-  },
-  categoryBadgeText: {
-    color: theme.colors.white,
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.medium,
-  },
+
   warrantyBadge: {
     position: 'absolute',
     top: theme.spacing.sm,

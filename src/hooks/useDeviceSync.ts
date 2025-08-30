@@ -152,12 +152,104 @@ export const useDeviceSync = () => {
     }
   }, [user?.id]);
 
+  const updateDevice = useCallback(async (deviceId: string, formData: DeviceFormData): Promise<{
+    success: boolean;
+    message: string;
+  }> => {
+    if (!user?.id) {
+      return { success: false, message: 'User not authenticated' };
+    }
+
+    console.log('Starting updateDevice with deviceId:', deviceId, 'and formData:', formData);
+    console.log('User ID:', user.id);
+
+    try {
+      setIsStoring(true);
+
+      // Validate required fields
+      if (!formData.name.trim()) {
+        return { success: false, message: 'Device name is required' };
+      }
+      if (!formData.purchaseDate) {
+        return { success: false, message: 'Purchase date is required' };
+      }
+      if (!formData.warrantyMonths.trim()) {
+        return { success: false, message: 'Warranty duration is required' };
+      }
+      if (!formData.receipt.uri) {
+        return { success: false, message: 'Receipt is required' };
+      }
+
+      // Calculate warranty end date
+      const warrantyMonths = parseInt(formData.warrantyMonths);
+      if (isNaN(warrantyMonths) || warrantyMonths <= 0) {
+        return { success: false, message: 'Invalid warranty duration' };
+      }
+
+      const purchaseDate = new Date(formData.purchaseDate);
+      const warrantyEndDate = new Date(purchaseDate);
+      warrantyEndDate.setMonth(warrantyEndDate.getMonth() + warrantyMonths);
+
+      // 1. Compress images first (for both local storage AND upload)
+      let compressedPhoto = null;
+      let compressedReceipt = null;
+      
+      if (formData.devicePhoto?.uri) {
+        console.log('Compressing device photo...');
+        compressedPhoto = await compressDevicePhoto(formData.devicePhoto.uri);
+        console.log('Device photo compressed successfully');
+      }
+      
+      if (formData.receipt?.uri) {
+        console.log('Compressing receipt...');
+        compressedReceipt = await compressReceipt(formData.receipt.uri);
+        console.log('Receipt compressed successfully');
+      }
+
+      // 2. Create updated device object with compressed images
+      const updatedDeviceData: Partial<LocalDevice> = {
+        name: formData.name.trim(),
+        supplier: formData.storeName.trim() || null,
+        category: formData.category.trim() || null,
+        purchase_date: purchaseDate.toISOString().split('T')[0], // YYYY-MM-DD format
+        warranty_months: warrantyMonths,
+        warranty_end_date: warrantyEndDate.toISOString().split('T')[0],
+        purchase_price: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
+        photo_irl: compressedPhoto, // Store compressed image
+        invoice_url: compressedReceipt, // Store compressed receipt
+        identifiers: formData.serialNumber.trim() || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      // 3. Update device locally
+      console.log('Updating device locally with ID:', deviceId);
+      await DeviceLocalStorage.updateDevice(deviceId, updatedDeviceData);
+      
+      console.log('Device updated locally successfully');
+
+      return {
+        success: true,
+        message: 'Device updated successfully!',
+      };
+
+    } catch (error) {
+      console.error('Error updating device:', error);
+      return {
+        success: false,
+        message: 'Failed to update device. Please try again.',
+      };
+    } finally {
+      setIsStoring(false);
+    }
+  }, [user?.id]);
+
   return {
     // State
     isStoring,
     
     // Actions
     addDevice,
+    updateDevice,
     
     // Data
     getLocalDevices,

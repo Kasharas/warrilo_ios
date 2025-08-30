@@ -54,8 +54,40 @@ export default function DeviceDetailsScreen() {
   };
 
   const handleEditDevice = () => {
-    // Mock edit functionality
-    Alert.alert('Edit Device', 'Edit functionality would be implemented here');
+    if (!device) {
+      Alert.alert('Error', 'Device data not available');
+      return;
+    }
+
+    console.log('DeviceCard: Edit button pressed for device:', device);
+    console.log('DeviceCard: invoice_url (receipt):', device.invoice_url);
+    console.log('DeviceCard: photo_irl:', device.photo_irl);
+    console.log('DeviceCard: identifiers (serial):', device.identifiers);
+
+    // Prepare navigation parameters
+    const navigationParams = {
+      id: device.local_id || device.id,
+      name: device.name,
+      brand: '', // Not available in LocalDevice
+      category: device.category || '',
+      photo_irl: device.photo_irl || '',
+      receipt_irl: device.invoice_url || '',
+      serial_number: device.identifiers || '',
+      purchase_price: device.purchase_price?.toString() || '',
+      store_name: device.supplier || '',
+      warranty_months: device.warranty_months?.toString() || '',
+      warranty_end_date: device.warranty_end_date || '',
+      notes: device.notes || '',
+    };
+
+    console.log('DeviceCard: Navigation params:', navigationParams);
+    console.log('DeviceCard: serial_number param:', navigationParams.serial_number);
+
+    // Navigate to edit-item screen with device data
+    router.push({
+      pathname: '/edit-item',
+      params: navigationParams
+    });
   };
 
   const handleDeleteDevice = () => {

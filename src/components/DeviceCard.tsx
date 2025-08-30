@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     minWidth: 80,
     height: 40,
     borderWidth: 2,
-    borderColor: '#0056CC', // Darker iOS blue for border
+    borderColor: '#007AFF', // Same iOS blue for border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     minWidth: 80,
     height: 40,
     borderWidth: 2,
-    borderColor: theme.colors.error?.[600] || '#dc2626', // Fallback to hex color
+    borderColor: theme.colors.error?.[500] || '#ef4444', // Same red for border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,

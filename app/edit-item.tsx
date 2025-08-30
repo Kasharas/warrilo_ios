@@ -17,7 +17,7 @@ export default function EditItemScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { user } = useAuth();
-  const { addDevice, isStoring } = useDeviceSync();
+  const { addDevice, updateDevice, isStoring } = useDeviceSync();
   const { isUploading, uploadDevice } = useDeviceUpload(user?.id || '');
   
   // Get the previous route from navigation state
@@ -74,9 +74,12 @@ export default function EditItemScreen() {
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const [hasUserSelectedDate, setHasUserSelectedDate] = useState(false);
 
-  // Populate form with existing item data when editing
+  // Track if form has been initially populated to prevent resetting
+  const [formInitialized, setFormInitialized] = useState(false);
+
+  // Populate form with existing item data when editing (only once)
   useEffect(() => {
-    if (params.id) {
+    if (params.id && !formInitialized) {
       console.log('Edit screen: Populating form with params:', params);
       setDeviceName(params.name as string || '');
       setBrand(params.brand as string || '');
@@ -132,8 +135,11 @@ export default function EditItemScreen() {
         setSelectedDate(date);
         setTempDate(date);
       }
+      
+      // Mark form as initialized to prevent future resets
+      setFormInitialized(true);
     }
-  }, [params]);
+  }, [params, formInitialized]);
 
   const handleBackPress = () => {
     console.log('Back button pressed - function called');
@@ -206,7 +212,7 @@ export default function EditItemScreen() {
       return;
     }
 
-    console.log('All validations passed, proceeding with submission...');
+    console.log('All validations passed, proceeding with update...');
 
     try {
       setCompressionStatus('Preparing images...');
@@ -224,17 +230,17 @@ export default function EditItemScreen() {
         devicePhoto: { uri: deviceImage || params.photo_irl || '', type: 'library' as const },
       };
 
-      console.log('Submitting form data:', formData);
+      console.log('Updating device with form data:', formData);
 
-      // Use the sync system to add device
-      const result = await addDevice(formData);
+      // Use the sync system to update device
+      const result = await updateDevice(params.id as string, formData);
       
       console.log('Edit item result:', result);
       
       if (result.success) {
-        console.log('Device stored locally with ID:', result.localId);
+        console.log('Device updated locally with ID:', params.id);
         console.log('Navigation: About to navigate to dashboard');
-        setCompressionStatus('Device saved!');
+        setCompressionStatus('Device updated!');
         
         // Show success message briefly, then navigate
         setTimeout(() => {
@@ -294,7 +300,7 @@ export default function EditItemScreen() {
           ]
         );
       } else {
-        console.error('Add device failed:', result.message);
+        console.error('Update device failed:', result.message);
         setCompressionStatus('');
         Alert.alert('Error', result.message);
       }
@@ -810,7 +816,7 @@ export default function EditItemScreen() {
         {/* Submit Button */}
         <Pressable
           style={[styles.submitButton, (isSubmitting || isUploading) && styles.submitButtonDisabled]}
-          onPress={handleSaveDevice}
+          onPress={handleSubmit}
           disabled={isSubmitting || isUploading}
         >
           {(isSubmitting || isUploading) ? (

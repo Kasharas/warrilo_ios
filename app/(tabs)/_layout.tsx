@@ -47,7 +47,7 @@ export default function TabLayout() {
             shadowRadius: focused ? 12 : 8,
             elevation: focused ? 8 : 4,
             borderWidth: 1,
-            borderColor: focused ? '#1d4ed8' : '#e5e7eb',
+            borderColor: focused ? '#007AFF' : '#e5e7eb',
           }}>
             <BarChart3 
               size={40} 
@@ -76,7 +76,7 @@ export default function TabLayout() {
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#0056CC' : '#e5e7eb',
+              borderColor: focused ? '#007AFF' : '#e5e7eb',
             }}>
               <Shield 
                 size={40} 
@@ -105,7 +105,7 @@ export default function TabLayout() {
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#0056CC' : '#e5e7eb',
+              borderColor: focused ? '#007AFF' : '#e5e7eb',
             }}>
               <Bell 
                 size={40} 
@@ -134,7 +134,7 @@ export default function TabLayout() {
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#0056CC' : '#e5e7eb',
+              borderColor: focused ? '#007AFF' : '#e5e7eb',
             }}>
               <User 
                 size={40} 

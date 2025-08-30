@@ -24,6 +24,7 @@ export interface LocalDevice {
   invoice_url: string;
   identifiers: string | null;
   created_at: string;
+  updated_at?: string; // Add updated_at field for tracking modifications
   sync_status: 'pending' | 'syncing' | 'synced' | 'failed';
   local_id?: string; // Temporary local ID before sync
 }
@@ -166,6 +167,38 @@ export class DeviceLocalStorage {
       }
     } catch (error) {
       console.error('Error updating device sync status:', error);
+    }
+  }
+
+  /**
+   * Update device data locally
+   */
+  static async updateDevice(deviceId: string, updatedData: Partial<LocalDevice>): Promise<void> {
+    try {
+      const devices = await this.getDevices();
+      const deviceIndex = devices.findIndex(d => d.local_id === deviceId || d.id === deviceId);
+      
+      if (deviceIndex !== -1) {
+        // Update the device with new data
+        devices[deviceIndex] = {
+          ...devices[deviceIndex],
+          ...updatedData,
+          sync_status: 'pending', // Mark as pending sync
+        };
+        
+        // Store updated devices
+        await AsyncStorage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify(devices));
+        
+        // Update sync status
+        await this.updateSyncStatus();
+        
+        console.log('Device updated locally:', deviceId);
+      } else {
+        throw new Error(`Device with ID ${deviceId} not found`);
+      }
+    } catch (error) {
+      console.error('Error updating device locally:', error);
+      throw error;
     }
   }
 

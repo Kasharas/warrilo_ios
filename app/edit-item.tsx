@@ -77,6 +77,7 @@ export default function EditItemScreen() {
   // Populate form with existing item data when editing
   useEffect(() => {
     if (params.id) {
+      console.log('Edit screen: Populating form with params:', params);
       setDeviceName(params.name as string || '');
       setBrand(params.brand as string || '');
       setCategory(params.category as string || '');
@@ -86,9 +87,13 @@ export default function EditItemScreen() {
       }
       if (params.photo_irl) {
         setDeviceImage(params.photo_irl as string);
+        console.log('Device photo loaded:', params.photo_irl);
       }
       if (params.receipt_irl) {
         setReceiptImage(params.receipt_irl as string);
+        console.log('Receipt loaded from params:', params.receipt_irl);
+      } else {
+        console.log('No receipt found in params');
       }
       // Set additional fields
       if (params.purchase_price) {
@@ -98,7 +103,21 @@ export default function EditItemScreen() {
         setStoreName(params.store_name as string);
       }
       if (params.serial_number) {
-        setSerialNumber(params.serial_number as string);
+        console.log('Raw serial_number from params:', params.serial_number);
+        // Handle case where serial_number might be JSON string
+        let serialValue = params.serial_number as string;
+        try {
+          // Check if it's a JSON string and extract the serial value
+          if (serialValue.startsWith('{') && serialValue.includes('"serial"')) {
+            const parsed = JSON.parse(serialValue);
+            serialValue = parsed.serial || serialValue;
+            console.log('Parsed serial from JSON:', parsed.serial);
+          }
+        } catch (error) {
+          console.log('Serial number is not JSON, using as-is:', serialValue);
+        }
+        setSerialNumber(serialValue);
+        console.log('Final serial number set to:', serialValue);
       }
       if (params.notes) {
         setNotes(params.notes as string);

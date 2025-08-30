@@ -7,16 +7,15 @@ import { theme } from '../styles/theme';
 interface Device {
   id: string;
   name: string;
-  brand?: string;
+  supplier?: string; // Store name from local storage
   category?: string;
   photo_irl?: string | null; // Device photo URL from local storage
-  receipt_irl?: string | null; // Receipt photo URL from local storage
+  invoice_url?: string | null; // Receipt photo URL from local storage (matches LocalDevice)
   created_at: string;
   warranty_end_date?: string; // Add warranty end date
   warranty_months?: number; // Add warranty months
   purchase_price?: number; // Purchase price
-  store_name?: string; // Store name
-  serial_number?: string; // Serial number
+  identifiers?: string; // Serial number from local storage
   notes?: string; // Notes
 }
 
@@ -64,25 +63,35 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
     if (onEdit) {
       onEdit();
     } else {
+      console.log('DeviceCard: Edit button pressed for device:', device);
+      console.log('DeviceCard: invoice_url (receipt):', device.invoice_url);
+      console.log('DeviceCard: photo_irl:', device.photo_irl);
+      console.log('DeviceCard: identifiers (serial):', device.identifiers);
+      
       // Default navigation to edit-item screen with device data
+      const editParams = {
+        id: device.id,
+        name: device.name,
+        brand: device.supplier || '', // Map supplier to brand
+        category: device.category || '',
+        photo_irl: device.photo_irl || '',
+        receipt_irl: device.invoice_url || '', // Map invoice_url to receipt_irl
+        warranty_end_date: device.warranty_end_date || '',
+        warranty_months: device.warranty_months?.toString() || '',
+        created_at: device.created_at,
+        // Add more fields that might be available
+        purchase_price: device.purchase_price?.toString() || '',
+        store_name: device.supplier || '', // Map supplier to store_name
+        serial_number: device.identifiers || '', // Map identifiers to serial_number
+        notes: device.notes || '',
+      };
+      
+      console.log('DeviceCard: Navigation params:', editParams);
+      console.log('DeviceCard: serial_number param:', editParams.serial_number);
+      
       router.push({
         pathname: '/edit-item',
-        params: {
-          id: device.id,
-          name: device.name,
-          brand: device.brand || '',
-          category: device.category || '',
-          photo_irl: device.photo_irl || '',
-          receipt_irl: device.receipt_irl || '',
-          warranty_end_date: device.warranty_end_date || '',
-          warranty_months: device.warranty_months?.toString() || '',
-          created_at: device.created_at,
-          // Add more fields that might be available
-          purchase_price: device.purchase_price?.toString() || '',
-          store_name: device.store_name || '',
-          serial_number: device.serial_number || '',
-          notes: device.notes || '',
-        }
+        params: editParams
       });
     }
   };

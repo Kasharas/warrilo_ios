@@ -1,5 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
 import { theme } from '../styles/theme';
 
 // Define interface for real device data from local storage
@@ -9,19 +10,26 @@ interface Device {
   brand?: string;
   category?: string;
   photo_irl?: string | null; // Device photo URL from local storage
+  receipt_irl?: string | null; // Receipt photo URL from local storage
   created_at: string;
   warranty_end_date?: string; // Add warranty end date
   warranty_months?: number; // Add warranty months
+  purchase_price?: number; // Purchase price
+  store_name?: string; // Store name
+  serial_number?: string; // Serial number
+  notes?: string; // Notes
 }
 
 interface DeviceCardProps {
   device: Device;
   onPress: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
   compact?: boolean;
 }
 
-export function DeviceCard({ device, onPress, onDelete, compact = false }: DeviceCardProps) {
+export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false }: DeviceCardProps) {
+  const router = useRouter();
   console.log('DeviceCard rendered with onDelete:', !!onDelete);
   
   // Helper function to check if image URL is valid
@@ -50,6 +58,34 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
 
   // State for image loading errors
   const [imageLoadError, setImageLoadError] = useState(false);
+
+  // Handle edit button press
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit();
+    } else {
+      // Default navigation to edit-item screen with device data
+      router.push({
+        pathname: '/edit-item',
+        params: {
+          id: device.id,
+          name: device.name,
+          brand: device.brand || '',
+          category: device.category || '',
+          photo_irl: device.photo_irl || '',
+          receipt_irl: device.receipt_irl || '',
+          warranty_end_date: device.warranty_end_date || '',
+          warranty_months: device.warranty_months?.toString() || '',
+          created_at: device.created_at,
+          // Add more fields that might be available
+          purchase_price: device.purchase_price?.toString() || '',
+          store_name: device.store_name || '',
+          serial_number: device.serial_number || '',
+          notes: device.notes || '',
+        }
+      });
+    }
+  };
 
   // Reset image error when image URL changes
   React.useEffect(() => {
@@ -143,7 +179,7 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
         <View style={styles.compactActionButtonsContainer}>
           {/* Edit Button */}
           <View style={styles.editButtonContainer}>
-            <Pressable style={styles.editButton}>
+            <Pressable style={styles.editButton} onPress={handleEdit}>
               <Text style={styles.editButtonText}>Edit</Text>
             </Pressable>
           </View>
@@ -209,7 +245,7 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
       <View style={styles.actionButtonsContainer}>
         {/* Edit Button */}
         <View style={styles.editButtonContainer}>
-          <Pressable style={styles.editButton}>
+          <Pressable style={styles.editButton} onPress={handleEdit}>
             <Text style={styles.editButtonText}>Edit</Text>
           </Pressable>
         </View>

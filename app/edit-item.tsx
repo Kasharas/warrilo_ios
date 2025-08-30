@@ -4,7 +4,7 @@ import { ArrowLeft, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 
 import { theme } from '@/src/styles/theme';
 import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
@@ -13,8 +13,9 @@ import { useDeviceUpload } from '@/src/hooks/useDeviceUpload';
 import { AddDeviceFormData, DeviceFileData } from '@/src/types/device';
 
 
-export default function AddDeviceScreen() {
+export default function EditItemScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { user } = useAuth();
   const { addDevice, isStoring } = useDeviceSync();
   const { isUploading, uploadDevice } = useDeviceUpload(user?.id || '');
@@ -72,6 +73,48 @@ export default function AddDeviceScreen() {
   // Track if user has manually scrolled or selected a date (to prevent auto-alignment)
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const [hasUserSelectedDate, setHasUserSelectedDate] = useState(false);
+
+  // Populate form with existing item data when editing
+  useEffect(() => {
+    if (params.id) {
+      setDeviceName(params.name as string || '');
+      setBrand(params.brand as string || '');
+      setCategory(params.category as string || '');
+      setWarrantyExpiryDate(params.warranty_end_date as string || '');
+      if (params.warranty_months) {
+        setWarrantyDuration(params.warranty_months as string);
+      }
+      if (params.photo_irl) {
+        setDeviceImage(params.photo_irl as string);
+      }
+      if (params.receipt_irl) {
+        setReceiptImage(params.receipt_irl as string);
+      }
+      // Set additional fields
+      if (params.purchase_price) {
+        setPurchasePrice(params.purchase_price as string);
+      }
+      if (params.store_name) {
+        setStoreName(params.store_name as string);
+      }
+      if (params.serial_number) {
+        setSerialNumber(params.serial_number as string);
+      }
+      if (params.notes) {
+        setNotes(params.notes as string);
+      }
+      // Set selected category for dropdown
+      setSelectedCategory(params.category as string || '');
+      setTempSelectedCategory(params.category as string || '');
+      
+      // Parse and set warranty expiry date
+      if (params.warranty_end_date) {
+        const date = new Date(params.warranty_end_date);
+        setSelectedDate(date);
+        setTempDate(date);
+      }
+    }
+  }, [params]);
 
   const handleBackPress = () => {
     console.log('Back button pressed - function called');
@@ -137,7 +180,8 @@ export default function AddDeviceScreen() {
       return;
     }
 
-    if (!receiptImage) {
+    // For editing, allow existing receipt or new receipt
+    if (!receiptImage && !params.receipt_irl) {
       console.log('Validation failed: Receipt image is not selected');
       Alert.alert('Error', 'Receipt is required');
       return;
@@ -154,11 +198,11 @@ export default function AddDeviceScreen() {
         purchaseDate: selectedDate,
         warrantyMonths: warrantyDuration,
         purchasePrice: purchasePrice.trim(),
-        receipt: { uri: receiptImage, type: 'library' as const },
+        receipt: { uri: receiptImage || params.receipt_irl || '', type: 'library' as const },
         serialNumber: serialNumber.trim(),
         storeName: storeName.trim(),
         category: selectedCategory || '', // Add category field
-        devicePhoto: { uri: deviceImage, type: 'library' as const },
+        devicePhoto: { uri: deviceImage || params.photo_irl || '', type: 'library' as const },
       };
 
       console.log('Submitting form data:', formData);
@@ -166,7 +210,7 @@ export default function AddDeviceScreen() {
       // Use the sync system to add device
       const result = await addDevice(formData);
       
-      console.log('Add device result:', result);
+      console.log('Edit item result:', result);
       
       if (result.success) {
         console.log('Device stored locally with ID:', result.localId);
@@ -240,12 +284,12 @@ export default function AddDeviceScreen() {
       setCompressionStatus('');
       
       // Handle specific error types
-      let errorMessage = 'Failed to add item. Please try again.';
+              let errorMessage = 'Failed to update item. Please try again.';
       if (error instanceof Error) {
         if (error.message.includes('quota')) {
           errorMessage = 'Storage is full. Please try again or contact support.';
         } else if (error.message.includes('Failed to store device locally')) {
-          errorMessage = 'Unable to save item locally. Please try again.';
+                      errorMessage = 'Unable to update item locally. Please try again.';
         }
       }
       
@@ -255,7 +299,7 @@ export default function AddDeviceScreen() {
 
   // New upload handler using the upload service with immediate local storage
   const handleSaveDevice = async () => {
-    console.log('=== ADD DEVICE BUTTON PRESSED ===');
+    console.log('=== EDIT ITEM BUTTON PRESSED ===');
     console.log('User ID:', user?.id);
     
     if (!user?.id) {
@@ -280,7 +324,8 @@ export default function AddDeviceScreen() {
       return;
     }
     
-    if (!receiptImage) {
+    // For editing, allow existing receipt or new receipt
+    if (!receiptImage && !params.receipt_irl) {
       Alert.alert('Error', 'Receipt is required');
       return;
     }
@@ -300,9 +345,9 @@ export default function AddDeviceScreen() {
         warranty_end_date: new Date(selectedDate.getTime() + (parseInt(warrantyDuration) * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
         location: null,
-        photo_irl: deviceImage || null,
+        photo_irl: deviceImage || params.photo_irl || null,
         notes: notes || null,
-        invoice_url: receiptImage || null,
+        invoice_url: receiptImage || params.receipt_irl || null,
         identifiers: serialNumber.trim() || null,
         created_at: new Date().toISOString(),
         sync_status: 'pending' as const,
@@ -348,10 +393,18 @@ export default function AddDeviceScreen() {
           uri: deviceImage,
           name: 'device-photo.jpg',
           type: 'image/jpeg'
-      } : undefined,
-        receiptPhoto: receiptImage ? {
+        } : params.photo_irl ? {
+          uri: params.photo_irl as string,
+          name: 'existing-device-photo.jpg',
+          type: 'image/jpeg'
+        } : undefined,
+                receiptPhoto: receiptImage ? {
           uri: receiptImage,
           name: 'receipt-photo.jpg',
+          type: 'image/jpeg'
+        } : params.receipt_irl ? {
+          uri: params.receipt_irl as string,
+          name: 'existing-receipt.jpg',
           type: 'image/jpeg'
         } : undefined,
         additionalPhotos: undefined,
@@ -479,7 +532,7 @@ export default function AddDeviceScreen() {
                  >
                    <ArrowLeft size={20} color={theme.colors.neutral[600]} />
                  </Pressable>
-        <Text style={styles.headerTitle}>Add Item</Text>
+        <Text style={styles.headerTitle}>Edit Item</Text>
         <View style={styles.headerActions} />
       </View>
 
@@ -744,7 +797,7 @@ export default function AddDeviceScreen() {
           {(isSubmitting || isUploading) ? (
             <ActivityIndicator color={theme.colors.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Add Item</Text>
+            <Text style={styles.submitButtonText}>Update Item</Text>
           )}
         </Pressable>
 

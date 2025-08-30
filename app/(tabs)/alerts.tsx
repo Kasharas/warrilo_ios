@@ -27,27 +27,31 @@ export default function AlertsScreen() {
 
   const filters = [
     { label: 'All', count: alerts.length },
-    { label: 'Warranty Expiring', count: alerts.filter(a => a.type === 'warranty_expiring').length },
-    { label: 'Maintenance Due', count: alerts.filter(a => a.type === 'maintenance_due').length },
-    { label: 'Recall Notice', count: alerts.filter(a => a.type === 'recall_notice').length },
-    { label: 'Other', count: alerts.filter(a => a.type === 'other').length },
+    { label: 'Expired warranty', count: alerts.filter(a => a.type === 'expired_warranty').length },
+    { label: 'Expire soon', count: alerts.filter(a => a.type === 'expire_soon').length },
   ];
 
   const filteredAlerts = alerts.filter(alert => {
     const matchesSearch = alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          alert.message.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = selectedFilter === 'All' || alert.type === selectedFilter.toLowerCase().replace(' ', '_');
+    
+    let matchesFilter = true;
+    if (selectedFilter === 'Expired warranty') {
+      matchesFilter = alert.type === 'expired_warranty';
+    } else if (selectedFilter === 'Expire soon') {
+      matchesFilter = alert.type === 'expire_soon';
+    }
+    // 'All' filter matches everything
+    
     return matchesSearch && matchesFilter;
   });
 
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case 'warranty_expiring':
-        return <Clock size={20} color={theme.colors.warning[500]} />;
-      case 'maintenance_due':
+      case 'expired_warranty':
         return <AlertTriangle size={20} color={theme.colors.error[500]} />;
-      case 'recall_notice':
-        return <AlertTriangle size={20} color={theme.colors.error[600]} />;
+      case 'expire_soon':
+        return <Clock size={20} color={theme.colors.warning[500]} />;
       default:
         return <Bell size={20} color={theme.colors.neutral[500]} />;
     }
@@ -55,12 +59,10 @@ export default function AlertsScreen() {
 
   const getAlertColor = (type: string) => {
     switch (type) {
-      case 'warranty_expiring':
+      case 'expired_warranty':
+        return theme.colors.error[100];
+      case 'expire_soon':
         return theme.colors.warning[100];
-      case 'maintenance_due':
-        return theme.colors.error[100];
-      case 'recall_notice':
-        return theme.colors.error[100];
       default:
         return theme.colors.neutral[100];
     }

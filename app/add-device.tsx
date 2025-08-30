@@ -699,9 +699,25 @@ export default function AddDeviceScreen() {
            </View>
 
                      <View style={styles.warrantyExpiryInfo}>
-                           <Text style={styles.warrantyExpiryLabel}>
-                             Active {warrantyExpiryDate || 'Select purchase date and duration'}
-                           </Text>
+                           {warrantyExpiryDate ? (
+                             <View style={styles.warrantyStatusRow}>
+                               <View style={[
+                                 styles.warrantyBadge,
+                                 { backgroundColor: new Date(warrantyExpiryDate) < new Date() ? iosColors.systemRed : '#10b981' }
+                               ]}>
+                                 <Text style={styles.warrantyBadgeText}>
+                                   {new Date(warrantyExpiryDate) < new Date() ? 'Expired' : 'Active'}
+                                 </Text>
+                               </View>
+                               <Text style={styles.warrantyDateText}>
+                                 {warrantyExpiryDate}
+                               </Text>
+                             </View>
+                           ) : (
+                             <Text style={styles.warrantyPlaceholderText}>
+                               Select purchase date and duration
+                             </Text>
+                           )}
            </View>
         </View>
 
@@ -1244,6 +1260,36 @@ const styles = StyleSheet.create({
       fontSize: iosFonts.body,
       fontWeight: iosFonts.medium,
       color: iosColors.systemGreen,
+    },
+            warrantyExpiredText: {
+      color: iosColors.systemRed,
+    },
+     warrantyStatusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: iosSpacing.md,
+    },
+     warrantyBadge: {
+      paddingHorizontal: iosSpacing.sm,
+      paddingVertical: iosSpacing.xs,
+      borderRadius: iosRadius.sm,
+      minWidth: 60,
+      alignItems: 'center',
+    },
+     warrantyBadgeText: {
+      fontSize: iosFonts.footnote,
+      fontWeight: iosFonts.semibold,
+      color: iosColors.systemBackground,
+    },
+     warrantyDateText: {
+      fontSize: iosFonts.body,
+      fontWeight: iosFonts.medium,
+      color: iosColors.label,
+    },
+     warrantyPlaceholderText: {
+      fontSize: iosFonts.body,
+      fontWeight: iosFonts.medium,
+      color: iosColors.placeholderText,
     },
      backButton: {
      flexDirection: 'row',

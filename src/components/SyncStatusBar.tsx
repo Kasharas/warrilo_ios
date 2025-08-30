@@ -52,7 +52,7 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
   };
 
   const getStatusIcon = () => {
-    if (isSyncing) return <RefreshCw size={16} color={theme.colors.primary[600]} />;
+    if (isSyncing) return <RefreshCw size={16} color="#007AFF" />;
     if (failed > 0) return <AlertCircle size={16} color={theme.colors.error[500]} />;
     if (pending > 0) return <Clock size={16} color={theme.colors.warning[500]} />;
     return <CheckCircle size={16} color={theme.colors.success[500]} />;
@@ -129,7 +129,7 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
         
         {isSyncing && (
           <View style={styles.detailRow}>
-            <RefreshCw size={16} color={theme.colors.primary[600]} />
+            <RefreshCw size={16} color="#007AFF" />
             <Text style={styles.detailText}>Synchronizing with database...</Text>
           </View>
         )}
@@ -226,8 +226,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
   },
   primaryButton: {
-    backgroundColor: theme.colors.primary[600],
-    borderColor: theme.colors.primary[600],
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
   },
   secondaryButton: {
     backgroundColor: theme.colors.white,

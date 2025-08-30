@@ -563,7 +563,7 @@ export default function EditItemScreen() {
         {/* Compression Status */}
         {compressionStatus && (
           <View style={styles.compressionStatus}>
-            <ActivityIndicator size="small" color={theme.colors.primary[600]} />
+            <ActivityIndicator size="small" color="#007AFF" />
             <Text style={styles.compressionStatusText}>{compressionStatus}</Text>
           </View>
         )}
@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
   saveButton: {
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.primary[600],
+            color: '#007AFF',
   },
   scrollView: {
     flex: 1,
@@ -1123,8 +1123,8 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.neutral[200],
   },
   categoryChipActive: {
-    backgroundColor: theme.colors.primary[600],
-    borderColor: theme.colors.primary[600],
+            backgroundColor: '#007AFF',
+        borderColor: '#007AFF',
   },
   categoryChipText: {
     fontSize: theme.fontSize.sm,

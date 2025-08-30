@@ -101,7 +101,7 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Total Value Protected</Text>
-            <Text style={[styles.overviewValue, { color: iosColors.systemBlue }]}>$4,250</Text>
+            <Text style={[styles.overviewValue, { color: '#007AFF' }]}>$4,250</Text>
           </View>
         </View>
         
@@ -127,7 +127,7 @@ export default function ProfileScreen() {
             </View>
           </View>
           <Pressable style={styles.inviteButton}>
-            <Users size={16} color={iosColors.systemBlue} />
+            <Users size={16} color="#007AFF" />
             <Text style={styles.inviteButtonText}>Invite Family Member</Text>
           </Pressable>
         </View>
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 100,
     height: 100,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#007AFF',
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
@@ -277,10 +277,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#2563eb',
+    borderColor: '#007AFF',
   },
   editProfileText: {
-    color: '#2563eb',
+    color: '#007AFF',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -366,14 +366,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: '#2563eb',
+    borderColor: '#007AFF',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 24,
     gap: 8,
   },
   inviteButtonText: {
-    color: '#2563eb',
+    color: '#007AFF',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#007AFF',
     width: '45%',
   },
   modalButtonText: {

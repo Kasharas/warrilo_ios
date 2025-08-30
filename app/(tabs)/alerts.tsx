@@ -70,7 +70,7 @@ export default function AlertsScreen() {
   if (loading && alerts.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary[600]} />
+        <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Loading alerts...</Text>
       </View>
     );
@@ -191,8 +191,8 @@ export default function AlertsScreen() {
             <RefreshControl
               refreshing={loading}
               onRefresh={handleRefresh}
-              colors={[theme.colors.primary[600]]}
-              tintColor={theme.colors.primary[600]}
+              colors={['#007AFF']}
+              tintColor={'#007AFF'}
             />
           }
         />
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   alertAction: {
-    backgroundColor: theme.colors.primary[600],
+            backgroundColor: '#007AFF',
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.md,

@@ -66,7 +66,7 @@ export default function AuthCallback() {
       alignItems: 'center', 
       backgroundColor: theme.colors.white 
     }}>
-      <ActivityIndicator size="large" color={theme.colors.primary[600]} />
+              <ActivityIndicator size="large" color="#007AFF" />
       <Text style={{ 
         marginTop: 16, 
         color: theme.colors.neutral[600],

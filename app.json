@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#2563eb"
+        "backgroundColor": "#007AFF"
       },
       "package": "com.warrilo.mobile"
     },

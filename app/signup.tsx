@@ -75,7 +75,7 @@ export default function SignupScreen() {
         {/* Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logo}>
-            <Shield size={40} color={theme.colors.primary[600]} />
+            <Shield size={40} color="#007AFF" />
           </View>
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Sign up to get started</Text>
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   primaryButton: {
-    backgroundColor: theme.colors.primary[600],
+    backgroundColor: '#007AFF',
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.lg,
     alignItems: 'center',
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   signInLink: {
     fontSize: theme.fontSize.base,
-    color: theme.colors.primary[600],
+            color: '#007AFF',
     fontWeight: theme.fontWeight.medium,
   },
 });

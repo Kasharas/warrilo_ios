@@ -34,7 +34,7 @@ export default function WelcomeScreen() {
           style={styles.logoContainer}
         >
           <View style={styles.logo}>
-            <Shield size={60} color={theme.colors.primary[600]} />
+            <Shield size={60} color="#007AFF" />
           </View>
         </Animated.View>
 
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   primaryButton: {
-    backgroundColor: theme.colors.primary[600],
+    backgroundColor: '#007AFF',
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.lg,
     alignItems: 'center',

@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
   },
   primaryButton: {
-    backgroundColor: theme.colors.primary[600],
+    backgroundColor: '#007AFF',
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.lg,
     alignItems: 'center',

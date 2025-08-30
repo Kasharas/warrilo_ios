@@ -24,7 +24,7 @@ export default function TabLayout() {
           shadowRadius: 16,
           elevation: 5,
         },
-        tabBarActiveTintColor: '#2563eb',
+        tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#6b7280',
         tabBarShowLabel: false,
       }}>
@@ -36,12 +36,12 @@ export default function TabLayout() {
           <View style={{
             width: 56,
             height: 56,
-            backgroundColor: focused ? '#2563eb' : '#ffffff',
+            backgroundColor: focused ? '#007AFF' : '#ffffff',
             borderRadius: 14,
             justifyContent: 'center',
             alignItems: 'center',
             marginTop: 20,
-            shadowColor: focused ? '#2563eb' : '#000000',
+            shadowColor: focused ? '#007AFF' : '#000000',
             shadowOffset: { width: 0, height: focused ? 4 : 2 },
             shadowOpacity: focused ? 0.4 : 0.15,
             shadowRadius: focused ? 12 : 8,
@@ -65,18 +65,18 @@ export default function TabLayout() {
             <View style={{
               width: 56,
               height: 56,
-              backgroundColor: focused ? '#2563eb' : '#ffffff',
+              backgroundColor: focused ? '#007AFF' : '#ffffff',
               borderRadius: 14,
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 20,
-              shadowColor: focused ? '#2563eb' : '#000000',
+              shadowColor: focused ? '#007AFF' : '#000000',
               shadowOffset: { width: 0, height: focused ? 4 : 2 },
               shadowOpacity: focused ? 0.4 : 0.15,
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#1d4ed8' : '#e5e7eb',
+              borderColor: focused ? '#0056CC' : '#e5e7eb',
             }}>
               <Shield 
                 size={40} 
@@ -94,18 +94,18 @@ export default function TabLayout() {
             <View style={{
               width: 56,
               height: 56,
-              backgroundColor: focused ? '#2563eb' : '#ffffff',
+              backgroundColor: focused ? '#007AFF' : '#ffffff',
               borderRadius: 14,
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 20,
-              shadowColor: focused ? '#2563eb' : '#000000',
+              shadowColor: focused ? '#007AFF' : '#000000',
               shadowOffset: { width: 0, height: focused ? 4 : 2 },
               shadowOpacity: focused ? 0.4 : 0.15,
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#1d4ed8' : '#e5e7eb',
+              borderColor: focused ? '#0056CC' : '#e5e7eb',
             }}>
               <Bell 
                 size={40} 
@@ -123,18 +123,18 @@ export default function TabLayout() {
             <View style={{
               width: 56,
               height: 56,
-              backgroundColor: focused ? '#2563eb' : '#ffffff',
+              backgroundColor: focused ? '#007AFF' : '#ffffff',
               borderRadius: 14,
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 20,
-              shadowColor: focused ? '#2563eb' : '#000000',
+              shadowColor: focused ? '#007AFF' : '#000000',
               shadowOffset: { width: 0, height: focused ? 4 : 2 },
               shadowOpacity: focused ? 0.4 : 0.15,
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#1d4ed8' : '#e5e7eb',
+              borderColor: focused ? '#0056CC' : '#e5e7eb',
             }}>
               <User 
                 size={40} 

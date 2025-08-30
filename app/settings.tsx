@@ -96,7 +96,7 @@ export default function SettingsScreen() {
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <User size={20} color={theme.colors.primary[600]} />
+                <User size={20} color="#007AFF" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Email</Text>
@@ -135,8 +135,8 @@ export default function SettingsScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
-              trackColor={{ false: theme.colors.neutral[300], true: theme.colors.primary[400] }}
-              thumbColor={notificationsEnabled ? theme.colors.primary[600] : theme.colors.neutral[400]}
+                      trackColor={{ false: theme.colors.neutral[300], true: '#60a5fa' }}
+        thumbColor={notificationsEnabled ? '#007AFF' : theme.colors.neutral[400]}
             />
           </View>
 
@@ -153,8 +153,8 @@ export default function SettingsScreen() {
             <Switch
               value={emailReminders}
               onValueChange={setEmailReminders}
-              trackColor={{ false: theme.colors.neutral[300], true: theme.colors.primary[400] }}
-              thumbColor={emailReminders ? theme.colors.primary[600] : theme.colors.neutral[400]}
+                      trackColor={{ false: theme.colors.neutral[300], true: '#60a5fa' }}
+        thumbColor={emailReminders ? '#007AFF' : theme.colors.neutral[400]}
             />
           </View>
         </View>
@@ -176,8 +176,8 @@ export default function SettingsScreen() {
             <Switch
               value={darkMode}
               onValueChange={setDarkMode}
-              trackColor={{ false: theme.colors.neutral[300], true: theme.colors.primary[400] }}
-              thumbColor={darkMode ? theme.colors.primary[600] : theme.colors.neutral[400]}
+                      trackColor={{ false: theme.colors.neutral[300], true: '#60a5fa' }}
+        thumbColor={darkMode ? '#007AFF' : theme.colors.neutral[400]}
             />
           </View>
 
@@ -194,8 +194,8 @@ export default function SettingsScreen() {
             <Switch
               value={autoSync}
               onValueChange={setAutoSync}
-              trackColor={{ false: theme.colors.neutral[300], true: theme.colors.primary[400] }}
-              thumbColor={autoSync ? theme.colors.primary[600] : theme.colors.neutral[400]}
+                      trackColor={{ false: theme.colors.neutral[300], true: '#60a5fa' }}
+        thumbColor={autoSync ? '#007AFF' : theme.colors.neutral[400]}
             />
           </View>
         </View>
@@ -207,7 +207,7 @@ export default function SettingsScreen() {
           <Pressable style={styles.settingRow} onPress={handleExportData}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <CreditCard size={20} color={theme.colors.primary[600]} />
+                <CreditCard size={20} color="#007AFF" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Export Data</Text>
@@ -285,7 +285,7 @@ export default function SettingsScreen() {
           <Pressable style={styles.settingRow} onPress={handleSupport}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <Mail size={20} color={theme.colors.primary[600]} />
+                <Mail size={20} color="#007AFF" />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Contact Support</Text>

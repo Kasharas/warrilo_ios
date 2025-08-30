@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: theme.colors.primary[600],
+    backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
     ...theme.shadows.lg,

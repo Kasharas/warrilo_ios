@@ -125,7 +125,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
   const getCategoryColor = (category?: string) => {
     switch (category?.toLowerCase()) {
       case 'electronics':
-        return theme.colors.primary[500];
+        return '#007AFF'; // iOS system blue
       case 'automotive':
         return theme.colors.warning[500];
       case 'clothing':
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   
   editButton: {
-    backgroundColor: theme.colors.primary?.[500] || '#3b82f6', // Blue color
+    backgroundColor: '#007AFF', // iOS system blue
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     minWidth: 80,
     height: 40,
     borderWidth: 2,
-    borderColor: theme.colors.primary?.[600] || '#2563eb', // Darker blue border
+    borderColor: '#0056CC', // Darker iOS blue for border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,

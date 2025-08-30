@@ -85,7 +85,7 @@ export default function LoginScreen() {
         {/* Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logo}>
-            <Shield size={40} color={theme.colors.primary[600]} />
+            <Shield size={40} color="#007AFF" />
           </View>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
@@ -119,9 +119,9 @@ export default function LoginScreen() {
               onPress={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
-                <EyeOff size={20} color={theme.colors.primary[600]} />
+                <EyeOff size={20} color="#007AFF" />
               ) : (
-                <Eye size={20} color={theme.colors.primary[600]} />
+                                  <Eye size={20} color="#007AFF" />
               )}
             </Pressable>
           </View>
@@ -155,7 +155,7 @@ export default function LoginScreen() {
           >
             {googleLoading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color={theme.colors.primary[600]} />
+                <ActivityIndicator size="small" color="#007AFF" />
                 <Text style={[styles.secondaryButtonText, styles.loadingText]}>
                   Connecting to Google...
                 </Text>
@@ -256,10 +256,10 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: theme.fontSize.sm,
-    color: theme.colors.primary[600],
+    color: '#007AFF',
   },
   primaryButton: {
-    backgroundColor: theme.colors.primary[600],
+    backgroundColor: '#007AFF',
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.lg,
     alignItems: 'center',
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing['3xl'],
   },
   secondaryButton: {
-    borderColor: theme.colors.primary[600],
+    borderColor: '#007AFF',
     borderWidth: 2,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.md,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.primary[600],
+    color: '#007AFF',
   },
   signUpContainer: {
     flexDirection: 'row',
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   signUpLink: {
     fontSize: theme.fontSize.base,
-    color: theme.colors.primary[600],
+    color: '#007AFF',
     fontWeight: theme.fontWeight.medium,
   },
   secondaryButtonDisabled: {

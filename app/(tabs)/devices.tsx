@@ -162,7 +162,7 @@ export default function DeviceListScreen() {
   if (loading && devices.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-                 <ActivityIndicator size="large" color={iosColors.systemBlue} />
+                 <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Loading devices...</Text>
       </View>
     );
@@ -277,8 +277,8 @@ export default function DeviceListScreen() {
                <RefreshControl
                  refreshing={loading}
                  onRefresh={handleRefresh}
-                 colors={[iosColors.systemBlue]}
-                 tintColor={iosColors.systemBlue}
+                               colors={['#007AFF']}
+              tintColor={'#007AFF'}
                />
              }
         />
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   searchContainerFocused: {
     borderWidth: 2,
-    borderColor: iosColors.systemBlue,
+            borderColor: '#007AFF',
   },
   searchIcon: {
     marginLeft: 10,

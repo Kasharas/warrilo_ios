@@ -177,8 +177,8 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={loading}
             onRefresh={handleRefresh}
-            colors={[iosColors.systemBlue]}
-            tintColor={iosColors.systemBlue}
+                          colors={['#007AFF']}
+              tintColor={'#007AFF'}
           />
         }
       >
@@ -328,7 +328,7 @@ export default function DashboardScreen() {
                       </View>
                     ) : (
                       <View style={styles.deviceIconContainer}>
-                        <IconComponent size={24} color={iosColors.systemBlue} />
+                        <IconComponent size={24} color="#007AFF" />
                       </View>
                     )}
                     
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     fontSize: iosFonts.footnote,
-    color: iosColors.systemBlue,
+            color: '#007AFF',
     fontWeight: iosFonts.medium,
     fontFamily: iosFonts.system,
   },

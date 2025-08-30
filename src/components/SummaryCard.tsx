@@ -12,7 +12,7 @@ interface SummaryCardProps {
 export function SummaryCard({ title, value, subtitle }: SummaryCardProps) {
   return (
     <LinearGradient
-      colors={[theme.colors.primary[600], theme.colors.secondary[500]]}
+              colors={['#007AFF', theme.colors.secondary[500]]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}

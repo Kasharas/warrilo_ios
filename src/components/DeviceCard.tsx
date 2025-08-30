@@ -124,8 +124,8 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
 
   if (compact) {
     return (
-      <Pressable style={styles.compactCard} onPress={onPress}>
-        <View style={styles.compactCardContent}>
+      <View style={styles.compactCard}>
+        <Pressable style={styles.compactCardContent} onPress={onPress}>
           <View style={styles.compactCardLeft}>
             <Text style={styles.compactDeviceName} numberOfLines={1}>
               {device.name}
@@ -137,8 +137,27 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
           <View style={styles.compactCardRight}>
             {/* Compact view - no additional info needed */}
           </View>
+        </Pressable>
+        
+        {/* Action Buttons for Compact View */}
+        <View style={styles.compactActionButtonsContainer}>
+          {/* Edit Button */}
+          <View style={styles.editButtonContainer}>
+            <Pressable style={styles.editButton}>
+              <Text style={styles.editButtonText}>Edit</Text>
+            </Pressable>
+          </View>
+          
+          {/* Delete Button */}
+          {onDelete && (
+            <View style={styles.deleteButtonContainer}>
+              <Pressable style={styles.deleteButton} onPress={onDelete}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
-      </Pressable>
+      </View>
     );
   }
 
@@ -186,14 +205,24 @@ export function DeviceCard({ device, onPress, onDelete, compact = false }: Devic
         </View>
       </Pressable>
 
-      {/* Delete Button - Bottom Right Corner */}
-      {onDelete && (
-        <View style={styles.deleteButtonContainer}>
-          <Pressable style={styles.deleteButton} onPress={onDelete}>
-            <Text style={styles.deleteButtonText}>Delete</Text>
+      {/* Action Buttons - Bottom Right Corner */}
+      <View style={styles.actionButtonsContainer}>
+        {/* Edit Button */}
+        <View style={styles.editButtonContainer}>
+          <Pressable style={styles.editButton}>
+            <Text style={styles.editButtonText}>Edit</Text>
           </Pressable>
         </View>
-      )}
+        
+        {/* Delete Button */}
+        {onDelete && (
+          <View style={styles.deleteButtonContainer}>
+            <Pressable style={styles.deleteButton} onPress={onDelete}>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </Pressable>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -222,6 +251,11 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   deviceImage: {
     width: '100%',
@@ -235,6 +269,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.neutral?.[200] || '#e5e7eb',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   placeholderText: {
     fontSize: 48,
@@ -248,6 +287,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.sm,
     borderRadius: theme.borderRadius.sm,
     zIndex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   warrantyBadgeText: {
     color: theme.colors.white,
@@ -269,10 +313,44 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
 
-  deleteButtonContainer: {
+  actionButtonsContainer: {
     position: 'absolute',
     bottom: theme.spacing.sm,
     right: theme.spacing.sm,
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+  },
+  
+  editButtonContainer: {
+    // Container for edit button positioning
+  },
+  
+  editButton: {
+    backgroundColor: theme.colors.primary?.[500] || '#3b82f6', // Blue color
+    borderRadius: theme.borderRadius.md,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 80,
+    height: 40,
+    borderWidth: 2,
+    borderColor: theme.colors.primary?.[600] || '#2563eb', // Darker blue border
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  
+  editButtonText: {
+    color: theme.colors.white,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+  },
+
+  deleteButtonContainer: {
+    // Container for delete button positioning
   },
 
   deleteButton: {
@@ -286,17 +364,11 @@ const styles = StyleSheet.create({
     height: 40,
     borderWidth: 2,
     borderColor: theme.colors.error?.[600] || '#dc2626', // Fallback to hex color
-    ...Platform.select({
-      ios: {
-        shadowColor: theme.colors.error?.[500] || '#ef4444',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   deleteButtonText: {
     color: theme.colors.white,
@@ -313,6 +385,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.neutral?.[200] || '#e5e7eb',
     ...theme.shadows?.sm,
+    position: 'relative', // For absolute positioning of action buttons
   },
   compactCardContent: {
     flexDirection: 'row',
@@ -325,6 +398,14 @@ const styles = StyleSheet.create({
   },
   compactCardRight: {
     alignItems: 'flex-end',
+  },
+  
+  compactActionButtonsContainer: {
+    position: 'absolute',
+    bottom: theme.spacing.sm,
+    right: theme.spacing.sm,
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
   },
   compactDeviceName: {
     fontSize: theme.fontSize.sm,

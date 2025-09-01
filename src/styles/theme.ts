@@ -1,5 +1,11 @@
+import { platformColors, platformFonts, platformSpacing, platformRadius, platformShadows } from './platformStyles';
+
 export const theme = {
   colors: {
+    // Platform-adaptive colors
+    ...platformColors,
+    
+    // Legacy color system (for backward compatibility)
     primary: {
       50: '#eff6ff',
       100: '#dbeafe',
@@ -76,7 +82,10 @@ export const theme = {
     white: '#ffffff',
     black: '#000000',
   },
+  // Platform-adaptive spacing system
   spacing: {
+    ...platformSpacing,
+    // Legacy spacing (for backward compatibility)
     xs: 4,
     sm: 8,
     md: 12,
@@ -89,7 +98,11 @@ export const theme = {
     '6xl': 56,
     '7xl': 64,
   },
+  
+  // Platform-adaptive border radius system
   borderRadius: {
+    ...platformRadius,
+    // Legacy radius (for backward compatibility)
     xs: 4,
     sm: 8,
     md: 12,
@@ -98,7 +111,11 @@ export const theme = {
     '2xl': 24,
     full: 9999,
   },
+  
+  // Platform-adaptive font system
   fontSize: {
+    ...platformFonts,
+    // Legacy font sizes (for backward compatibility)
     xs: 12,
     sm: 14,
     base: 16,
@@ -110,35 +127,18 @@ export const theme = {
     '5xl': 36,
     '6xl': 48,
   },
+  
   fontWeight: {
+    ...platformFonts,
+    // Legacy font weights (for backward compatibility)
     normal: '400',
     medium: '500',
     semibold: '600',
     bold: '700',
   },
-  shadows: {
-    sm: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 3,
-    },
-    md: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 16,
-      elevation: 5,
-    },
-    lg: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.25,
-      shadowRadius: 24,
-      elevation: 8,
-    },
-  },
+  
+  // Platform-adaptive shadow system
+  shadows: platformShadows,
 };
 
 export type Theme = typeof theme;

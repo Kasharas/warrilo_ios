@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal, Platform, Alert } from 'react-native';
 import { LogOut, Users } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
-import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -97,7 +96,7 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Active Warranties</Text>
-            <Text style={[styles.overviewValue, { color: iosColors.systemGreen }]}>7 active</Text>
+            <Text style={[styles.overviewValue, { color: theme.colors.systemGreen }]}>7 active</Text>
           </View>
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Total Value Protected</Text>
@@ -142,7 +141,7 @@ export default function ProfileScreen() {
             onPress={handleSignOut} 
             disabled={isSigningOut}
           >
-            <LogOut size={20} color={iosColors.systemRed} />
+            <LogOut size={20} color={theme.colors.systemRed} />
             <Text style={styles.signOutText}>
               {isSigningOut ? 'Signing Out...' : 'Sign Out'}
             </Text>
@@ -191,32 +190,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: iosSpacing.xxxl,
-    marginTop: iosSpacing.lg,
+    marginBottom: theme.spacing.xxxl,
+    marginTop: theme.spacing.lg,
   },
   headerTitle: {
-    fontSize: iosFonts.largeTitle,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
-    fontFamily: iosFonts.system,
+    fontSize: theme.fontSize.largeTitle,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.label,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: iosSpacing.md,
+    gap: theme.spacing.md,
   },
   menuButton: {
     width: 32,
     height: 32,
-    backgroundColor: iosColors.systemBlue,
-    borderRadius: iosRadius.md,
+    backgroundColor: theme.colors.systemBlue,
+    borderRadius: theme.borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
     width: 20,
     height: 2,
-    backgroundColor: iosColors.systemBackground,
+    backgroundColor: theme.colors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
   },

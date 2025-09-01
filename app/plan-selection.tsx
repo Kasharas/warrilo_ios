@@ -63,7 +63,7 @@ export default function PlanSelectionScreen() {
         {/* Logo and Title */}
         <View style={styles.titleSection}>
           <View style={styles.logo}>
-            <Shield size={40} color="#007AFF" />
+            <Shield size={40} color={theme.colors.systemBlue} />
           </View>
           <Text style={styles.title}>Select Your Plan</Text>
           <Text style={styles.subtitle}>Choose the plan that works best for you</Text>
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral[600],
   },
   billingLabelActive: {
-    color: '#007AFF',
+    color: theme.colors.systemBlue,
   },
   toggle: {
     width: 44,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   toggleActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
   },
   toggleKnob: {
     width: 20,
@@ -292,14 +292,14 @@ const styles = StyleSheet.create({
   },
   planCardRecommended: {
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: theme.colors.systemBlue,
   },
   recommendedBadge: {
     position: 'absolute',
     top: -12,
     left: '50%',
     transform: [{ translateX: -50 }],
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
     borderRadius: theme.borderRadius.md,
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.xs,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: theme.fontSize['2xl'],
     fontWeight: theme.fontWeight.bold,
-    color: '#007AFF',
+    color: theme.colors.systemBlue,
   },
   pricePeriod: {
     fontSize: theme.fontSize.sm,
@@ -343,12 +343,12 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: theme.colors.systemBlue,
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioButtonSelected: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
   },
   radioButtonInner: {
     width: 8,
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral[700],
   },
   upgradeButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.lg,
     alignItems: 'center',

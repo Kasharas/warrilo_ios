@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, TextInput, RefreshControl } from 'react-native';
 import { Search, Bell, Filter, AlertTriangle, CheckCircle, Clock } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
-import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -72,7 +72,7 @@ export default function AlertsScreen() {
   if (loading && alerts.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={theme.colors.systemBlue} />
         <Text style={styles.loadingText}>Loading alerts...</Text>
       </View>
     );
@@ -193,8 +193,8 @@ export default function AlertsScreen() {
             <RefreshControl
               refreshing={loading}
               onRefresh={handleRefresh}
-              colors={['#007AFF']}
-              tintColor={'#007AFF'}
+                      colors={[theme.colors.systemBlue]}
+        tintColor={theme.colors.systemBlue}
             />
           }
         />
@@ -214,19 +214,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: iosSpacing.xxxl,
-    marginTop: iosSpacing.lg,
+    marginBottom: theme.spacing.xxxl,
+    marginTop: theme.spacing.lg,
   },
   headerTitle: {
-    fontSize: iosFonts.largeTitle,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
-    fontFamily: iosFonts.system,
+    fontSize: theme.fontSize.largeTitle,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.label,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: iosSpacing.md,
+    gap: theme.spacing.md,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -241,7 +240,7 @@ const styles = StyleSheet.create({
   },
   searchContainerFocused: {
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: theme.colors.neutral[900],
   },
   searchIcon: {
     marginLeft: 10,
@@ -280,8 +279,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   filterChipActive: {
-    backgroundColor: '#007AFF',
-    shadowColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
+    shadowColor: theme.colors.systemBlue,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -289,7 +288,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 13,
-    color: '#8E8E93',
+    color: theme.colors.neutral[500],
     fontWeight: '500',
   },
   filterChipTextActive: {
@@ -365,7 +364,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   alertAction: {
-            backgroundColor: '#007AFF',
+            backgroundColor: theme.colors.systemBlue,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.md,
@@ -379,15 +378,15 @@ const styles = StyleSheet.create({
   menuButton: {
     width: 32,
     height: 32,
-    borderRadius: iosRadius.md,
-    backgroundColor: iosColors.systemBlue,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.systemBlue,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
     width: 20,
     height: 2,
-    backgroundColor: iosColors.systemBackground,
+    backgroundColor: theme.colors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
   },

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, TextInput, Modal, RefreshControl } from 'react-native';
 import { Plus, Search, Filter, Shield } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
-import { iosColors, iosFonts, iosSpacing, iosRadius } from '@/src/styles/iosDesignSystem';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -162,7 +162,7 @@ export default function DeviceListScreen() {
   if (loading && devices.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-                 <ActivityIndicator size="large" color="#007AFF" />
+                 <ActivityIndicator size="large" color={theme.colors.systemBlue} />
         <Text style={styles.loadingText}>Loading devices...</Text>
       </View>
     );
@@ -200,13 +200,13 @@ export default function DeviceListScreen() {
         styles.searchContainer,
         isSearchFocused && styles.searchContainerFocused
       ]}>
-                 <Search size={20} color={iosColors.systemGray} style={styles.searchIcon} />
+                 <Search size={20} color={theme.colors.neutral[500]} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search items..."
           value={searchQuery}
           onChangeText={setSearchQuery}
-                     placeholderTextColor={iosColors.placeholderText}
+                     placeholderTextColor={theme.colors.neutral[500]}
           onFocus={() => setIsSearchFocused(true)}
           onBlur={() => setIsSearchFocused(false)}
         />
@@ -277,8 +277,8 @@ export default function DeviceListScreen() {
                <RefreshControl
                  refreshing={loading}
                  onRefresh={handleRefresh}
-                               colors={['#007AFF']}
-              tintColor={'#007AFF'}
+                               colors={[theme.colors.systemBlue]}
+              tintColor={theme.colors.systemBlue}
                />
              }
         />
@@ -312,7 +312,7 @@ export default function DeviceListScreen() {
                 onPress={cancelDelete}
                 disabled={deleting}
               >
-                                 <Text style={[styles.modalButtonText, { color: iosColors.label }]}>No, Keep It</Text>
+                                 <Text style={[styles.modalButtonText, { color: theme.colors.label }]}>No, Keep It</Text>
               </Pressable>
               <Pressable 
                 style={[
@@ -325,7 +325,7 @@ export default function DeviceListScreen() {
               >
                 {deleting ? (
                   <View style={styles.loadingButtonContent}>
-                                         <ActivityIndicator size="small" color={iosColors.systemBackground} />
+                                         <ActivityIndicator size="small" color={theme.colors.systemBackground} />
                     <Text style={[styles.modalButtonText, { marginLeft: 8 }]}>Deleting...</Text>
                   </View>
                 ) : (
@@ -351,48 +351,46 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: iosSpacing.xxxl,
-    marginTop: iosSpacing.lg,
+    marginBottom: theme.spacing.xxxl,
+    marginTop: theme.spacing.lg,
   },
   headerTitle: {
-    fontSize: iosFonts.largeTitle,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
-    fontFamily: iosFonts.system,
+    fontSize: theme.fontSize.largeTitle,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.label,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: iosSpacing.md,
+    gap: theme.spacing.md,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: iosColors.systemBackground,
-    borderRadius: iosRadius.lg,
-    marginBottom: iosSpacing.md,
+    backgroundColor: theme.colors.systemBackground,
+    borderRadius: theme.borderRadius.lg,
+    marginBottom: theme.spacing.md,
     // No horizontal margins - let it fill the full container width
     borderWidth: 1,
-    borderColor: iosColors.systemGray5,
+    borderColor: theme.colors.neutral[200],
     ...theme.shadows.sm,
   },
   searchContainerFocused: {
     borderWidth: 2,
-            borderColor: '#007AFF',
+            borderColor: theme.colors.systemBlue,
   },
   searchIcon: {
     marginLeft: 10,
   },
   searchInput: {
     flex: 1,
-    fontSize: iosFonts.body,
-    color: iosColors.label,
-    paddingHorizontal: iosSpacing.lg,
-    paddingVertical: iosSpacing.md,
+    fontSize: theme.fontSize.base,
+    color: theme.colors.label,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
     borderWidth: 0,
     borderColor: 'transparent',
     outlineStyle: 'none',
-    fontFamily: iosFonts.system,
   },
   filtersContainer: {
     marginBottom: theme.spacing.lg,
@@ -418,8 +416,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   filterChipActive: {
-    backgroundColor: '#007AFF',
-    shadowColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
+    shadowColor: theme.colors.systemBlue,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -427,7 +425,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 13,
-    color: '#8E8E93',
+    color: theme.colors.neutral[500],
     fontWeight: '500',
   },
   filterChipTextActive: {
@@ -451,26 +449,23 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing['2xl'],
   },
   loadingText: {
-    fontSize: iosFonts.body,
-    color: iosColors.secondaryLabel,
-    fontFamily: iosFonts.system,
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[600],
   },
   emptyContainer: {
     alignItems: 'center',
     paddingVertical: theme.spacing['2xl'],
   },
   emptyText: {
-    fontSize: iosFonts.title3,
-    fontWeight: iosFonts.semibold,
-    color: iosColors.label,
-    marginBottom: iosSpacing.sm,
-    fontFamily: iosFonts.system,
+    fontSize: theme.fontSize.xl,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.label,
+    marginBottom: theme.spacing.sm,
   },
   emptySubtext: {
-    fontSize: iosFonts.subhead,
-    color: iosColors.secondaryLabel,
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.neutral[600],
     textAlign: 'center',
-    fontFamily: iosFonts.system,
   },
   deviceCardWrapper: {
     marginBottom: 5, // Set to exactly 5px for very tight spacing
@@ -491,26 +486,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: iosColors.systemBackground,
-    borderRadius: iosRadius.xl,
-    padding: iosSpacing.lg,
+    backgroundColor: theme.colors.systemBackground,
+    borderRadius: theme.borderRadius.xl,
+    padding: theme.spacing.lg,
     width: '80%',
     alignItems: 'center',
     ...theme.shadows.md,
   },
   modalTitle: {
-    fontSize: iosFonts.title3,
-    fontWeight: iosFonts.bold,
-    color: iosColors.label,
-    marginBottom: iosSpacing.md,
-    fontFamily: iosFonts.system,
+    fontSize: theme.fontSize.xl,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.label,
+    marginBottom: theme.spacing.md,
   },
   modalMessage: {
-    fontSize: iosFonts.body,
-    color: iosColors.secondaryLabel,
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[600],
     textAlign: 'center',
-    marginBottom: iosSpacing.lg,
-    fontFamily: iosFonts.system,
+    marginBottom: theme.spacing.lg,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -519,27 +512,26 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     flex: 1,
-    paddingVertical: iosSpacing.md,
-    paddingHorizontal: iosSpacing.lg,
-    borderRadius: iosRadius.md,
-    marginHorizontal: iosSpacing.sm,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    marginHorizontal: theme.spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalButtonText: {
-    fontSize: iosFonts.body,
-    fontWeight: iosFonts.semibold,
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.semibold,
     textAlign: 'center',
-    fontFamily: iosFonts.system,
   },
   modalButtonCancel: {
-    backgroundColor: iosColors.systemGray5,
+    backgroundColor: theme.colors.neutral[200],
   },
   modalButtonConfirm: {
-    backgroundColor: iosColors.systemRed,
+    backgroundColor: theme.colors.systemRed,
   },
   modalButtonDisabled: {
-    backgroundColor: iosColors.systemGray3,
+    backgroundColor: theme.colors.neutral[400],
     opacity: 0.6,
   },
   loadingButtonContent: {
@@ -550,15 +542,15 @@ const styles = StyleSheet.create({
   menuButton: {
     width: 32,
     height: 32,
-    borderRadius: iosRadius.md,
-    backgroundColor: iosColors.systemBlue,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.systemBlue,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuLine: {
     width: 20,
     height: 2,
-    backgroundColor: iosColors.systemBackground,
+    backgroundColor: theme.colors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
   },

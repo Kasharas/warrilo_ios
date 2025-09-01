@@ -5,18 +5,59 @@ import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-
-// TEMPORARY: Import test component for Phase 1 validation
-import ImageCompressionTest from '@/src/components/ImageCompressionTest';
+import { useDeviceSync } from '@/src/hooks/useDeviceSync';
+import { LocalDevice } from '@/src/lib/localStorage';
 
 // WARRANTY ALERT SYSTEM TEMPORARILY DISABLED TO FIX IMPORT.META ERROR
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { getLocalDevices } = useDeviceSync();
   
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [devices, setDevices] = useState<LocalDevice[]>([]);
+  const [totalValue, setTotalValue] = useState(0);
+  const [activeWarranties, setActiveWarranties] = useState(0);
+
+  // Load device data for live statistics
+  useEffect(() => {
+    if (user) {
+      loadDeviceData();
+    }
+  }, [user]);
+
+  const loadDeviceData = async () => {
+    try {
+      const localDevices = await getLocalDevices();
+      setDevices(localDevices);
+      
+      // Calculate total value from devices with valid purchase prices
+      const devicesWithValidPrices = localDevices.filter(device => 
+        device.purchase_price && typeof device.purchase_price === 'number' && device.purchase_price > 0
+      );
+      
+      const totalPurchaseValue = devicesWithValidPrices.reduce((total, device) => {
+        return total + (device.purchase_price || 0);
+      }, 0);
+      
+      setTotalValue(totalPurchaseValue);
+      
+      // Calculate active warranties (devices with warranty end date in the future)
+      const now = new Date();
+      const activeWarrantyCount = localDevices.filter(device => {
+        if (!device.warranty_end_date) return false;
+        const warrantyEnd = new Date(device.warranty_end_date);
+        return warrantyEnd > now;
+      }).length;
+      
+      setActiveWarranties(activeWarrantyCount);
+      
+    } catch (error) {
+      console.error('Error loading device data for profile:', error);
+    }
+  };
 
   const handleSignOut = () => {
     console.log('🔘 Profile: Sign out button clicked');
@@ -51,6 +92,16 @@ export default function ProfileScreen() {
     setShowSignOutModal(false);
   };
 
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -83,9 +134,6 @@ export default function ProfileScreen() {
             </View>
             <Text style={styles.planPrice}>€1.99/month</Text>
           </View>
-          <Pressable style={styles.editProfileButton}>
-            <Text style={styles.editProfileText}>Edit Profile</Text>
-          </Pressable>
         </View>
         
         {/* Account Overview Card */}
@@ -97,15 +145,15 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Total Devices</Text>
-            <Text style={styles.overviewValue}>12 devices</Text>
+            <Text style={styles.overviewValue}>{devices.length} devices</Text>
           </View>
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Active Warranties</Text>
-            <Text style={[styles.overviewValue, { color: theme.colors.systemGreen }]}>7 active</Text>
+            <Text style={[styles.overviewValue, { color: theme.colors.systemGreen }]}>{activeWarranties} active</Text>
           </View>
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Total Value Protected</Text>
-            <Text style={[styles.overviewValue, { color: '#007AFF' }]}>$4,250</Text>
+            <Text style={[styles.overviewValue, { color: '#007AFF' }]}>{formatCurrency(totalValue)}</Text>
           </View>
         </View>
         
@@ -157,14 +205,6 @@ export default function ProfileScreen() {
         <View style={styles.versionContainer}>
           <Text style={styles.versionText}>Warrilo v1.0.0</Text>
         </View>
-        
-        {/* TEMPORARY: Image Compression Test Component */}
-        {__DEV__ && (
-          <View style={styles.testSection}>
-            <Text style={styles.testTitle}>Image Compression Test (Phase 1)</Text>
-            <ImageCompressionTest />
-          </View>
-        )}
       </ScrollView>
 
       {/* Native iOS-style confirmation modal */}
@@ -281,19 +321,6 @@ const styles = StyleSheet.create({
   planPrice: {
     color: '#6b7280',
     fontSize: 14,
-  },
-  editProfileButton: {
-    backgroundColor: '#f9fafb',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#007AFF',
-  },
-  editProfileText: {
-    color: '#007AFF',
-    fontSize: 14,
-    fontWeight: '500',
   },
   overviewCard: {
     backgroundColor: 'white',
@@ -417,18 +444,6 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 14,
     color: '#6b7280',
-  },
-  testSection: {
-    marginTop: 20,
-    marginBottom: 20,
-    paddingHorizontal: 0,
-  },
-  testTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 15,
-    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,

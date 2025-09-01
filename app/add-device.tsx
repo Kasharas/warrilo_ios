@@ -725,7 +725,15 @@ export default function AddDeviceScreen() {
             <Text style={styles.proBadge}>PRO</Text>
                          <Switch
                value={autoReceiptExtraction}
-               onValueChange={setAutoReceiptExtraction}
+               onValueChange={(value) => {
+                 if (value) {
+                   // If turning on auto receipt extraction, navigate to plan selection
+                   router.push('/plan-selection');
+                 } else {
+                   // If turning off, just update the state
+                   setAutoReceiptExtraction(value);
+                 }
+               }}
                trackColor={{ false: theme.colors.neutral[200], true: theme.colors.neutral[200] }}
                thumbColor={autoReceiptExtraction ? theme.colors.systemGreen : theme.colors.systemRed}
                ios_backgroundColor={theme.colors.neutral[200]}

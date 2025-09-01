@@ -92,6 +92,11 @@ export default function PlanSelectionScreen() {
 
         {/* Pro Plan */}
         <View style={[styles.planCard, styles.planCardRecommended]}>
+          {/* COMING SOON Banner - Overlay on top */}
+          <View style={styles.comingSoonBanner}>
+            <Text style={styles.comingSoonText}>COMING SOON</Text>
+          </View>
+          
           <View style={styles.recommendedBadge}>
             <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
           </View>
@@ -408,5 +413,28 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.neutral[600],
+  },
+  comingSoonBanner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: theme.colors.warning[500],
+    paddingVertical: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.xl,
+    borderRadius: theme.borderRadius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 80,
+    transform: [{ rotate: '0deg' }],
+    zIndex: 1,
+    ...theme.shadows.lg,
+  },
+  comingSoonText: {
+    fontSize: theme.fontSize.xl,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.white,
+    textAlign: 'center',
+    letterSpacing: 1,
   },
 });

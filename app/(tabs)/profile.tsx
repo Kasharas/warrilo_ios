@@ -129,10 +129,10 @@ export default function ProfileScreen() {
           <Text style={styles.userName}>{user?.user_metadata?.full_name || user?.email || 'User'}</Text>
           <Text style={styles.userEmail}>{user?.email}</Text>
           <View style={styles.planContainer}>
-            <View style={styles.planBadge}>
-              <Text style={styles.planText}>PRO PLAN</Text>
+            <View style={[styles.planBadge, { backgroundColor: theme.colors.systemRed }]}>
+              <Text style={styles.planText}>FREE PLAN</Text>
             </View>
-            <Text style={styles.planPrice}>€1.99/month</Text>
+            <Text style={styles.planPrice}>€0/month</Text>
           </View>
         </View>
         
@@ -160,25 +160,7 @@ export default function ProfileScreen() {
         {/* Family Sharing Card */}
         <View style={styles.familyCard}>
           <Text style={styles.cardTitle}>Family Sharing</Text>
-          <View style={styles.familyMember}>
-            <View style={styles.familyAvatar}>
-              <Text style={styles.familyAvatarText}>SM</Text>
-            </View>
-            <View style={styles.familyInfo}>
-              <Text style={styles.familyName}>Sarah Miller</Text>
-              <Text style={styles.familyEmail}>sarah.m@email.com</Text>
-            </View>
-          </View>
-          <View style={styles.familyMember}>
-            <View style={styles.familyAvatar}>
-              <Text style={styles.familyAvatarText}>MD</Text>
-            </View>
-            <View style={styles.familyInfo}>
-              <Text style={styles.familyName}>Mike Doe</Text>
-              <Text style={styles.familyEmail}>mike.d@email.com</Text>
-            </View>
-          </View>
-          <Pressable style={styles.inviteButton}>
+          <Pressable style={styles.inviteButton} onPress={() => router.push('/plan-selection')}>
             <Users size={16} color="#007AFF" />
             <Text style={styles.inviteButtonText}>Invite Family Member</Text>
           </Pressable>

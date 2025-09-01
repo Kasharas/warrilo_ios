@@ -13,8 +13,6 @@ export interface WarrantyAlert {
   user_id: string;
   reminder_date: string; // ISO date string
   warranty_expire_date: string; // ISO date string
-  alert_type: '30_days' | '7_days' | '1_day';
-  created_at: string;
 }
 
 // Safe date parsing for mobile platforms
@@ -63,18 +61,8 @@ export const createWarrantyAlerts = (params: CreateAlertParams): Omit<WarrantyAl
       device_id: deviceId,
       user_id: userId,
       reminder_date: format(reminderDate, 'yyyy-MM-dd'),
-      warranty_expire_date: warrantyExpireDateString,
-      alert_type: type,
-      created_at: now
+      warranty_expire_date: warrantyExpireDateString
     };
-  }).filter(alert => {
-    // Only create alerts for future dates
-    const alertDate = parseDate(alert.reminder_date);
-    const isFuture = alertDate > new Date();
-    if (!isFuture) {
-      console.log(`Skipping past alert: ${alert.alert_type} for ${alert.reminder_date}`);
-    }
-    return isFuture;
   });
   
   console.log(`Created ${alerts.length} warranty alerts for device ${deviceId} (expires: ${warrantyExpireDateString})`);

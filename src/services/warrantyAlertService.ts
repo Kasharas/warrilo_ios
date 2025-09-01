@@ -1,9 +1,9 @@
-import { supabase } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
+import { SUPABASE_CONFIG } from '../../lib/config';
 
-// CRITICAL: REMOVE the problematic NetInfo import completely
-// DELETE THIS LINE if it exists:
-// import NetInfo from '@react-native-community/netinfo';
+// ✅ CREATE FRESH SUPABASE CLIENT to avoid corruption
+const warrantySupabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
 
 export interface SupabaseWarrantyAlert {
   id?: string;
@@ -13,18 +13,13 @@ export interface SupabaseWarrantyAlert {
   warranty_expire_date: string;
 }
 
-// Web-safe network check - NO NetInfo import
+// Web-safe network check
 const checkConnectivity = async (): Promise<boolean> => {
   if (Platform.OS === 'web') {
-    // Web: Use browser API
     return navigator?.onLine ?? true;
   }
   
-  // Mobile: Conditional require (not import)
   try {
-    if (Platform.OS === 'web') {
-      return navigator?.onLine ?? true;
-    }
     const NetInfo = require('@react-native-community/netinfo');
     const netInfo = await NetInfo.fetch();
     return netInfo.isConnected ?? true;
@@ -34,7 +29,6 @@ const checkConnectivity = async (): Promise<boolean> => {
   }
 };
 
-// Rest of service code stays the same...
 export const warrantyAlertService = {
   async fetchUserAlerts(userId: string): Promise<SupabaseWarrantyAlert[]> {
     const isConnected = await checkConnectivity();
@@ -43,9 +37,9 @@ export const warrantyAlertService = {
     }
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await warrantySupabase
         .from('warranty_reminders')
-        .select('id, device_id, user_id, reminder_date, warranty_expire_date')
+        .select('id, device_id, user_id, reminder_date, warranty_expire_date, created_at')
         .eq('user_id', userId)
         .order('reminder_date', { ascending: true });
       
@@ -64,18 +58,65 @@ export const warrantyAlertService = {
       return [];
     }
     
-    if (alerts.length === 0) return [];
+    if (alerts.length === 0) {
+      console.log('No alerts to create');
+      return [];
+    }
     
     try {
-      const { data, error } = await supabase
-        .from('warranty_reminders')
-        .insert(alerts)
-        .select('id, device_id, user_id, reminder_date, warranty_expire_date');
+      console.log('🔧 Attempting to create warranty alerts in Supabase...');
+      console.log('📊 Alert data to insert:', JSON.stringify(alerts, null, 2));
       
-      if (error) throw error;
-      return data || [];
+      // ✅ VALIDATE DATA BEFORE INSERT
+      const validAlerts = alerts.filter(alert => {
+        const isValid = alert.device_id && alert.user_id && alert.reminder_date && 
+                       alert.warranty_expire_date;
+        if (!isValid) {
+          console.warn('⚠️ Invalid alert data:', alert);
+        }
+        return isValid;
+      });
+      
+      if (validAlerts.length === 0) {
+        console.warn('⚠️ No valid alerts to insert');
+        return [];
+      }
+      
+      console.log(`📝 Inserting ${validAlerts.length} valid alerts...`);
+      
+      // ✅ SIMPLIFIED INSERT - NO .select() to avoid URL corruption
+      const { data, error } = await warrantySupabase
+        .from('warranty_reminders')
+        .insert(validAlerts);
+      
+      if (error) {
+        console.error('❌ Supabase insert error:', error);
+        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+        throw error;
+      }
+      
+      console.log('✅ Successfully created warranty alerts in Supabase');
+      console.log('📊 Created alerts count:', data?.length || 0);
+      
+      // Return the alerts with generated IDs
+      return validAlerts.map((alert, index) => ({
+        ...alert,
+        id: data?.[index]?.id || `temp_${Date.now()}_${index}`
+      }));
+      
     } catch (error) {
-      console.error('Error creating warranty alerts:', error);
+      console.error('❌ Error creating warranty alerts:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error message:', error instanceof Error ? error.message : 'Unknown error');
+      
+      // ✅ ADDITIONAL DEBUGGING
+      if (error && typeof error === 'object' && 'code' in error) {
+        console.error('❌ Error code:', (error as any).code);
+      }
+      if (error && typeof error === 'object' && 'details' in error) {
+        console.error('❌ Error details:', (error as any).details);
+      }
+      
       throw error;
     }
   },
@@ -88,7 +129,7 @@ export const warrantyAlertService = {
     }
     
     try {
-      const { error } = await supabase
+      const { error } = await warrantySupabase
         .from('warranty_reminders')
         .delete()
         .eq('device_id', deviceId);

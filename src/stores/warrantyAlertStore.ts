@@ -8,7 +8,7 @@ interface WarrantyAlert {
   user_id: string;
   reminder_date: string;
   warranty_expire_date: string;
-  alert_type: '30_days' | '7_days' | '1_day';
+
   created_at: string;
 }
 

@@ -28,23 +28,12 @@ export const useWarrantyAlertSync = () => {
       
       // Convert Supabase alerts to local format
       const localAlerts = supabaseAlerts.map(alert => {
-        // Determine alert type based on days difference
-        const reminderDate = new Date(alert.reminder_date);
-        const expiryDate = new Date(alert.warranty_expire_date);
-        const daysDiff = Math.ceil((expiryDate.getTime() - reminderDate.getTime()) / (1000 * 60 * 60 * 24));
-        
-        let alertType: '30_days' | '7_days' | '1_day' = '30_days';
-        if (daysDiff <= 1) alertType = '1_day';
-        else if (daysDiff <= 7) alertType = '7_days';
-        else alertType = '30_days';
-        
         return {
           id: alert.id || `synced_${Date.now()}_${Math.random()}`,
           device_id: alert.device_id,
           user_id: alert.user_id,
           reminder_date: alert.reminder_date,
           warranty_expire_date: alert.warranty_expire_date,
-          alert_type: alertType,
           created_at: new Date().toISOString()
         };
       });

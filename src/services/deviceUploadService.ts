@@ -3,6 +3,8 @@ import { AddDeviceFormData, DeviceFileData, DeviceUploadResult } from '../types/
 import { uploadDevicePhoto } from '../utils/uploadDevicePhoto'
 import { uploadReceiptPhoto } from '../utils/uploadReceiptPhoto'
 import { prepareDeviceData } from '../utils/prepareDeviceData'
+import { createWarrantyAlerts } from '../utils/warrantyAlertUtils'
+import { warrantyAlertService } from './warrantyAlertService'
 
 export const uploadDevice = async (
   formData: AddDeviceFormData,
@@ -83,6 +85,46 @@ export const uploadDevice = async (
       return { 
         success: false, 
         error: insertError.message 
+      }
+    }
+
+    // ✅ STEP 1 COMPLETE: Create warranty alerts after successful device insertion
+    try {
+      console.log('🎯 Creating warranty alerts for device:', device.id);
+      console.log('🔍 Form data for warranty alerts:', {
+        deviceId: device.id,
+        userId: userId,
+        purchaseDate: formData.purchaseDate,
+        warrantyMonths: formData.warrantyMonths
+      });
+      
+      // Create 3 warranty alerts (30, 7, 1 day before expiry)
+      const warrantyAlerts = createWarrantyAlerts({
+        deviceId: device.id,
+        userId: userId,
+        purchaseDate: formData.purchaseDate || '',
+        warrantyMonths: formData.warrantyMonths || 0
+      });
+      
+      console.log('📅 Warranty alerts created locally:', warrantyAlerts);
+      
+      if (warrantyAlerts.length > 0) {
+        console.log(`📅 Created ${warrantyAlerts.length} warranty alerts`);
+        
+        // Store alerts in Supabase warranty_reminders table
+        const createdAlerts = await warrantyAlertService.createAlerts(warrantyAlerts);
+        console.log(`✅ Successfully stored ${createdAlerts.length} warranty alerts in Supabase`);
+      } else {
+        console.log('⚠️ No warranty alerts created (invalid warranty info)');
+      }
+    } catch (alertError) {
+      // Don't fail the device upload if warranty alerts fail
+      console.error('❌ Error creating warranty alerts:', alertError);
+      console.log('⚠️ Device uploaded successfully, but warranty alerts failed');
+      
+      // ✅ ADDITIONAL DEBUGGING
+      if (alertError && typeof alertError === 'object') {
+        console.error('❌ Alert error details:', JSON.stringify(alertError, null, 2));
       }
     }
 

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Usage Check</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .storage-item { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .warning { color: #d32f2f; font-weight: bold; }
+        .success { color: #388e3c; font-weight: bold; }
+        .info { color: #1976d2; font-weight: bold; }
+        button { padding: 10px 20px; margin: 5px; background: #007AFF; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .clear-btn { background: #dc3545; }
+        .clear-btn:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Warrilo App Storage Analysis</h1>
+    
+    <div class="section">
+        <h2>📊 Storage Limits & Usage</h2>
+        <div id="storageInfo"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🗂️ Application Data</h2>
+        <div id="appData"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🧹 Storage Management</h2>
+        <button onclick="clearAllStorage()" class="clear-btn">Clear All Storage</button>
+        <button onclick="clearAppStorage()" class="clear-btn">Clear App Storage Only</button>
+        <button onclick="refreshData()">Refresh Data</button>
+    </div>
+    
+    <div class="section">
+        <h2>📝 Storage Test</h2>
+        <button onclick="testStorageCapacity()">Test Storage Capacity</button>
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        // Storage keys used by Warrilo app
+        const WARRILO_KEYS = [
+            'warrilo_devices',
+            'warrilo_pending_sync', 
+            'warrilo_sync_status',
+            'warranty-alerts-storage'
+        ];
+
+        // Check storage availability and usage
+        function checkStorage() {
+            const storageInfo = document.getElementById('storageInfo');
+            let html = '';
+
+            // Check localStorage support
+            if (typeof(Storage) !== "undefined") {
+                html += '<div class="storage-item success">✅ localStorage is supported</div>';
+                
+                // Check quota estimation (approximate)
+                try {
+                    const testKey = '__storage_test__';
+                    const testValue = 'x'.repeat(1024 * 1024); // 1MB test
+                    let testSize = 0;
+                    
+                    // Test how much we can store
+                    for (let i = 0; i < 10; i++) { // Try up to 10MB
+                        try {
+                            localStorage.setItem(testKey + i, testValue);
+                            testSize += 1;
+                        } catch (e) {
+                            break;
+                        }
+                    }
+                    
+                    // Clean up test data
+                    for (let i = 0; i < testSize; i++) {
+                        localStorage.removeItem(testKey + i);
+                    }
+                    
+                    const estimatedQuota = testSize * 1024; // Convert to KB
+                    html += `<div class="storage-item info">📏 Estimated localStorage quota: ~${estimatedQuota}KB (${(estimatedQuota/1024).toFixed(1)}MB)</div>`;
+                    
+                } catch (e) {
+                    html += '<div class="storage-item warning">⚠️ Could not estimate storage quota</div>';
+                }
+                
+            } else {
+                html += '<div class="storage-item warning">❌ localStorage is not supported</div>';
+            }
+
+            // Check sessionStorage
+            if (typeof(sessionStorage) !== "undefined") {
+                html += '<div class="storage-item success">✅ sessionStorage is supported</div>';
+            } else {
+                html += '<div class="storage-item warning">❌ sessionStorage is not supported</div>';
+            }
+
+            // Check IndexedDB
+            if ('indexedDB' in window) {
+                html += '<div class="storage-item success">✅ IndexedDB is supported</div>';
+            } else {
+                html += '<div class="storage-item warning">❌ IndexedDB is not supported</div>';
+            }
+
+            storageInfo.innerHTML = html;
+        }
+
+        // Check application data
+        function checkAppData() {
+            const appData = document.getElementById('appData');
+            let html = '<h3>Current Storage Usage:</h3>';
+            
+            let totalSize = 0;
+            let itemCount = 0;
+
+            // Check each Warrilo storage key
+            WARRILO_KEYS.forEach(key => {
+                try {
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        const size = new Blob([value]).size;
+                        const sizeKB = (size / 1024).toFixed(2);
+                        totalSize += size;
+                        itemCount++;
+                        
+                        html += `<div class="storage-item">
+                            <strong>${key}:</strong> ${sizeKB}KB
+                            <button onclick="removeItem('${key}')" style="float: right; padding: 5px 10px; font-size: 12px;">Remove</button>
+                        </div>`;
+                        
+                        // Show first 200 characters of content
+                        const preview = value.length > 200 ? value.substring(0, 200) + '...' : value;
+                        html += `<div style="margin-left: 20px; font-size: 12px; color: #666; font-family: monospace;">${preview}</div>`;
+                    } else {
+                        html += `<div class="storage-item" style="color: #999;">${key}: Not set</div>`;
+                    }
+                } catch (e) {
+                    html += `<div class="storage-item warning">${key}: Error reading - ${e.message}</div>`;
+                }
+            });
+
+            // Summary
+            const totalSizeKB = (totalSize / 1024).toFixed(2);
+            const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+            
+            html += `<div class="storage-item info">
+                <strong>Total App Storage:</strong> ${totalSizeKB}KB (${totalSizeMB}MB) across ${itemCount} items
+            </div>`;
+
+            appData.innerHTML = html;
+        }
+
+        // Remove specific storage item
+        function removeItem(key) {
+            try {
+                localStorage.removeItem(key);
+                alert(`Removed: ${key}`);
+                refreshData();
+            } catch (e) {
+                alert(`Error removing ${key}: ${e.message}`);
+            }
+        }
+
+        // Clear all storage
+        function clearAllStorage() {
+            if (confirm('Are you sure you want to clear ALL browser storage? This will log you out and remove all data.')) {
+                try {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    alert('All storage cleared!');
+                    refreshData();
+                } catch (e) {
+                    alert(`Error clearing storage: ${e.message}`);
+                }
+            }
+        }
+
+        // Clear only app storage
+        function clearAppStorage() {
+            if (confirm('Are you sure you want to clear only Warrilo app storage? This will remove all local device data.')) {
+                try {
+                    WARRILO_KEYS.forEach(key => {
+                        localStorage.removeItem(key);
+                    });
+                    alert('App storage cleared!');
+                    refreshData();
+                } catch (e) {
+                    alert(`Error clearing app storage: ${e.message}`);
+                }
+            }
+        }
+
+        // Test storage capacity
+        function testStorageCapacity() {
+            const testResults = document.getElementById('testResults');
+            testResults.innerHTML = '<div class="storage-item">Testing storage capacity...</div>';
+            
+            try {
+                const testKey = '__capacity_test__';
+                const testValue = 'x'.repeat(1024); // 1KB chunks
+                let totalStored = 0;
+                let chunks = 0;
+                
+                // Try to store data in 1KB chunks
+                while (true) {
+                    try {
+                        localStorage.setItem(testKey + chunks, testValue);
+                        totalStored += 1024;
+                        chunks++;
+                        
+                        // Update progress
+                        if (chunks % 100 === 0) {
+                            testResults.innerHTML = `<div class="storage-item">Testing... Stored ${(totalStored/1024).toFixed(1)}KB so far</div>`;
+                        }
+                    } catch (e) {
+                        break;
+                    }
+                }
+                
+                // Clean up test data
+                for (let i = 0; i < chunks; i++) {
+                    localStorage.removeItem(testKey + i);
+                }
+                
+                const totalKB = (totalStored / 1024).toFixed(1);
+                const totalMB = (totalStored / (1024 * 1024)).toFixed(1);
+                
+                testResults.innerHTML = `
+                    <div class="storage-item success">
+                        <strong>Storage Capacity Test Complete!</strong><br>
+                        Maximum storable: ${totalKB}KB (${totalMB}MB)<br>
+                        Test chunks: ${chunks} x 1KB
+                    </div>
+                `;
+                
+            } catch (e) {
+                testResults.innerHTML = `<div class="storage-item warning">Storage test failed: ${e.message}</div>`;
+            }
+        }
+
+        // Refresh all data
+        function refreshData() {
+            checkStorage();
+            checkAppData();
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            checkStorage();
+            checkAppData();
+        };
+    </script>
+</body>
+</html>

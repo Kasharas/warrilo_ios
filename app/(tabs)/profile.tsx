@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Modal, Platform, Alert } from 'react-native';
 import { LogOut, Users } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+
+// TEMPORARY: Import test component for Phase 1 validation
+import ImageCompressionTest from '@/src/components/ImageCompressionTest';
+
+// WARRANTY ALERT SYSTEM TEMPORARILY DISABLED TO FIX IMPORT.META ERROR
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -152,6 +157,14 @@ export default function ProfileScreen() {
         <View style={styles.versionContainer}>
           <Text style={styles.versionText}>Warrilo v1.0.0</Text>
         </View>
+        
+        {/* TEMPORARY: Image Compression Test Component */}
+        {__DEV__ && (
+          <View style={styles.testSection}>
+            <Text style={styles.testTitle}>Image Compression Test (Phase 1)</Text>
+            <ImageCompressionTest />
+          </View>
+        )}
       </ScrollView>
 
       {/* Native iOS-style confirmation modal */}
@@ -404,6 +417,18 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 14,
     color: '#6b7280',
+  },
+  testSection: {
+    marginTop: 20,
+    marginBottom: 20,
+    paddingHorizontal: 0,
+  },
+  testTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 15,
+    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,

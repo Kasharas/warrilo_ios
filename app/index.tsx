@@ -91,7 +91,7 @@ export default function Index() {
       alignItems: 'center', 
       backgroundColor: theme.colors.white 
     }}>
-              <ActivityIndicator size="large" color="#007AFF" />
+              <ActivityIndicator size="large" color={theme.colors.systemBlue} />
       <Text style={{ 
         marginTop: 16, 
         color: theme.colors.neutral[600],

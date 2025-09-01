@@ -1,4 +1,25 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Platform } from 'react-native';
+
+// Platform-specific storage
+const getStorage = () => {
+  if (Platform.OS === 'web') {
+    return localStorage;
+  }
+  // Mobile: dynamic require to avoid import.meta issues
+  try {
+    return require('@react-native-async-storage/async-storage');
+  } catch (error) {
+    console.warn('AsyncStorage not available, using memory fallback');
+    return {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {}
+    };
+  }
+};
+
+const AsyncStorage = getStorage();
 
 // Use the existing storage key from your current implementation
 const DEVICES_STORAGE_KEY = 'warrilo_devices'

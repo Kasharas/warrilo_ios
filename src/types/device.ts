@@ -1,10 +1,10 @@
 export interface AddDeviceFormData {
   // Device Information
   deviceName: string
-  brand: string
+  brand?: string
   modelNumber?: string
   serialNumber?: string
-  category: string
+  category?: string
   
   // Purchase Details
   purchaseDate: string // ISO date string

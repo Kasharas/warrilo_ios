@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase'
-import { compressDevicePhoto } from '../lib/imageCompression'
 
 interface PhotoUploadOptions {
   userId: string
@@ -24,16 +23,16 @@ export const uploadDevicePhoto = async ({
       }
     }
 
-    // Step 1: Compress the image
-    console.log('Compressing device photo...');
-    const compressedImageUri = await compressDevicePhoto(photo.uri);
-    console.log('Device photo compressed successfully');
+    // ✅ FIXED: Images are already compressed from the add/edit device screen
+    // No need to compress again - use the compressed URI directly
+    console.log('Using pre-compressed device photo for upload...');
+    const imageUriForUpload = photo.uri; // Already compressed from local storage
 
     // Generate unique filename (always JPEG after compression)
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
 
     // Convert compressed URI to blob for upload
-    const response = await fetch(compressedImageUri)
+    const response = await fetch(imageUriForUpload)
     const blob = await response.blob()
 
     // Check file size (10MB limit)

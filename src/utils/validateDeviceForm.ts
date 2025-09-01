@@ -6,6 +6,8 @@ export interface ValidationResult {
 }
 
 export const validateDeviceForm = (formData: AddDeviceFormData): ValidationResult => {
+  console.log('🔍 Validating form data:', formData);
+  
   const errors: Record<string, string> = {}
 
   // Required fields validation
@@ -15,16 +17,17 @@ export const validateDeviceForm = (formData: AddDeviceFormData): ValidationResul
     errors.deviceName = 'Device name must be less than 100 characters'
   }
 
-  if (!formData.brand?.trim()) {
-    errors.brand = 'Brand is required'
-  } else if (formData.brand.trim().length > 100) {
+  // Brand is optional but if provided, validate length
+  if (formData.brand && formData.brand.trim().length > 100) {
     errors.brand = 'Brand name must be less than 100 characters'
   }
 
-  if (!formData.category?.trim()) {
-    errors.category = 'Category is required'
+  // Category is optional but if provided, validate length
+  if (formData.category && formData.category.trim().length > 100) {
+    errors.category = 'Category must be less than 100 characters'
   }
 
+  // Store name is required
   if (!formData.store?.trim()) {
     errors.store = 'Store name is required'
   }
@@ -79,6 +82,8 @@ export const validateDeviceForm = (formData: AddDeviceFormData): ValidationResul
   if (formData.notes && formData.notes.length > 1000) {
     errors.notes = 'Notes must be less than 1000 characters'
   }
+
+  console.log('🔍 Validation result:', { isValid: Object.keys(errors).length === 0, errors });
 
   return {
     isValid: Object.keys(errors).length === 0,

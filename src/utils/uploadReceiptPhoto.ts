@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import { compressReceipt } from '../lib/imageCompression'
+// ✅ FIXED: Removed unused import since we're no longer compressing here
 
 interface ReceiptUploadOptions {
   userId: string
@@ -73,17 +73,17 @@ export const uploadReceiptPhoto = async ({
       }
     }
 
-    // Step 1: Compress image receipts
-    console.log('Compressing receipt image...');
-    const compressedImageUri = await compressReceipt(receipt.uri);
-    console.log('Receipt image compressed successfully');
+    // ✅ FIXED: Image receipts are already compressed from the add/edit device screen
+    // No need to compress again - use the compressed URI directly
+    console.log('Using pre-compressed receipt image for upload...');
+    const imageUriForUpload = receipt.uri; // Already compressed from local storage
 
     // Generate unique filename for compressed image
     const fileExtension = 'jpg' // Always JPEG after compression
     const fileName = `${userId}/${Date.now()}-invoice-${Math.random().toString(36).substring(7)}.${fileExtension}`
 
     // Convert compressed URI to blob for upload
-    const response = await fetch(compressedImageUri)
+    const response = await fetch(imageUriForUpload)
     const blob = await response.blob()
 
     // Check file size (25MB limit for receipts)

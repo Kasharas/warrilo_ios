@@ -354,11 +354,120 @@ export default function EditItemScreen() {
       return;
     }
     
-    console.log('Validation passed, storing device locally first...');
-    
-    try {
-      // Step 1: Store device locally immediately for instant UI update
-      const localDeviceData = {
+          console.log('Validation passed, starting image compression...');
+      
+      try {
+        // Step 1: Compress images BEFORE storing locally
+        let compressedDevicePhoto = null;
+        let compressedReceipt = null;
+        
+        // Import compression and validation functions
+        const { compressDevicePhoto, compressReceipt } = await import('@/src/lib/imageCompression');
+        const { validateImageUri, isObviouslyInvalidUri } = await import('@/src/utils/validateImageUri');
+        
+        // Validate and compress device photo if exists (new or existing)
+        if (deviceImage || params.photo_irl) {
+          const photoToCompress = deviceImage || params.photo_irl;
+          console.log('🔍 Validating device photo URI...');
+          setCompressionStatus('Validating device photo...');
+          
+          // Quick check for obviously invalid URIs
+          if (isObviouslyInvalidUri(photoToCompress)) {
+            console.error('❌ Device photo URI is obviously invalid:', photoToCompress);
+            setCompressionStatus('Device photo URI is invalid - please select a new image');
+            Alert.alert('Invalid Image', 'The selected device photo is invalid. Please select a new image.');
+            return;
+          }
+          
+          // Detailed validation
+          const validationResult = await validateImageUri(photoToCompress);
+          if (!validationResult.isValid) {
+            console.error('❌ Device photo validation failed:', validationResult.error);
+            setCompressionStatus('Device photo validation failed: ' + validationResult.error);
+            Alert.alert('Invalid Image', `Device photo validation failed: ${validationResult.error}`);
+            return;
+          }
+          
+          console.log('✅ Device photo URI validated:', {
+            mimeType: validationResult.mimeType,
+            size: validationResult.size ? `${(validationResult.size / 1024).toFixed(1)}KB` : 'unknown'
+          });
+          
+          console.log('🖼️ Compressing device photo...');
+          setCompressionStatus('Compressing device photo...');
+          
+          try {
+            const compressionResult = await compressDevicePhoto(photoToCompress);
+            if (compressionResult.success) {
+              compressedDevicePhoto = compressionResult.compressedUri;
+              console.log(`✅ Device photo compressed: ${compressionResult.originalSizeKB.toFixed(1)}KB → ${compressionResult.compressedSizeKB.toFixed(1)}KB (${compressionResult.compressionRatio.toFixed(1)}% reduction)`);
+              setCompressionStatus(`Device photo compressed: ${compressionResult.compressionRatio.toFixed(1)}% reduction`);
+            } else {
+              console.warn('⚠️ Device photo compression failed, using original:', compressionResult.error);
+              compressedDevicePhoto = photoToCompress; // Fallback to original
+              setCompressionStatus('Device photo compression failed, using original');
+            }
+          } catch (error) {
+            console.error('❌ Device photo compression error:', error);
+            compressedDevicePhoto = photoToCompress; // Fallback to original
+            setCompressionStatus('Device photo compression error, using original');
+          }
+        }
+        
+        // Validate and compress receipt if exists (new or existing)
+        if (receiptImage || params.receipt_irl) {
+          const receiptToCompress = receiptImage || params.receipt_irl;
+          console.log('🔍 Validating receipt URI...');
+          setCompressionStatus('Validating receipt...');
+          
+          // Quick check for obviously invalid URIs
+          if (isObviouslyInvalidUri(receiptToCompress)) {
+            console.error('❌ Receipt URI is obviously invalid:', receiptToCompress);
+            setCompressionStatus('Receipt URI is invalid - please select a new image');
+            Alert.alert('Invalid Image', 'The selected receipt is invalid. Please select a new image.');
+            return;
+          }
+          
+          // Detailed validation
+          const validationResult = await validateImageUri(receiptToCompress);
+          if (!validationResult.isValid) {
+            console.error('❌ Receipt validation failed:', validationResult.error);
+            setCompressionStatus('Receipt validation failed: ' + validationResult.error);
+            Alert.alert('Invalid Image', `Receipt validation failed: ${validationResult.error}`);
+            return;
+          }
+          
+          console.log('✅ Receipt URI validated:', {
+            mimeType: validationResult.mimeType,
+            size: validationResult.size ? `${(validationResult.size / 1024).toFixed(1)}KB` : 'unknown'
+          });
+          
+          console.log('🧾 Compressing receipt...');
+          setCompressionStatus('Compressing receipt...');
+          
+          try {
+            const compressionResult = await compressReceipt(receiptToCompress);
+            if (compressionResult.success) {
+              compressedReceipt = compressionResult.compressedUri;
+              console.log(`✅ Receipt compressed: ${compressionResult.originalSizeKB.toFixed(1)}KB → ${compressionResult.compressedSizeKB.toFixed(1)}KB (${compressionResult.compressionRatio.toFixed(1)}% reduction)`);
+              setCompressionStatus(`Receipt compressed: ${compressionResult.compressionRatio.toFixed(1)}% reduction`);
+            } else {
+              console.warn('⚠️ Receipt compression failed, using original:', compressionResult.error);
+              compressedReceipt = receiptImage; // Fallback to original
+              setCompressionStatus('Receipt compression failed, using original');
+            }
+          } catch (error) {
+            console.error('❌ Receipt compression error:', error);
+            compressedReceipt = receiptImage; // Fallback to original
+            setCompressionStatus('Receipt compression error, using original');
+          }
+        }
+        
+        console.log('✅ Image compression completed, storing device locally...');
+        setCompressionStatus('Storing device locally...');
+        
+        // Step 2: Store device locally with COMPRESSED images
+        const localDeviceData = {
         id: `temp_${Date.now()}`, // Temporary ID until Supabase sync
         user_id: user.id,
         name: deviceName.trim(),
@@ -369,31 +478,32 @@ export default function EditItemScreen() {
         warranty_end_date: new Date(selectedDate.getTime() + (parseInt(warrantyDuration) * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
         location: null,
-        photo_irl: deviceImage || params.photo_irl || null,
+        photo_irl: compressedDevicePhoto, // Store COMPRESSED image
         notes: notes || null,
-        invoice_url: receiptImage || params.receipt_irl || null,
+        invoice_url: compressedReceipt, // Store COMPRESSED receipt
         identifiers: serialNumber.trim() || null,
         created_at: new Date().toISOString(),
         sync_status: 'pending' as const,
         local_id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       };
       
-      console.log('Storing device locally:', localDeviceData);
+      console.log('Storing device locally with COMPRESSED images:', localDeviceData);
       
       // Import and use DeviceLocalStorage to store immediately
       const { DeviceLocalStorage } = await import('@/src/lib/localStorage');
       await DeviceLocalStorage.storeDevice(localDeviceData);
       
-      console.log('✅ Device stored locally successfully');
+      console.log('✅ Device stored locally successfully with compressed images');
+      setCompressionStatus('Device stored locally successfully!');
       
-      // Step 2: Navigate to dashboard with refresh parameter
+      // Step 3: Navigate to dashboard with refresh parameter
       console.log('Navigating to dashboard with refresh parameter...');
       router.push({
         pathname: '/',
         params: { refresh: 'true', timestamp: Date.now().toString() }
       });
       
-      // Step 3: Continue with background upload
+      // Step 4: Continue with background upload
       console.log('Starting background device upload process...');
       
       // Prepare form data for background upload
@@ -411,49 +521,53 @@ export default function EditItemScreen() {
       
       console.log('Form data prepared for background upload:', formData);
 
-      // Prepare file data for background upload
+      // Prepare file data for background upload (using COMPRESSED images for Supabase)
       const fileData: DeviceFileData = {
-        devicePhoto: deviceImage ? {
-          uri: deviceImage,
+        devicePhoto: compressedDevicePhoto ? {
+          uri: compressedDevicePhoto, // Use compressed image for Supabase upload
           name: 'device-photo.jpg',
           type: 'image/jpeg'
         } : params.photo_irl ? {
-          uri: params.photo_irl as string,
+          uri: params.photo_irl as string, // Use existing image for Supabase upload
           name: 'existing-device-photo.jpg',
           type: 'image/jpeg'
         } : undefined,
-                receiptPhoto: receiptImage ? {
-          uri: receiptImage,
+        receiptPhoto: compressedReceipt ? {
+          uri: compressedReceipt, // Use compressed image for Supabase upload
           name: 'receipt-photo.jpg',
           type: 'image/jpeg'
         } : params.receipt_irl ? {
-          uri: params.receipt_irl as string,
+          uri: params.receipt_irl as string, // Use existing image for Supabase upload
           name: 'existing-receipt.jpg',
           type: 'image/jpeg'
         } : undefined,
         additionalPhotos: undefined,
       };
       
-      console.log('File data prepared for background upload:', fileData);
+      console.log('File data prepared for background upload (compressed images for Supabase):', fileData);
 
       // Upload the device in background (no await)
       uploadDevice(formData, fileData).then(result => {
         console.log('Background upload result:', result);
         if (result.success) {
           console.log('✅ Background upload completed successfully');
+          setCompressionStatus('Upload completed successfully!');
           // Could show a success toast notification here
         } else {
           console.log('❌ Background upload failed:', result.error);
+          setCompressionStatus('Upload failed: ' + result.error);
           // Could show an error toast notification here
         }
       }).catch(error => {
         console.error('Background upload error:', error);
+        setCompressionStatus('Upload error: ' + error.message);
         // Could show an error toast notification here
       });
       
     } catch (error) {
-      console.error('Error storing device locally:', error);
-      Alert.alert('Error', 'Failed to store item locally. Please try again.');
+      console.error('Error in device save process:', error);
+      setCompressionStatus('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      Alert.alert('Error', 'Failed to save item. Please try again.');
     }
   };
 

@@ -58,7 +58,7 @@ export default function RootLayout() {
   if (isLoading) {
     return (
       <View style={{ flex:1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.white }}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={theme.colors.systemBlue} />
         <Text style={{ marginTop: 16, color: theme.colors.neutral[600] }}>Initializing...</Text>
       </View>
     );
@@ -66,7 +66,7 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-      <StatusBar backgroundColor="#ffffff" style="dark" barStyle="dark-content" />
+      <StatusBar backgroundColor={theme.colors.white} style="dark" barStyle="dark-content" />
       <AuthProvider>
         <SyncProvider>
           <AppContent />

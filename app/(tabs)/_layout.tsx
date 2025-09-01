@@ -18,14 +18,14 @@ export default function TabLayout() {
           height: 80,
           paddingBottom: 10,
           paddingTop: 10,
-          shadowColor: '#000',
+          shadowColor: theme.colors.neutral[900],
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.1,
           shadowRadius: 16,
           elevation: 5,
         },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#6b7280',
+        tabBarActiveTintColor: theme.colors.systemBlue,
+        tabBarInactiveTintColor: theme.colors.neutral[500],
         tabBarShowLabel: false,
       }}>
       <Tabs.Screen
@@ -36,22 +36,22 @@ export default function TabLayout() {
           <View style={{
             width: 56,
             height: 56,
-            backgroundColor: focused ? '#007AFF' : '#ffffff',
+            backgroundColor: focused ? theme.colors.systemBlue : theme.colors.white,
             borderRadius: 14,
             justifyContent: 'center',
             alignItems: 'center',
             marginTop: 17,
-            shadowColor: focused ? '#007AFF' : '#000000',
+            shadowColor: focused ? theme.colors.systemBlue : theme.colors.neutral[900],
             shadowOffset: { width: 0, height: focused ? 4 : 2 },
             shadowOpacity: focused ? 0.4 : 0.15,
             shadowRadius: focused ? 12 : 8,
             elevation: focused ? 8 : 4,
             borderWidth: 1,
-            borderColor: focused ? '#007AFF' : '#e5e7eb',
+            borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
           }}>
             <BarChart3 
               size={40} 
-              color={focused ? '#ffffff' : '#6b7280'} 
+              color={focused ? theme.colors.white : theme.colors.neutral[500]} 
             />
           </View>
         ),
@@ -65,22 +65,22 @@ export default function TabLayout() {
             <View style={{
               width: 56,
               height: 56,
-              backgroundColor: focused ? '#007AFF' : '#ffffff',
+              backgroundColor: focused ? theme.colors.systemBlue : theme.colors.white,
               borderRadius: 14,
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 17,
-              shadowColor: focused ? '#007AFF' : '#000000',
+              shadowColor: focused ? theme.colors.systemBlue : theme.colors.neutral[900],
               shadowOffset: { width: 0, height: focused ? 4 : 2 },
               shadowOpacity: focused ? 0.4 : 0.15,
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#007AFF' : '#e5e7eb',
+              borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
             }}>
               <Shield 
                 size={40} 
-                color={focused ? '#ffffff' : '#6b7280'} 
+                color={focused ? theme.colors.white : theme.colors.neutral[500]} 
               />
             </View>
           ),
@@ -94,22 +94,22 @@ export default function TabLayout() {
             <View style={{
               width: 56,
               height: 56,
-              backgroundColor: focused ? '#007AFF' : '#ffffff',
+              backgroundColor: focused ? theme.colors.systemBlue : theme.colors.white,
               borderRadius: 14,
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 17,
-              shadowColor: focused ? '#007AFF' : '#000000',
+              shadowColor: focused ? theme.colors.systemBlue : theme.colors.neutral[900],
               shadowOffset: { width: 0, height: focused ? 4 : 2 },
               shadowOpacity: focused ? 0.4 : 0.15,
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#007AFF' : '#e5e7eb',
+              borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
             }}>
               <Bell 
                 size={40} 
-                color={focused ? '#ffffff' : '#6b7280'} 
+                color={focused ? theme.colors.white : theme.colors.neutral[500]} 
               />
             </View>
           ),
@@ -123,22 +123,22 @@ export default function TabLayout() {
             <View style={{
               width: 56,
               height: 56,
-              backgroundColor: focused ? '#007AFF' : '#ffffff',
+              backgroundColor: focused ? theme.colors.systemBlue : theme.colors.white,
               borderRadius: 14,
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 17,
-              shadowColor: focused ? '#007AFF' : '#000000',
+              shadowColor: focused ? theme.colors.systemBlue : theme.colors.neutral[900],
               shadowOffset: { width: 0, height: focused ? 4 : 2 },
               shadowOpacity: focused ? 0.4 : 0.15,
               shadowRadius: focused ? 12 : 8,
               elevation: focused ? 8 : 4,
               borderWidth: 1,
-              borderColor: focused ? '#007AFF' : '#e5e7eb',
+              borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
             }}>
               <User 
                 size={40} 
-                color={focused ? '#ffffff' : '#6b7280'} 
+                color={focused ? theme.colors.white : theme.colors.neutral[500]} 
               />
             </View>
           ),

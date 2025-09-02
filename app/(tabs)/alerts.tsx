@@ -86,10 +86,10 @@ export default function AlertsScreen() {
         reminderDate.getDate()
       );
       
-      console.log(`Alert check: ${alert.reminder_date} >= ${today.toDateString()} = ${alertDate >= today}`);
+      console.log(`Alert check: ${alert.reminder_date} <= ${today.toDateString()} = ${alertDate <= today}`);
       
-      // Show alerts for today and future dates
-      return alertDate >= today;
+      // Show alerts for today and past dates only (not future dates)
+      return alertDate <= today;
     });
   };
 
@@ -97,15 +97,15 @@ export default function AlertsScreen() {
   const renderWarrantyAlert = (alert, index) => (
     <View key={`warranty-${index}`} style={styles.notificationItem}>
       <View style={[styles.notificationIcon, { backgroundColor: '#f59e0b' }]}>
-        <Text style={{ color: 'white', fontSize: 18 }}>⚠️</Text>
+        <Text style={{ color: 'white', fontSize: 18 }}>!</Text>
       </View>
       <View style={styles.notificationContent}>
-        <Text style={styles.notificationTitle}>Warranty Expiring Soon</Text>
+        <Text style={styles.notificationTitle}>🚨 Warranty Alert</Text>
         <Text style={styles.notificationMessage}>
-          Device warranty reminder
+          Your device warranty expires soon. Please take action to renew or extend your coverage.
         </Text>
-        <Text style={styles.notificationTime}>
-          {alert.reminder_date ? new Date(alert.reminder_date).toLocaleDateString() : 'Today'}
+        <Text style={[styles.notificationTime, { color: theme.colors.neutral[900], fontWeight: 'bold' }]}>
+          Expires: {alert.warranty_expire_date ? new Date(alert.warranty_expire_date).toLocaleDateString() : 'Unknown'}
         </Text>
       </View>
     </View>

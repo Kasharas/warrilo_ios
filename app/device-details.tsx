@@ -286,7 +286,7 @@ export default function DeviceDetailsScreen() {
 
         {/* Purchase Details Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Purchase & Creation Details</Text>
+          <Text style={styles.sectionTitle}>Purchase Details</Text>
           
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
@@ -297,12 +297,6 @@ export default function DeviceDetailsScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
               {device.purchase_price ? formatPrice(device.purchase_price) : 'No purchase price'}
-            </Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.textInput}>
-              {device.created_at ? formatDate(device.created_at) : 'No creation date'}
             </Text>
           </View>
         </View>

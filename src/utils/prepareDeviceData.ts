@@ -1,5 +1,6 @@
 import { AddDeviceFormData } from '../types/device'
 import { Database } from '../lib/supabase'
+import { addMonths } from 'date-fns'
 
 type DeviceInsert = Database['public']['Tables']['devices']['Insert']
 
@@ -12,8 +13,8 @@ export const prepareDeviceData = (
   // Calculate warranty end date
   let warrantyEndDate: string | null = null
   if (formData.purchaseDate && formData.warrantyMonths) {
-    const endDate = new Date(formData.purchaseDate)
-    endDate.setMonth(endDate.getMonth() + formData.warrantyMonths)
+    const purchaseDate = new Date(formData.purchaseDate)
+    const endDate = addMonths(purchaseDate, formData.warrantyMonths)
     warrantyEndDate = endDate.toISOString().split('T')[0]
   }
 

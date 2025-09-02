@@ -95,7 +95,17 @@ export default function AlertsScreen() {
 
   // Add inside AlertsScreen component
   const renderWarrantyAlert = (alert, index) => (
-    <View key={`warranty-${index}`} style={styles.notificationItem}>
+    <Pressable 
+      key={`warranty-${index}`} 
+      style={styles.notificationItem}
+      onPress={() => {
+        console.log('Warranty alert pressed, navigating to device details for device_id:', alert.device_id);
+        router.push({
+          pathname: '/device-details',
+          params: { deviceId: alert.device_id }
+        });
+      }}
+    >
       <View style={[styles.notificationIcon, { backgroundColor: '#f59e0b' }]}>
         <Text style={{ color: 'white', fontSize: 18 }}>!</Text>
       </View>
@@ -108,7 +118,7 @@ export default function AlertsScreen() {
           Expires: {alert.warranty_expire_date ? new Date(alert.warranty_expire_date).toLocaleDateString() : 'Unknown'}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 
   const handleRefresh = async () => {

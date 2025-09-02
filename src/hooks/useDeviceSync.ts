@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { DeviceLocalStorage, LocalDevice } from '@/src/lib/localStorage';
 import { useAuth } from '@/contexts/AuthContext';
+import { addMonths } from 'date-fns';
 
 export interface DeviceFormData {
   // Mandatory fields (user must provide)
@@ -88,8 +89,7 @@ export const useDeviceSync = () => {
       }
 
       const purchaseDate = new Date(formData.purchaseDate);
-      const warrantyEndDate = new Date(purchaseDate);
-      warrantyEndDate.setMonth(warrantyEndDate.getMonth() + warrantyMonths);
+      const warrantyEndDate = addMonths(purchaseDate, warrantyMonths);
 
       // 1. Images are already compressed in the add device screen
       // No need to compress again here - use the compressed URIs directly
@@ -177,8 +177,7 @@ export const useDeviceSync = () => {
       }
 
       const purchaseDate = new Date(formData.purchaseDate);
-      const warrantyEndDate = new Date(purchaseDate);
-      warrantyEndDate.setMonth(warrantyEndDate.getMonth() + warrantyMonths);
+      const warrantyEndDate = addMonths(purchaseDate, warrantyMonths);
 
       // 1. Images are already compressed in the edit device screen
       // No need to compress again here - use the compressed URIs directly

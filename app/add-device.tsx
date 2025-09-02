@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addMonths } from 'date-fns';
 import { useDeviceUpload } from '@/src/hooks/useDeviceUpload';
 import { AddDeviceFormData, DeviceFileData } from '@/src/types/device';
 
@@ -542,8 +543,7 @@ export default function AddDeviceScreen() {
         const duration = parseInt(warrantyDuration);
         
         if (!isNaN(duration)) {
-          let expiryDate = new Date(purchase);
-          expiryDate.setMonth(expiryDate.getMonth() + duration);
+          const expiryDate = addMonths(purchase, duration);
           setWarrantyExpiryDate(expiryDate.toLocaleDateString());
         } else {
           setWarrantyExpiryDate('');

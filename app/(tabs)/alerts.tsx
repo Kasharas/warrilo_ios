@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, TextInput, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, ScrollView, Pressable, ActivityIndicator, TextInput, RefreshControl } from 'react-native';
 import { Search, Bell, Filter, AlertTriangle, CheckCircle, Clock } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -18,6 +21,95 @@ export default function AlertsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // Add inside AlertsScreen component, at the top after existing state
+  const [warrantyAlerts, setWarrantyAlerts] = useState([]);
+  const [loadingAlerts, setLoadingAlerts] = useState(false);
+  const [warrantyAlertsError, setWarrantyAlertsError] = useState(null);
+
+  // Add inside AlertsScreen component after state declarations
+  useFocusEffect(
+    useCallback(() => {
+      const loadWarrantyAlerts = async () => {
+        setLoadingAlerts(true);
+        setWarrantyAlertsError(null);
+        try {
+          const alerts = await readWarrantyAlerts();
+          const filteredAlerts = filterCurrentWarrantyAlerts(alerts);
+          console.log('Filtered warranty alerts:', filteredAlerts);
+          setWarrantyAlerts(filteredAlerts);
+        } catch (error) {
+          console.error('Failed to load warranty alerts:', error);
+          setWarrantyAlertsError('Failed to load warranty alerts');
+        } finally {
+          setLoadingAlerts(false);
+        }
+      };
+
+      loadWarrantyAlerts();
+    }, [])
+  );
+
+  // Add this function inside AlertsScreen component (don't call it yet)
+  const readWarrantyAlerts = async () => {
+    try {
+      console.log('📖 Reading warranty alerts from local storage...');
+      const alertsData = await AsyncStorage.getItem('warranty_alerts');
+      
+      if (alertsData) {
+        const alerts = JSON.parse(alertsData);
+        console.log(`Found ${alerts.length} warranty alerts in local storage`);
+        return alerts;
+      }
+      
+      console.log('No warranty alerts found in local storage');
+      return [];
+    } catch (error) {
+      console.error('Error reading warranty alerts:', error);
+      return [];
+    }
+  };
+
+  // Add inside AlertsScreen component
+  const filterCurrentWarrantyAlerts = (alerts) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return alerts.filter(alert => {
+      // Use snake_case property names from Supabase
+      if (!alert.reminder_date) return false;
+      
+      const reminderDate = new Date(alert.reminder_date);
+      const alertDate = new Date(
+        reminderDate.getFullYear(), 
+        reminderDate.getMonth(), 
+        reminderDate.getDate()
+      );
+      
+      console.log(`Alert check: ${alert.reminder_date} >= ${today.toDateString()} = ${alertDate >= today}`);
+      
+      // Show alerts for today and future dates
+      return alertDate >= today;
+    });
+  };
+
+  // Add inside AlertsScreen component
+  const renderWarrantyAlert = (alert, index) => (
+    <View key={`warranty-${index}`} style={styles.notificationItem}>
+      <View style={[styles.notificationIcon, { backgroundColor: '#f59e0b' }]}>
+        <Text style={{ color: 'white', fontSize: 18 }}>⚠️</Text>
+      </View>
+      <View style={styles.notificationContent}>
+        <Text style={styles.notificationTitle}>Warranty Expiring Soon</Text>
+        <Text style={styles.notificationMessage}>
+          Device warranty reminder
+        </Text>
+        <Text style={styles.notificationTime}>
+          {alert.reminder_date ? new Date(alert.reminder_date).toLocaleDateString() : 'Today'}
+        </Text>
+      </View>
+    </View>
+  );
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -154,7 +246,7 @@ export default function AlertsScreen() {
       </View>
 
       {/* Content Area - Show alerts list or empty state */}
-      {filteredAlerts.length === 0 ? (
+      {warrantyAlerts.length === 0 && filteredAlerts.length === 0 ? (
         // Empty state within the main layout
         <View style={styles.emptyContainer}>
           <Bell size={64} color={theme.colors.neutral[300]} style={styles.emptyIcon} />
@@ -167,9 +259,69 @@ export default function AlertsScreen() {
         </View>
       ) : (
         // Alerts List
-        <FlatList 
-          data={filteredAlerts}
-          renderItem={({ item }) => (
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.alertsListContent}
+          scrollEventThrottle={16}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={handleRefresh}
+              colors={[theme.colors.systemBlue]}
+              tintColor={theme.colors.systemBlue}
+            />
+          }
+        >
+          {/* NEW: Add warranty alerts first */}
+          {warrantyAlerts.map((alert, index) => renderWarrantyAlert(alert, index))}
+          
+          {/* Loading indicator for warranty alerts */}
+          {loadingAlerts && (
+            <View style={{
+              padding: 16,
+              alignItems: 'center',
+              backgroundColor: '#f9fafb',
+              borderRadius: 12,
+              marginBottom: 12
+            }}>
+              <ActivityIndicator size="small" color="#2563eb" />
+              <Text style={{ marginTop: 8, color: '#6b7280', fontSize: 14 }}>
+                Loading warranty alerts...
+              </Text>
+            </View>
+          )}
+
+          {/* Empty state for warranty alerts */}
+          {!loadingAlerts && warrantyAlerts.length === 0 && !warrantyAlertsError && (
+            <View style={{
+              padding: 16,
+              alignItems: 'center',
+              backgroundColor: '#f0f9ff',
+              borderRadius: 12,
+              marginBottom: 12
+            }}>
+              <Text style={{ color: '#0369a1', fontSize: 14, textAlign: 'center' }}>
+                No warranty alerts at this time
+              </Text>
+            </View>
+          )}
+
+          {/* Error display for warranty alerts */}
+          {warrantyAlertsError && (
+            <View style={{
+              padding: 16,
+              backgroundColor: '#fef2f2',
+              borderRadius: 12,
+              marginBottom: 12
+            }}>
+              <Text style={{ color: '#dc2626', fontSize: 14, textAlign: 'center' }}>
+                {warrantyAlertsError}
+              </Text>
+            </View>
+          )}
+
+          {/* EXISTING: Keep all existing static notification items below */}
+          {filteredAlerts.map((item) => (
             <View key={item.id} style={[styles.alertCard, { backgroundColor: getAlertColor(item.type) }]}>
               <View style={styles.alertHeader}>
                 {getAlertIcon(item.type)}
@@ -184,20 +336,8 @@ export default function AlertsScreen() {
                 </Pressable>
               )}
             </View>
-          )}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.alertsListContent}
-          scrollEventThrottle={16}
-          refreshControl={
-            <RefreshControl
-              refreshing={loading}
-              onRefresh={handleRefresh}
-                      colors={[theme.colors.systemBlue]}
-        tintColor={theme.colors.systemBlue}
-            />
-          }
-        />
+          ))}
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -389,5 +529,41 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.systemBackground,
     borderRadius: 1,
     marginVertical: 1,
+  },
+  notificationItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
+    marginBottom: theme.spacing.sm,
+    ...theme.shadows.sm,
+  },
+  notificationIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing.md,
+  },
+  notificationContent: {
+    flex: 1,
+  },
+  notificationTitle: {
+    fontSize: theme.fontSize.base,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.neutral[900],
+    marginBottom: theme.spacing.xs,
+  },
+  notificationMessage: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.neutral[700],
+    marginBottom: theme.spacing.xs,
+    lineHeight: 20,
+  },
+  notificationTime: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.neutral[500],
   },
 });

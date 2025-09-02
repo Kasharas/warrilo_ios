@@ -5,6 +5,7 @@ import { uploadReceiptPhoto } from '../utils/uploadReceiptPhoto'
 import { prepareDeviceData } from '../utils/prepareDeviceData'
 import { createWarrantyAlerts } from '../utils/warrantyAlertUtils'
 import { warrantyAlertService } from './warrantyAlertService'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export const uploadDevice = async (
   formData: AddDeviceFormData,
@@ -114,6 +115,17 @@ export const uploadDevice = async (
         // Store alerts in Supabase warranty_reminders table
         const createdAlerts = await warrantyAlertService.createAlerts(warrantyAlerts);
         console.log(`✅ Successfully stored ${createdAlerts.length} warranty alerts in Supabase`);
+        
+        // ADD THIS LOCAL STORAGE CODE:
+        if (createdAlerts && createdAlerts.length > 0) {
+          try {
+            // Store warranty alerts locally for AlertsScreen
+            await AsyncStorage.setItem('warranty_alerts', JSON.stringify(createdAlerts));
+            console.log(`💾 Stored ${createdAlerts.length} warranty alerts locally`);
+          } catch (error) {
+            console.error('Error storing warranty alerts locally:', error);
+          }
+        }
       } else {
         console.log('⚠️ No warranty alerts created (invalid warranty info)');
       }

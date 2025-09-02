@@ -42,8 +42,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     console.log('=== AUTH CONTEXT useEffect TRIGGERED ===');
     console.log('0a. useEffect dependency array changed');
-    console.log('0b. Current window.location.href:', window.location.href);
-    console.log('0c. Current window.location.search:', window.location.search);
+    
+    // Platform-specific URL logging
+    const isWeb = typeof window !== 'undefined';
+    console.log('0b. Current window.location.href:', isWeb ? window.location.href : 'N/A (mobile)');
+    console.log('0c. Current window.location.search:', isWeb ? window.location.search : 'N/A (mobile)');
     
     const getInitialSession = async () => {
       console.log('=== AUTH CONTEXT INITIALIZATION ===');
@@ -53,12 +56,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const handleAuthCallback = async () => {
         try {
           console.log('2a. Checking for OAuth callback in URL...');
-          console.log('2b. Current URL:', window.location.href);
-          console.log('2c. URL Hash:', window.location.hash);
-          console.log('2d. URL Search:', window.location.search);
           
-          // Check if we have OAuth tokens in URL hash
-          if (window.location.hash && window.location.hash.includes('access_token')) {
+          // Platform-specific URL handling
+          const isWeb = typeof window !== 'undefined';
+          const currentUrl = isWeb ? window.location.href : '';
+          const urlHash = isWeb ? window.location.hash : '';
+          const urlSearch = isWeb ? window.location.search : '';
+          
+          console.log('2b. Current URL:', currentUrl);
+          console.log('2c. URL Hash:', urlHash);
+          console.log('2d. URL Search:', urlSearch);
+          
+          // Check if we have OAuth tokens in URL hash (web only)
+          if (isWeb && urlHash && urlHash.includes('access_token')) {
             console.log('3a. OAuth callback detected in URL hash');
             const { data, error } = await supabase.auth.getSessionFromUrl();
             if (error) {
@@ -74,13 +84,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
           }
           
-          // NEW: Also check for OAuth code in query parameters
+          // NEW: Also check for OAuth code in query parameters (web only)
           console.log('2e. Checking query parameters...');
-          console.log('2f. Raw search string:', window.location.search);
-          console.log('2g. Search string length:', window.location.search.length);
-          console.log('2h. Search string type:', typeof window.location.search);
+          console.log('2f. Raw search string:', urlSearch);
+          console.log('2g. Search string length:', urlSearch.length);
+          console.log('2h. Search string type:', typeof urlSearch);
           
-          const urlParams = new URLSearchParams(window.location.search);
+          const urlParams = isWeb ? new URLSearchParams(urlSearch) : new URLSearchParams();
           console.log('2i. URLSearchParams created');
           console.log('2j. All URL params:', Object.fromEntries(urlParams.entries()));
           
@@ -106,8 +116,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   setLoading(false);
                   setSyncReady(true); // NEW: Mark sync as ready after OAuth success
                   
-                  // Clean up URL by removing the code parameter
-                  window.history.replaceState({}, '', window.location.origin);
+                  // Clean up URL by removing the code parameter (web only)
+                  if (isWeb) {
+                    window.history.replaceState({}, '', window.location.origin);
+                  }
                   return;
                 }
               } else {
@@ -163,8 +175,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   setLoading(false);
                   setSyncReady(true); // NEW: Mark sync as ready after OAuth success
                   
-                  // Clean up URL by removing the code parameter
-                  window.history.replaceState({}, '', window.location.origin);
+                  // Clean up URL by removing the code parameter (web only)
+                  if (isWeb) {
+                    window.history.replaceState({}, '', window.location.origin);
+                  }
                   return;
                   }
                 }

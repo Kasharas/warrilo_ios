@@ -230,7 +230,7 @@ class BackgroundSyncService {
   // Setup network monitoring
   private setupNetworkMonitoring(): void {
     // Web
-    if (typeof window !== 'undefined' && window.navigator) {
+    if (typeof window !== 'undefined' && window.navigator && window.addEventListener) {
       this.isOnline = window.navigator.onLine
       
       window.addEventListener('online', () => {

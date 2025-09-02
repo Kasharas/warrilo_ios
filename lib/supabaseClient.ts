@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { Linking } from 'react-native';
 import { SUPABASE_CONFIG } from './config';
 
 console.log('=== SUPABASE CLIENT INITIALIZATION ===');
@@ -60,7 +61,21 @@ export const signInWithGoogle = async (options?: { redirectTo?: string }) => {
       setTimeout(() => {
         console.log('13. Redirecting to:', testResult.data.url);
         console.log('14. After OAuth, user will be redirected to:', redirectUrl);
-        window.location.href = testResult.data.url;
+        
+        // Platform-specific redirect
+        try {
+          // Try to set location.href (works on web)
+          window.location.href = testResult.data.url;
+        } catch (error) {
+          // Mobile platform - use Linking with error handling
+          try {
+            console.log('Using Linking.openURL for mobile redirect');
+            Linking.openURL(testResult.data.url);
+          } catch (linkingError) {
+            console.error('Failed to open URL with Linking:', linkingError);
+            console.log('OAuth URL (fallback):', testResult.data.url);
+          }
+        }
       }, 100);
       
       return { error: null };

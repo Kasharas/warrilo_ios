@@ -32,6 +32,26 @@ export const iosColors = {
   // Borders
   separator: '#3C3C434F',
   opaqueSeparator: '#C6C6C8',
+
+  // Alert Colors
+  alertBackground: '#FFF9E6',
+  alertBorder: '#FFE5B3',
+  alertText: '#8B4513',
+
+  // Status Colors
+  statusSuccess: '#10b981',
+  statusWarning: '#f59e0b',
+  statusError: '#ef4444',
+
+  // Background Variants
+  backgroundLight: '#f9fafb',
+  backgroundBlue: '#f0f9ff',
+  backgroundRed: '#fef2f2',
+
+  // Text Variants
+  textMediumGray: '#6b7280',
+  textErrorRed: '#dc2626',
+  textDarkBlue: '#0369a1',
 };
 
 export const iosFonts = {

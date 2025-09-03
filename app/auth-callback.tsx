@@ -1,80 +1,75 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import { theme } from '@/src/styles/theme';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { Platform } from 'react-native';
 
 export default function AuthCallback() {
+  const params = useLocalSearchParams();
   const router = useRouter();
-  const { user, loading } = useAuth();
-  const [processed, setProcessed] = useState(false);
-
+  
   useEffect(() => {
-    const processCallback = async () => {
-      if (processed) return;
-      setProcessed(true);
-
-      console.log('=== AUTH CALLBACK PROCESSING ===');
-      console.log('1. Auth callback route loaded');
-      console.log('2. Current user:', user?.id || 'No user');
-      console.log('3. Loading state:', loading);
-      console.log('4. Current URL:', window.location.href);
-      console.log('5. URL Hash:', window.location.hash);
-      console.log('6. URL Search:', window.location.search);
-
-      // Check if we have OAuth tokens in URL
-      if (window.location.hash && window.location.hash.includes('access_token')) {
-        console.log('7a. OAuth tokens detected in URL, processing...');
+    const handleAuthCallback = async () => {
+      try {
+        console.log('=== AUTH CALLBACK HANDLER ===');
+        console.log('1. Platform:', Platform.OS);
+        console.log('2. Received params:', params);
         
-        try {
-          // Force session refresh from URL
-          const { data, error } = await supabase.auth.refreshSession();
-          console.log('7b. Session refresh result:', { data, error });
+        // Handle different callback scenarios
+        if (Platform.OS === 'web') {
+          // Web handles OAuth automatically via Supabase
+          console.log('3. Web platform - checking session...');
+          const { data, error } = await supabase.auth.getSession();
           
-          if (data.session?.user) {
-            console.log('7c. User found after refresh, going to dashboard');
+          if (error) {
+            console.error('4. Web auth callback error:', error);
+          } else if (data.session) {
+            console.log('5. Web auth callback success:', data.session.user?.id);
             router.replace('/(tabs)');
+          } else {
+            console.log('6. No session found, redirecting to login...');
+            router.replace('/login');
+          }
+        } else {
+          // Mobile deep link handling
+          console.log('3. Mobile platform - processing deep link...');
+          
+          // Extract OAuth parameters from URL params
+          const code = params.code as string;
+          const error = params.error as string;
+          
+          if (error) {
+            console.error('4. Mobile OAuth error:', error);
+            router.replace('/login');
             return;
           }
-        } catch (error) {
-          console.error('7d. Error refreshing session:', error);
+          
+          if (code) {
+            console.log('5. Mobile OAuth code received, exchanging for session...');
+            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+            
+            if (exchangeError) {
+              console.error('6. Code exchange error:', exchangeError);
+              router.replace('/login');
+            } else if (data.session) {
+              console.log('7. Mobile auth success:', data.session.user?.id);
+              router.replace('/(tabs)');
+            } else {
+              console.log('8. No session after code exchange');
+              router.replace('/login');
+            }
+          } else {
+            console.log('4. No OAuth code found in mobile callback');
+            router.replace('/login');
+          }
         }
-      }
-
-      // Wait for authentication to complete
-      if (!loading) {
-        if (user) {
-          console.log('8. User authenticated, redirecting to dashboard...');
-          // User is authenticated, redirect to dashboard
-          router.replace('/(tabs)');
-        } else {
-          console.log('9. No user found, redirecting to welcome...');
-          // No user found, redirect to welcome
-          router.replace('/welcome');
-        }
+      } catch (error) {
+        console.error('Auth callback error:', error);
+        router.replace('/login');
       }
     };
-
-    processCallback();
-  }, [user, loading, router, processed]);
-
-  return (
-    <View style={{ 
-      flex: 1, 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      backgroundColor: theme.colors.white 
-    }}>
-              <ActivityIndicator size="large" color="#007AFF" />
-      <Text style={{ 
-        marginTop: 16, 
-        color: theme.colors.neutral[600],
-        fontSize: 16
-      }}>
-        Completing authentication...
-      </Text>
-    </View>
-  );
+    
+    handleAuthCallback();
+  }, [params]);
+  
+  return null;
 }
-

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { SUPABASE_CONFIG } from './config';
 
 console.log('=== SUPABASE CLIENT INITIALIZATION ===');
@@ -23,11 +23,24 @@ console.log('4. Supabase auth methods available:', !!supabase.auth);
 console.log('5. Supabase OAuth method available:', !!supabase.auth.signInWithOAuth);
 
 export const signInWithGoogle = async (options?: { redirectTo?: string }) => {
-  const redirectUrl = options?.redirectTo || 'http://localhost:8081';
+  // Platform-specific redirect URLs
+  const getDefaultRedirectUrl = () => {
+    if (Platform.OS === 'web') {
+      return 'http://localhost:8081';
+    } else {
+      // Mobile platforms (iOS/Android) - use custom deep link scheme
+      return 'warrilo://auth-callback';
+    }
+  };
+  
+  const redirectUrl = options?.redirectTo || getDefaultRedirectUrl();
   
   console.log('=== GOOGLE OAUTH FUNCTION CALLED ===');
+  console.log('6. Platform detected:', Platform.OS);
+  console.log('6a. Using redirect URL:', redirectUrl);
+  console.log('6b. Is HTTP URL being used?', redirectUrl.startsWith('http://'));
+  console.log('6c. Platform-specific redirect:', Platform.OS === 'web' ? 'WEB (http://localhost:8081)' : 'MOBILE (warrilo://auth-callback)');
   console.log('6. Calling supabase.auth.signInWithOAuth...');
-  console.log('6b. Redirect URL will be:', redirectUrl);
   
   try {
     // Test the OAuth configuration first

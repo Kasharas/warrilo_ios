@@ -12,6 +12,53 @@ export const SUPABASE_CONFIG = {
 // 4. Copy the "Project URL" and "anon public" key
 // 5. Replace the values above
 
+// Add this validation function to your existing config.ts:
+
+export const AUTH_CONFIG = {
+  supabaseUrl: SUPABASE_CONFIG.url,
+  supabaseAnonKey: SUPABASE_CONFIG.anonKey,
+  // No Google Client ID needed - Supabase handles Google OAuth configuration
+};
+
+export const validateAuthConfiguration = () => {
+  console.log('🔧 VALIDATING AUTH CONFIGURATION 🔧');
+  
+  const requiredEnvVars = [
+    'EXPO_PUBLIC_SUPABASE_URL',
+    'EXPO_PUBLIC_SUPABASE_ANON_KEY'
+  ];
+  
+  const missing = [];
+  const present = [];
+  
+  requiredEnvVars.forEach(varName => {
+    const value = process.env[varName];
+    if (!value || value === 'your-client-id-here' || value === 'your-anon-key-here') {
+      missing.push(varName);
+    } else {
+      present.push(varName);
+    }
+  });
+  
+  console.log('✅ Environment variables present:', present);
+  console.log('❌ Environment variables missing/invalid:', missing);
+  
+  if (missing.length > 0) {
+    console.warn('⚠️ Some required environment variables are missing');
+    console.warn('Please update your .env file with actual values');
+  }
+  
+  return {
+    isValid: missing.length === 0,
+    missing,
+    present
+  };
+};
+
+
+
+
+
 
 
 

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Shield, Check } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { AuthTestComponent } from '@/components/AuthTestComponent';
+import { useAuth } from '@/contexts/AuthContext';
 
 const features = [
   'Store receipts securely in the cloud',
@@ -15,15 +17,27 @@ const features = [
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
 
-  // Note: Auto-redirect logic removed - now handled by app/index.tsx
-  // This prevents redirect loops and provides cleaner routing
+  // Handle authentication redirect in useEffect to prevent render-time navigation
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('WelcomeScreen: User authenticated, redirecting to dashboard');
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, user, router]);
 
   const handleGetStarted = () => {
     // User is not logged in (welcome screen only shows for unauthenticated users)
     // Go to login screen
     router.push('/login');
   };
+
+  // Don't render anything if user is authenticated (will redirect)
+  if (isAuthenticated && user) {
+    return null;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -67,6 +81,9 @@ export default function WelcomeScreen() {
             </Animated.View>
           ))}
         </Animated.View>
+
+        {/* Auth Test Component */}
+        <AuthTestComponent />
 
         {/* Action Buttons */}
         <Animated.View 

@@ -6,6 +6,7 @@ import { prepareDeviceData } from '../utils/prepareDeviceData'
 import { createWarrantyAlerts } from '../utils/warrantyAlertUtils'
 import { warrantyAlertService } from './warrantyAlertService'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { validateSupabaseSession } from '../lib/sessionValidator'
 
 export const uploadDevice = async (
   formData: AddDeviceFormData,
@@ -13,6 +14,37 @@ export const uploadDevice = async (
   userId: string
 ): Promise<DeviceUploadResult> => {
   try {
+    console.log('Mobile upload: Starting device upload with files...', {
+      deviceName: formData.deviceName,
+      hasPhoto: !!fileData.devicePhoto,
+      hasReceipt: !!fileData.receiptPhoto,
+      platform: 'mobile'
+    });
+
+    // Validate session before upload operations
+    console.log('Mobile upload: Validating session...');
+    const sessionResult = await validateSupabaseSession();
+    
+    if (!sessionResult.isValid) {
+      console.error('Mobile upload: Aborted - invalid session:', {
+        error: sessionResult.error,
+        deviceName: formData.deviceName,
+        platform: 'mobile'
+      });
+      
+      return { 
+        success: false, 
+        error: `Upload failed: ${sessionResult.error}`,
+        details: 'Session validation failed before upload'
+      };
+    }
+    
+    console.log('Mobile upload: Session validated successfully, proceeding with uploads...', {
+      userId: sessionResult.session?.user.id,
+      deviceName: formData.deviceName,
+      platform: 'mobile'
+    });
+
     // Step 1: Upload files in parallel
     const uploadPromises: Promise<any>[] = []
     

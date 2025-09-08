@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { DeviceLocalStorage, LocalDevice } from './localStorage';
+import { validateSupabaseSession } from './sessionValidator';
 
 /**
  * Device Sync Service
@@ -56,10 +57,39 @@ export class DeviceSyncService {
    */
   private static async syncDevice(device: LocalDevice): Promise<void> {
     try {
-      // Update status to syncing
+      console.log('Mobile sync: Starting device sync process...', {
+        deviceId: device.id,
+        localId: device.local_id,
+        deviceName: device.name,
+        platform: 'mobile'
+      });
+
+      // Update sync status to syncing
       await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'syncing');
+
+      // Validate session before API call
+      console.log('Mobile sync: Validating session before Supabase operation...');
+      const sessionResult = await validateSupabaseSession();
       
-      // Prepare device data for database (remove local fields)
+      if (!sessionResult.isValid) {
+        console.error('Mobile sync: Cannot sync device - invalid session:', {
+          error: sessionResult.error,
+          deviceId: device.id,
+          localId: device.local_id,
+          platform: 'mobile'
+        });
+        
+        await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'failed');
+        throw new Error(`Mobile sync failed: ${sessionResult.error}`);
+      }
+      
+      console.log('Mobile sync: Session validated successfully, proceeding with Supabase insert...', {
+        userId: sessionResult.session?.user.id,
+        deviceId: device.id,
+        platform: 'mobile'
+      });
+
+      // Prepare device data (preserve existing transformation logic)
       const deviceData = {
         user_id: device.user_id,
         name: device.name,
@@ -75,30 +105,105 @@ export class DeviceSyncService {
         created_at: device.created_at,
       };
 
-      // Insert device into database
-      const { data, error } = await supabase
-        .from('devices')
-        .insert([deviceData])
-        .select()
-        .single();
+      console.log('Mobile sync: Attempting Supabase insert...', {
+        deviceName: deviceData.name,
+        userId: deviceData.user_id,
+        platform: 'mobile'
+      });
 
-      if (error) {
+      try {
+        const { data, error } = await supabase
+          .from('devices')
+          .insert([deviceData])
+          .select()
+          .single();
+
+        if (error) {
+          // Check for authentication-specific errors
+          if (error.message?.includes('AuthApiError') || 
+              error.message?.includes('invalid request') ||
+              error.message?.includes('auth code') ||
+              error.message?.includes('code verifier')) {
+            
+            console.error('Mobile sync: Authentication error during device sync:', {
+              error: error.message,
+              code: error.code,
+              deviceId: device.id,
+              localId: device.local_id,
+              platform: 'mobile',
+              errorType: 'AuthAPIError'
+            });
+            
+            await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'failed');
+            throw new Error('Sync failed: Authentication error. Please log out and log in again.');
+          }
+          
+          // Handle other Supabase errors
+          console.error('Mobile sync: Supabase operation failed:', {
+            error: error.message,
+            code: error.code,
+            deviceId: device.id,
+            platform: 'mobile'
+          });
+          
+          await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'failed');
+          throw error;
+        }
+        
+        console.log('Mobile sync: Device synced successfully to Supabase:', {
+          supabaseId: data.id,
+          localId: device.local_id,
+          deviceName: data.name,
+          platform: 'mobile'
+        });
+        
+        // Mark as synced but keep in local storage (LOCAL-FIRST APPROACH)
+        await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'synced');
+        console.log('Mobile sync: Device marked as synced, preserved in local storage for local-first approach', {
+          localId: device.local_id,
+          deviceName: device.name,
+          syncStatus: 'synced',
+          platform: 'mobile'
+        });
+        
+      } catch (error) {
+        // Catch any uncaught authentication errors
+        if (error instanceof Error && 
+            (error.message.includes('AuthApiError') || 
+             error.message.includes('auth code') ||
+             error.message.includes('invalid request'))) {
+          
+          console.error('Mobile sync: Caught AuthAPIError in device sync:', {
+            error: error.message,
+            deviceId: device.id,
+            localId: device.local_id,
+            platform: 'mobile'
+          });
+          
+          await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'failed');
+          throw new Error('Authentication error during sync. Please log out and log in again.');
+        }
+        
+        // Re-throw other errors
         throw error;
       }
 
-      console.log('Device synced successfully:', data.id);
-      
-      // Remove from local storage after successful sync
-      await DeviceLocalStorage.removeDevice(device.local_id!);
-      
     } catch (error) {
-      console.error('Error syncing device:', error);
+      console.error('Mobile sync: Device sync exception:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        deviceId: device.id,
+        localId: device.local_id,
+        platform: 'mobile'
+      });
       
-      // Update status to failed
-      await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'failed');
+      // Ensure device is marked as failed on any error
+      try {
+        await DeviceLocalStorage.updateDeviceSyncStatus(device.local_id!, 'failed');
+      } catch (statusError) {
+        console.error('Mobile sync: Failed to update device status:', statusError);
+      }
       
-      // You could implement retry logic here
-      // For now, we'll leave it as failed and user can retry manually
+      throw error;
     }
   }
 
@@ -180,24 +285,53 @@ export class DeviceSyncService {
    */
   private static async updateLastSyncTime(): Promise<void> {
     try {
+      console.log('Mobile sync: Updating last sync time...');
+      
+      // Validate session before API call
+      const sessionResult = await validateSupabaseSession();
+      
+      if (!sessionResult.isValid) {
+        console.warn('Mobile sync: Cannot update sync status - invalid session:', {
+          error: sessionResult.error,
+          platform: 'mobile'
+        });
+        return;
+      }
+      
       const syncStatus = await DeviceLocalStorage.getSyncStatus();
       syncStatus.last_sync = new Date().toISOString();
+      
+      console.log('Mobile sync: Updating sync status in Supabase...', {
+        userId: sessionResult.session?.user.id,
+        lastSync: syncStatus.last_sync,
+        platform: 'mobile'
+      });
       
       // Update in storage
       const { data, error } = await supabase
         .from('sync_status')
         .upsert([{
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: sessionResult.session?.user.id,
           last_sync: syncStatus.last_sync,
           updated_at: new Date().toISOString(),
         }]);
 
       if (error) {
-        console.warn('Could not update sync status in database:', error);
+        console.warn('Mobile sync: Could not update sync status in database:', {
+          error: error.message,
+          platform: 'mobile'
+        });
+      } else {
+        console.log('Mobile sync: Sync status updated successfully', {
+          platform: 'mobile'
+        });
       }
       
     } catch (error) {
-      console.error('Error updating last sync time:', error);
+      console.error('Mobile sync: Error updating last sync time:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        platform: 'mobile'
+      });
     }
   }
 
@@ -210,6 +344,23 @@ export class DeviceSyncService {
     purchase_date: string;
   }): Promise<boolean> {
     try {
+      console.log('Mobile sync: Checking device existence...', {
+        deviceName: deviceData.name,
+        userId: deviceData.user_id,
+        platform: 'mobile'
+      });
+      
+      // Validate session before API call
+      const sessionResult = await validateSupabaseSession();
+      
+      if (!sessionResult.isValid) {
+        console.warn('Mobile sync: Cannot check device existence - invalid session:', {
+          error: sessionResult.error,
+          platform: 'mobile'
+        });
+        return false; // Assume it doesn't exist if we can't check
+      }
+      
       const { data, error } = await supabase
         .from('devices')
         .select('id')
@@ -220,13 +371,29 @@ export class DeviceSyncService {
 
       if (error && error.code !== 'PGRST116') {
         // PGRST116 means no rows returned, which is what we want
+        console.error('Mobile sync: Error checking device existence:', {
+          error: error.message,
+          code: error.code,
+          platform: 'mobile'
+        });
         throw error;
       }
 
-      return !!data; // Returns true if device exists, false otherwise
+      const exists = !!data;
+      console.log('Mobile sync: Device existence check result:', {
+        exists,
+        deviceName: deviceData.name,
+        platform: 'mobile'
+      });
+      
+      return exists; // Returns true if device exists, false otherwise
       
     } catch (error) {
-      console.error('Error checking device existence:', error);
+      console.error('Mobile sync: Error checking device existence:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        deviceName: deviceData.name,
+        platform: 'mobile'
+      });
       return false; // Assume it doesn't exist if we can't check
     }
   }

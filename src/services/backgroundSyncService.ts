@@ -2,14 +2,18 @@ import { syncStatusService } from './syncStatusService'
 import { localStorageSyncAdapter } from './localStorageSyncAdapter'
 import { supabaseDataService } from './supabaseDataService'
 import { dataComparisonService, SyncPlan } from './dataComparisonService'
+import { validateSupabaseSession } from '../lib/sessionValidator'
 
 export interface SyncResult {
   success: boolean
   error?: string
+  message?: string
   syncPlan?: SyncPlan
   operationsCompleted: number
   operationsFailed: number
   duration: number
+  devicesProcessed?: number
+  errors?: string[]
 }
 
 class BackgroundSyncService {
@@ -31,6 +35,41 @@ class BackgroundSyncService {
   // Main sync method
   public async performSync(userId: string, force: boolean = false): Promise<SyncResult> {
     const startTime = Date.now()
+    
+    console.log('Mobile background sync: Starting sync operation...', {
+      userId,
+      timestamp: new Date().toISOString(),
+      platform: 'mobile'
+    });
+
+    // Validate session before any sync operations
+    console.log('Mobile background sync: Validating session...');
+    const sessionResult = await validateSupabaseSession();
+    
+    if (!sessionResult.isValid) {
+      console.error('Mobile background sync: Aborted - invalid session:', {
+        error: sessionResult.error,
+        userId,
+        platform: 'mobile',
+        syncAttempt: 'background'
+      });
+      
+      return {
+        success: false,
+        message: `Background sync failed: ${sessionResult.error}`,
+        devicesProcessed: 0,
+        errors: [`Session validation failed: ${sessionResult.error}`],
+        operationsCompleted: 0,
+        operationsFailed: 1,
+        duration: Date.now() - startTime
+      };
+    }
+    
+    console.log('Mobile background sync: Session validated successfully, proceeding with sync...', {
+      userId: sessionResult.session?.user.id,
+      sessionValid: true,
+      platform: 'mobile'
+    });
     
     console.log('=== BACKGROUND SYNC STARTED ===')
     console.log('User ID:', userId)
@@ -76,7 +115,38 @@ class BackgroundSyncService {
 
       // Step 2: Create sync plan
       console.log('Creating sync plan...')
-      const syncPlan = await dataComparisonService.createSyncPlan(userId)
+      let syncPlan: SyncPlan
+      
+      try {
+        syncPlan = await dataComparisonService.createSyncPlan(userId)
+      } catch (error) {
+        // Handle authentication errors from sync plan creation
+        if (error instanceof Error && 
+            (error.message.includes('AuthApiError') || 
+             error.message.includes('Authentication error') ||
+             error.message.includes('auth code'))) {
+          
+          console.error('Mobile background sync: Authentication error during sync plan creation:', {
+            error: error.message,
+            userId,
+            platform: 'mobile',
+            errorType: 'AuthAPIError'
+          });
+          
+          return {
+            success: false,
+            message: 'Background sync failed: Authentication error. Please log out and log in again.',
+            devicesProcessed: 0,
+            errors: [`Authentication error: ${error.message}`],
+            operationsCompleted: 0,
+            operationsFailed: 1,
+            duration: Date.now() - startTime
+          };
+        }
+        
+        // Re-throw other errors
+        throw error;
+      }
 
       if (syncPlan.summary.totalOperations === 0) {
         console.log('No operations needed - data is in sync')

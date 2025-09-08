@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Linking, Platform } from 'react-native';
+import * as ExpoLinking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { SUPABASE_CONFIG } from './config';
 
 console.log('=== SUPABASE CLIENT INITIALIZATION ===');
@@ -26,10 +28,12 @@ export const signInWithGoogle = async (options?: { redirectTo?: string }) => {
   // Platform-specific redirect URLs
   const getDefaultRedirectUrl = () => {
     if (Platform.OS === 'web') {
-      return 'http://localhost:8081';
+      return 'http://localhost:8081/auth-callback';
     } else {
-      // Mobile platforms (iOS/Android) - use custom deep link scheme
-      return 'warrilo://auth-callback';
+      // Use distinct scheme to avoid domain fallback (com.warrilo.mobile vs warrilo.com)
+      const deepLink = 'com.warrilo.mobile://auth-callback';
+      console.log('Generated deep link:', deepLink);
+      return deepLink;
     }
   };
   
@@ -39,63 +43,57 @@ export const signInWithGoogle = async (options?: { redirectTo?: string }) => {
   console.log('6. Platform detected:', Platform.OS);
   console.log('6a. Using redirect URL:', redirectUrl);
   console.log('6b. Is HTTP URL being used?', redirectUrl.startsWith('http://'));
-  console.log('6c. Platform-specific redirect:', Platform.OS === 'web' ? 'WEB (http://localhost:8081)' : 'MOBILE (warrilo://auth-callback)');
+  console.log('6c. Platform-specific redirect:', Platform.OS === 'web' ? 'WEB (http://192.168.1.8:8081)' : 'MOBILE (com.warrilo.mobile://auth-callback)');
   console.log('6. Calling supabase.auth.signInWithOAuth...');
   
   try {
-    // Test the OAuth configuration first
-    console.log('6a. Testing OAuth configuration...');
-    const testResult = await supabase.auth.signInWithOAuth({
+    // Start OAuth and get provider URL
+    const oauthStart = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
-        }
+        },
+        skipBrowserRedirect: Platform.OS !== 'web'
       }
     });
-    
-    console.log('7. OAuth result:', testResult);
-    console.log('8. OAuth data:', testResult.data);
-    console.log('9. OAuth error:', testResult.error);
-    
-    if (testResult.error) {
-      console.error('10. OAuth returned error:', testResult.error);
-      return { error: testResult.error };
+
+    console.log('7. OAuth start result:', oauthStart);
+    if (oauthStart.error) return { error: oauthStart.error };
+
+    if (!oauthStart.data?.url) {
+      console.log('No OAuth URL returned');
+      return oauthStart;
     }
-    
-    if (testResult.data?.url) {
-      console.log('11. OAuth URL generated:', testResult.data.url);
-      console.log('12. About to redirect to OAuth URL...');
-      
-      // For web, we need to redirect to the OAuth URL
-      // Use setTimeout to ensure console logs are visible
+
+    const authUrl = String(oauthStart.data.url);
+
+    if (Platform.OS === 'web') {
+      // Web redirect
       setTimeout(() => {
-        console.log('13. Redirecting to:', testResult.data.url);
-        console.log('14. After OAuth, user will be redirected to:', redirectUrl);
-        
-        // Platform-specific redirect
         try {
-          // Try to set location.href (works on web)
-          window.location.href = testResult.data.url;
-        } catch (error) {
-          // Mobile platform - use Linking with error handling
-          try {
-            console.log('Using Linking.openURL for mobile redirect');
-            Linking.openURL(testResult.data.url);
-          } catch (linkingError) {
-            console.error('Failed to open URL with Linking:', linkingError);
-            console.log('OAuth URL (fallback):', testResult.data.url);
-          }
-        }
-      }, 100);
-      
+          (window.location as any).href = authUrl;
+        } catch {}
+      }, 50);
       return { error: null };
     }
-    
-    console.log('14. No OAuth URL generated, result:', testResult);
-    return testResult;
+
+    // Native: Use Expo AuthSession for better deep link handling
+    console.log('Using Expo AuthSession instead of WebBrowser');
+
+    try {
+      // Open browser and wait for callback via deep link
+      await Linking.openURL(authUrl);
+      console.log('Browser opened, waiting for deep link callback...');
+
+      // Return immediately - the auth-callback route will handle the code exchange
+      return { error: null };
+    } catch (error) {
+      console.error('Failed to open OAuth URL:', error);
+      return { error } as any;
+    }
   } catch (error) {
     console.error('15. OAuth error:', error);
     throw error;

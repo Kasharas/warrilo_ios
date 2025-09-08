@@ -16,9 +16,21 @@ export default function Index() {
       console.log('1. Index loaded - User:', user ? 'logged in' : 'not logged in');
       console.log('2. Loading state:', loading);
       console.log('3. Current URL:', window.location.href);
+      console.log('4. Window location search:', window.location.search);
+      console.log('5. Window location hash:', window.location.hash);
 
+      // Check auth system
+      const currentUser = user;
+      const currentLoading = loading;
+      
       // If user is already authenticated, go straight to dashboard
-      if (!loading && user) {
+      if (!currentLoading && currentUser) {
+        console.log('INDEX: Current navigation state');
+        console.log('INDEX: Available routes:', router.canGoBack());
+        console.log('INDEX: Authentication check completed');
+        console.log('INDEX: User exists?', !!currentUser);
+        console.log('INDEX: Loading state?', currentLoading);
+        console.log('INDEX: About to navigate to:', currentUser ? 'dashboard' : 'welcome');
         console.log('4. User already authenticated, going to dashboard');
         // Clean URL if it still has OAuth code
         if (window.location.search.includes('code=')) {
@@ -32,8 +44,16 @@ export default function Index() {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
       
-      if (code && !user) {  // <- Added !user condition
+      console.log('6. Checking for OAuth code in URL...');
+      console.log('6a. URL search params:', window.location.search);
+      console.log('6b. Extracted code:', code);
+      console.log('6c. Code exists:', !!code);
+      console.log('6d. User exists:', !!user);
+      
+      if (code && !currentUser) {  // <- Added !currentUser condition
         console.log('4. OAuth code detected:', code);
+        console.log('4a. Code length:', code.length);
+        console.log('4b. Code preview:', code.substring(0, 20) + '...');
         console.log('5. Processing OAuth code directly in index.tsx...');
         setProcessingOAuth(true);
         
@@ -70,8 +90,14 @@ export default function Index() {
       }
 
       // No OAuth code and not loading - normal routing
-      if (!loading && !code) {
-        if (user) {
+      if (!currentLoading && !code) {
+        console.log('INDEX: Current navigation state');
+        console.log('INDEX: Available routes:', router.canGoBack());
+        console.log('INDEX: Authentication check completed');
+        console.log('INDEX: User exists?', !!currentUser);
+        console.log('INDEX: Loading state?', currentLoading);
+        console.log('INDEX: About to navigate to:', currentUser ? 'dashboard' : 'welcome');
+        if (currentUser) {
           console.log('4. User authenticated, going to dashboard');
           router.replace('/(tabs)');
         } else {

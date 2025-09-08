@@ -5,15 +5,16 @@ import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import * as Linking from 'expo-linking';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signInWithGoogle, loading: isLoading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -23,13 +24,8 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const { error } = await signIn(email, password);
-      if (error) {
-        Alert.alert('Login Failed', error.message);
-      } else {
-        // Successfully logged in, navigate to dashboard
-        router.replace('/(tabs)');
-      }
+      // For now, show a message that email/password login is not implemented in new system
+      Alert.alert('Info', 'Email/password login will be implemented in the new auth system');
     } catch (error) {
       Alert.alert('Error', 'An unexpected error occurred');
     } finally {
@@ -46,37 +42,38 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = async () => {
-    if (googleLoading) return; // Prevent multiple clicks
+    if (isLoading) return; // Prevent multiple clicks
     
     console.log('=== GOOGLE LOGIN DEBUG START ===');
-    console.log('1. Button clicked, setting loading state...');
-    console.log('2. Current window location:', window.location.href);
-    console.log('3. About to call signInWithGoogle...');
-    
-    setGoogleLoading(true);
+    console.log('1. Button clicked, using auth system...');
+    console.log('2. Current auth state:', { isLoading, error });
     
     try {
-      console.log('4. Calling signInWithGoogle function...');
+      console.log('3. Calling signInWithGoogle function...');
       const { error } = await signInWithGoogle();
-      console.log('5. signInWithGoogle returned:', { error });
-      
       if (error) {
-        console.error('6. Google sign-in error:', error);
-        Alert.alert('Google Sign-In Failed', error.message || 'An error occurred during Google sign-in');
-        setGoogleLoading(false); // Only reset on error
+        console.error('4. Google sign-in error:', error);
+        setError(error.message || 'Google sign-in failed');
       } else {
-        console.log('7. OAuth flow started successfully - redirecting to Google...');
-        console.log('8. User should see Google account selection page now');
-        Alert.alert('Success', 'OAuth started! Check if Google account selection opened.');
-        // Don't clear loading state here - let the OAuth redirect handle it
+        console.log('4. OAuth flow started successfully - redirecting to Google...');
+        console.log('5. User should see Google account selection page now');
       }
     } catch (error) {
-      console.error('9. Unexpected error during Google sign-in:', error);
-      Alert.alert('Error', 'An unexpected error occurred during Google Sign-In');
-      setGoogleLoading(false);
+      console.error('6. Unexpected error during Google sign-in:', error);
+      setError('An unexpected error occurred during Google Sign-In');
     }
     
     console.log('=== GOOGLE LOGIN DEBUG END ===');
+  };
+
+  const testDeepLink = () => {
+    const testUrl = 'com.warrilo.mobile://auth-callback?code=test123&state=test';
+    console.log('🧪 TESTING DEEP LINK:', testUrl);
+    Alert.alert('Testing Deep Link', testUrl);
+    Linking.openURL(testUrl).catch(err => {
+      console.error('🧪 DEEP LINK TEST FAILED:', err);
+      Alert.alert('Deep Link Test Failed', err.message);
+    });
   };
 
   return (
@@ -148,12 +145,12 @@ export default function LoginScreen() {
           <Pressable 
             style={[
               styles.secondaryButton,
-              googleLoading && styles.secondaryButtonDisabled
+              isLoading && styles.secondaryButtonDisabled
             ]}
             onPress={handleGoogleLogin}
-            disabled={googleLoading}
+            disabled={isLoading}
           >
-            {googleLoading ? (
+            {isLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#007AFF" />
                 <Text style={[styles.secondaryButtonText, styles.loadingText]}>
@@ -163,6 +160,23 @@ export default function LoginScreen() {
             ) : (
               <Text style={styles.secondaryButtonText}>Sign in with Google</Text>
             )}
+          </Pressable>
+
+          {error && (
+            <Text style={styles.errorText}>
+              {error}
+            </Text>
+          )}
+
+          {/* Add this test button */}
+          <Pressable onPress={testDeepLink} style={{ 
+            padding: 10, 
+            backgroundColor: '#f0f0f0', 
+            margin: 10, 
+            borderRadius: 8,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 14, color: '#666' }}>🧪 Test Deep Link</Text>
           </Pressable>
 
           <View style={styles.signUpContainer}>
@@ -318,5 +332,12 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginLeft: theme.spacing.sm,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: theme.fontSize.sm,
+    textAlign: 'center',
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
   },
 });

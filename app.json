@@ -5,7 +5,8 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "warrilo",
+    "scheme": "com.warrilo.mobile",
+    "schemes": ["com.warrilo.mobile", "exp+warrilo-mobile"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "backgroundColor": "#ffffff",
@@ -33,6 +34,15 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "RECORD_AUDIO"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": {
+            "scheme": "com.warrilo.mobile"
+          }
+        }
       ]
     },
     "web": {

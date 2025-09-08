@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, TextInput, Modal, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, TextInput, Modal, RefreshControl, Button } from 'react-native';
 import { Plus, Search, Filter, Shield } from 'lucide-react-native';
 import { theme } from '@/src/styles/theme';
 
@@ -193,6 +193,17 @@ export default function DeviceListScreen() {
             <View style={styles.menuLine} />
           </Pressable>
         </View>
+      </View>
+
+      {/* Test Deep Link Button */}
+      <View style={{ padding: 16, backgroundColor: '#f0f0f0' }}>
+        <Button
+          title="Test Auth Callback"
+          onPress={() => {
+            console.log('🧪 Testing navigation to auth-callback...');
+            router.push('/auth-callback?code=test123&state=test456');
+          }}
+        />
       </View>
 
       {/* Search Bar */}

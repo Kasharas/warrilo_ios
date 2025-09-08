@@ -40,12 +40,37 @@ class SupabaseDataService {
         .order('created_at', { ascending: false })
 
       if (error) {
+        // Check for authentication errors
+        if (error.message?.includes('AuthApiError') || 
+            error.message?.includes('invalid request') ||
+            error.message?.includes('auth code')) {
+          
+          console.error('Mobile background sync: Authentication error during fetch:', {
+            error: error.message,
+            userId,
+            platform: 'mobile',
+            errorType: 'AuthAPIError'
+          });
+          
+          throw new Error('Background sync failed: Authentication error. Please log out and log in again.');
+        }
+        
         console.error('Error fetching devices from Supabase:', error)
         throw error
       }
 
       return data || []
     } catch (error) {
+      if (error instanceof Error && error.message.includes('AuthApiError')) {
+        console.error('Mobile background sync: Caught AuthAPIError:', {
+          error: error.message,
+          userId,
+          platform: 'mobile'
+        });
+        
+        throw new Error('Background sync authentication error');
+      }
+      
       console.error('Error in getUserDevices:', error)
       throw error
     }
@@ -60,12 +85,37 @@ class SupabaseDataService {
         .eq('user_id', userId)
 
       if (error) {
+        // Check for authentication errors
+        if (error.message?.includes('AuthApiError') || 
+            error.message?.includes('invalid request') ||
+            error.message?.includes('auth code')) {
+          
+          console.error('Mobile background sync: Authentication error during device IDs fetch:', {
+            error: error.message,
+            userId,
+            platform: 'mobile',
+            errorType: 'AuthAPIError'
+          });
+          
+          throw new Error('Background sync failed: Authentication error. Please log out and log in again.');
+        }
+        
         console.error('Error fetching device IDs from Supabase:', error)
         throw error
       }
 
       return (data || []).map(device => device.id)
     } catch (error) {
+      if (error instanceof Error && error.message.includes('AuthApiError')) {
+        console.error('Mobile background sync: Caught AuthAPIError in getUserDeviceIds:', {
+          error: error.message,
+          userId,
+          platform: 'mobile'
+        });
+        
+        throw new Error('Background sync authentication error');
+      }
+      
       console.error('Error in getUserDeviceIds:', error)
       throw error
     }
@@ -80,12 +130,37 @@ class SupabaseDataService {
         .eq('user_id', userId)
 
       if (error) {
+        // Check for authentication errors
+        if (error.message?.includes('AuthApiError') || 
+            error.message?.includes('invalid request') ||
+            error.message?.includes('auth code')) {
+          
+          console.error('Mobile background sync: Authentication error during device count:', {
+            error: error.message,
+            userId,
+            platform: 'mobile',
+            errorType: 'AuthAPIError'
+          });
+          
+          throw new Error('Background sync failed: Authentication error. Please log out and log in again.');
+        }
+        
         console.error('Error counting user devices:', error)
         throw error
       }
 
       return count || 0
     } catch (error) {
+      if (error instanceof Error && error.message.includes('AuthApiError')) {
+        console.error('Mobile background sync: Caught AuthAPIError in getUserDevicesCount:', {
+          error: error.message,
+          userId,
+          platform: 'mobile'
+        });
+        
+        throw new Error('Background sync authentication error');
+      }
+      
       console.error('Error in getUserDevicesCount:', error)
       return 0
     }

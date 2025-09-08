@@ -1,75 +1,80 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabaseClient';
-import { Platform } from 'react-native';
+import { theme } from '@/src/styles/theme';
 
 export default function AuthCallback() {
-  const params = useLocalSearchParams();
   const router = useRouter();
-  
+  const params = useLocalSearchParams();
+  const [processing, setProcessing] = useState(true);
+
   useEffect(() => {
-    const handleAuthCallback = async () => {
+    const processCallback = async () => {
+      console.log('🔗 AUTH CALLBACK: Starting processing...');
+      console.log('🔗 AUTH CALLBACK: Received params:', JSON.stringify(params, null, 2));
+
       try {
-        console.log('=== AUTH CALLBACK HANDLER ===');
-        console.log('1. Platform:', Platform.OS);
-        console.log('2. Received params:', params);
-        
-        // Handle different callback scenarios
-        if (Platform.OS === 'web') {
-          // Web handles OAuth automatically via Supabase
-          console.log('3. Web platform - checking session...');
-          const { data, error } = await supabase.auth.getSession();
+        // Extract code from params (handle both string and array)
+        let code = params.code;
+        if (Array.isArray(code)) {
+          code = code[0];
+        }
+
+        console.log('🔗 AUTH CALLBACK: Extracted code:', code);
+
+        if (code && typeof code === 'string') {
+          console.log('🔗 AUTH CALLBACK: Exchanging code for session...');
+          
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
           
           if (error) {
-            console.error('4. Web auth callback error:', error);
-          } else if (data.session) {
-            console.log('5. Web auth callback success:', data.session.user?.id);
-            router.replace('/(tabs)');
-          } else {
-            console.log('6. No session found, redirecting to login...');
-            router.replace('/login');
-          }
-        } else {
-          // Mobile deep link handling
-          console.log('3. Mobile platform - processing deep link...');
-          
-          // Extract OAuth parameters from URL params
-          const code = params.code as string;
-          const error = params.error as string;
-          
-          if (error) {
-            console.error('4. Mobile OAuth error:', error);
+            console.error('🔗 AUTH CALLBACK: Exchange error:', error);
             router.replace('/login');
             return;
           }
           
-          if (code) {
-            console.log('5. Mobile OAuth code received, exchanging for session...');
-            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-            
-            if (exchangeError) {
-              console.error('6. Code exchange error:', exchangeError);
-              router.replace('/login');
-            } else if (data.session) {
-              console.log('7. Mobile auth success:', data.session.user?.id);
-              router.replace('/(tabs)');
-            } else {
-              console.log('8. No session after code exchange');
-              router.replace('/login');
-            }
+          if (data.session) {
+            console.log('🔗 AUTH CALLBACK: Session created! User:', data.session.user.id);
+            console.log('🔗 AUTH CALLBACK: Redirecting to dashboard...');
+            router.replace('/(tabs)');
           } else {
-            console.log('4. No OAuth code found in mobile callback');
+            console.error('🔗 AUTH CALLBACK: No session in response');
             router.replace('/login');
           }
+        } else {
+          console.error('🔗 AUTH CALLBACK: No valid code found');
+          router.replace('/login');
         }
       } catch (error) {
-        console.error('Auth callback error:', error);
+        console.error('🔗 AUTH CALLBACK: Processing error:', error);
         router.replace('/login');
+      } finally {
+        setProcessing(false);
       }
     };
-    
-    handleAuthCallback();
-  }, [params]);
-  
-  return null;
+
+    // Add a small delay to ensure params are fully loaded
+    const timer = setTimeout(processCallback, 100);
+    return () => clearTimeout(timer);
+  }, [params, router]);
+
+  return (
+    <View style={{ 
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      backgroundColor: theme.colors.white 
+    }}>
+      <ActivityIndicator size="large" color={theme.colors.systemBlue} />
+      <Text style={{ 
+        marginTop: 16, 
+        color: theme.colors.neutral[600],
+        fontSize: 16,
+        textAlign: 'center'
+      }}>
+        {processing ? 'Completing sign-in...' : 'Redirecting...'}
+      </Text>
+    </View>
+  );
 }

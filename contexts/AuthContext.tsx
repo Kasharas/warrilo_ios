@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
 import { supabase, signInWithGoogle as supabaseSignInWithGoogle } from '../lib/supabaseClient';
 import { DeviceLocalStorage } from '../src/lib/localStorage';
+import { validateSupabaseSession } from '../src/lib/sessionValidator';
 
 interface AuthContextType {
   user: User | null;
@@ -52,171 +54,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('=== AUTH CONTEXT INITIALIZATION ===');
       console.log('1. Getting initial session...');
       
-      // Handle OAuth callback first - this is crucial!
-      const handleAuthCallback = async () => {
-        try {
-          console.log('2a. Checking for OAuth callback in URL...');
-          
-          // Platform-specific URL handling
-          const isWeb = typeof window !== 'undefined';
-          const currentUrl = isWeb ? window.location.href : '';
-          const urlHash = isWeb ? window.location.hash : '';
-          const urlSearch = isWeb ? window.location.search : '';
-          
-          console.log('2b. Current URL:', currentUrl);
-          console.log('2c. URL Hash:', urlHash);
-          console.log('2d. URL Search:', urlSearch);
-          
-          // Check if we have OAuth tokens in URL hash (web only)
-          if (isWeb && urlHash && urlHash.includes('access_token')) {
-            console.log('3a. OAuth callback detected in URL hash');
-            const { data, error } = await supabase.auth.getSessionFromUrl();
-            if (error) {
-              console.error('3b. OAuth callback error:', error);
-            }
-                    if (data.session) {
-          console.log('3c. OAuth session established:', data.session.user.id);
-          setSession(data.session);
-          setUser(data.session.user);
-          setLoading(false);
-          setSyncReady(true); // NEW: Mark sync as ready after OAuth success
-          return;
-        }
-          }
-          
-          // NEW: Also check for OAuth code in query parameters (web only)
-          console.log('2e. Checking query parameters...');
-          console.log('2f. Raw search string:', urlSearch);
-          console.log('2g. Search string length:', urlSearch.length);
-          console.log('2h. Search string type:', typeof urlSearch);
-          
-          const urlParams = isWeb ? new URLSearchParams(urlSearch) : new URLSearchParams();
-          console.log('2i. URLSearchParams created');
-          console.log('2j. All URL params:', Object.fromEntries(urlParams.entries()));
-          
-          const code = urlParams.get('code');
-          console.log('2k. Code parameter value:', code);
-          
-          if (code) {
-            console.log('3d. OAuth code detected in query parameters:', code);
-            
-            try {
-              console.log('3e. Attempting to process OAuth code with Supabase...');
-              
-              // Method 1: Try exchangeCodeForSession (modern Supabase method)
-              if (supabase.auth.exchangeCodeForSession) {
-                console.log('3f. Method 1: exchangeCodeForSession');
-                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-                console.log('3g. Method 1 result:', { data, error });
-                
-                if (data?.session) {
-                  console.log('3h. Method 1 successful - OAuth session established:', data.session.user.id);
-                  setSession(data.session);
-                  setUser(data.session.user);
-                  setLoading(false);
-                  setSyncReady(true); // NEW: Mark sync as ready after OAuth success
-                  
-                  // Clean up URL by removing the code parameter (web only)
-                  if (isWeb) {
-                    window.history.replaceState({}, '', window.location.origin);
-                  }
-                  return;
-                }
-              } else {
-                console.log('3f. exchangeCodeForSession method not available');
-              }
-              
-              // Method 2: Try to refresh session (fallback)
-              console.log('3i. Method 2: refreshSession fallback');
-              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-              console.log('3j. Method 2 result:', { data: refreshData, error: refreshError });
-              
-              if (refreshData?.session) {
-                console.log('3k. Method 2 successful - Session refreshed:', refreshData.session.user.id);
-                setSession(refreshData.session);
-                setUser(refreshData.session.user);
-                setLoading(false);
-                setSyncReady(true); // NEW: Mark sync as ready after OAuth success
-                
-                // Clean up URL by removing the code parameter
-                window.history.replaceState({}, '', window.location.origin);
-                return;
-              }
-              
-              // Method 3: Manual OAuth processing via direct API call
-              console.log('3l. Method 3: Manual OAuth processing via API');
+              // Handle OAuth callback first - now delegated to dedicated screen
+        const handleAuthCallback = async () => {
+          try {
+            // OAuth processing is now handled by auth-callback.tsx
+            console.log('AuthContext: OAuth processing delegated to auth-callback.tsx');
+
+            // Regular session check
+            console.log('4. Checking regular session...');
+            const { data: { session } } = await supabase.auth.getSession();
+            console.log('DEBUG: Initial session check:', session?.user?.id || 'No session');
+            console.log('DEBUG: Session access token exists:', !!session?.access_token);
+            console.log('DEBUG: Full session:', session);
+
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
+
+            // NEW: Validate session before marking sync as ready
+            if (session?.user?.id) {
+              console.log('Mobile auth: Regular session found, validating for sync readiness...', {
+                userId: session.user.id,
+                platform: 'mobile'
+              });
+
               try {
-                const response = await fetch(`${supabase.supabaseUrl}/auth/v1/token?grant_type=authorization_code&code=${code}`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': supabase.supabaseKey
-                  }
-                });
-                
-                const tokenData = await response.json();
-                console.log('3m. Manual API response:', tokenData);
-                
-                if (tokenData.access_token) {
-                  console.log('3n. Manual API successful, setting session...');
-                  
-                  // Set the session manually
-                  const { data: manualData, error: manualError } = await supabase.auth.setSession({
-                    access_token: tokenData.access_token,
-                    refresh_token: tokenData.refresh_token
+                const sessionValidation = await validateSupabaseSession();
+
+                if (sessionValidation.isValid) {
+                  console.log('Mobile auth: Session validated successfully - enabling sync', {
+                    userId: session.user.id,
+                    syncReady: true,
+                    platform: 'mobile'
                   });
-                  
-                  console.log('3o. Manual session set result:', { data: manualData, error: manualError });
-                  
-                  if (manualData?.session) {
-                                      console.log('3p. Manual method successful - OAuth session established:', manualData.session.user.id);
-                  setSession(manualData.session);
-                  setUser(manualData.session.user);
-                  setLoading(false);
-                  setSyncReady(true); // NEW: Mark sync as ready after OAuth success
-                  
-                  // Clean up URL by removing the code parameter (web only)
-                  if (isWeb) {
-                    window.history.replaceState({}, '', window.location.origin);
-                  }
-                  return;
-                  }
+                  setSyncReady(true);
+                } else {
+                  console.error('Mobile auth: Session validation failed for regular session:', {
+                    error: sessionValidation.error,
+                    userId: session.user.id,
+                    syncReady: false,
+                    platform: 'mobile'
+                  });
+                  setSyncReady(false);
                 }
-              } catch (apiError) {
-                console.error('3q. Manual API method failed:', apiError);
+              } catch (validationError) {
+                console.error('Mobile auth: Session validation exception for regular session:', {
+                  error: validationError instanceof Error ? validationError.message : 'Unknown error',
+                  userId: session.user.id,
+                  platform: 'mobile'
+                });
+                setSyncReady(false);
               }
-              
-              console.log('3r. All OAuth processing methods failed');
-              
-            } catch (error) {
-              console.error('3s. Error during OAuth processing:', error);
             }
-          } else {
-            console.log('3d. No OAuth code found in query parameters');
+
+            console.log('5. Initial session set, user:', session?.user?.id || 'No user');
+          } catch (error) {
+            console.error('AuthContext: Error during regular session check:', error);
           }
-        } catch (error) {
-          console.error('3g. Error handling OAuth callback:', error);
-        }
-        
-        // Regular session check if no OAuth callback
-        console.log('4. No OAuth callback, checking regular session...');
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('DEBUG: Initial session check:', session?.user?.id || 'No session');
-        console.log('DEBUG: Session access token exists:', !!session?.access_token);
-        console.log('DEBUG: Full session:', session);
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        
-        // NEW: Mark sync as ready if we have a valid session
-        if (session?.user?.id) {
-          setSyncReady(true);
-          console.log('5a. Sync marked as ready for user:', session.user.id);
-        }
-        
-        console.log('5. Initial session set, user:', session?.user?.id || 'No user');
-      };
+        };
 
       // Add a small delay to ensure URL is fully loaded
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -235,28 +130,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('=== AUTH STATE CHANGE ===');
+        console.log('🔄 AUTH STATE CHANGE DETECTED 🔄');
+        // Only update state if there's an actual change
+        const currentUserId = user?.id;
+        const newUserId = session?.user?.id;
+        console.log('Event type:', event);
+        console.log('Previous user ID:', currentUserId);
+        console.log('New user ID:', newUserId);
+        console.log('State will update:', currentUserId !== newUserId || event === 'SIGNED_OUT');
         console.log('DEBUG: Auth state changed:', event);
         console.log('DEBUG: New session user ID:', session?.user?.id || 'No user');
         console.log('DEBUG: New session access token exists:', !!session?.access_token);
         console.log('DEBUG: Full new session:', session);
         console.log('DEBUG: Event type:', event);
         
-        // Only update state if there's an actual change
-        const currentUserId = user?.id;
-        const newUserId = session?.user?.id;
-        
         if (currentUserId !== newUserId || event === 'SIGNED_OUT') {
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
 
-          // NEW: Update sync readiness based on auth state
+          // NEW: Update sync readiness based on auth state with session validation
           if (session?.user?.id) {
-            setSyncReady(true);
-            console.log('DEBUG: Sync marked as ready for user:', session.user.id);
+            console.log('Mobile auth: Auth state change - validating session for sync readiness...', {
+              userId: session.user.id,
+              platform: 'mobile'
+            });
+            
+            try {
+              const sessionValidation = await validateSupabaseSession();
+              
+              if (sessionValidation.isValid) {
+                console.log('Mobile auth: Session validated successfully - enabling sync', {
+                  userId: session.user.id,
+                  syncReady: true,
+                  platform: 'mobile'
+                });
+                setSyncReady(true);
+              } else {
+                console.error('Mobile auth: Session validation failed in auth state change:', {
+                  error: sessionValidation.error,
+                  userId: session.user.id,
+                  syncReady: false,
+                  platform: 'mobile'
+                });
+                setSyncReady(false);
+              }
+            } catch (validationError) {
+              console.error('Mobile auth: Session validation exception in auth state change:', {
+                error: validationError instanceof Error ? validationError.message : 'Unknown error',
+                userId: session.user.id,
+                platform: 'mobile'
+              });
+              setSyncReady(false);
+            }
           } else {
             setSyncReady(false);
-            console.log('DEBUG: Sync marked as not ready - no user session');
+            console.log('Mobile auth: Sync marked as not ready - no user session', {
+              platform: 'mobile'
+            });
           }
         } else {
           console.log('DEBUG: No user change detected, skipping state update');

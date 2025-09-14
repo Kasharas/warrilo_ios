@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, Platform } from 'react-native';
-import { Camera, Upload, X } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 
 interface UploadZoneProps {
@@ -39,13 +39,13 @@ export const UploadZone = memo(({
           <Image 
             source={imageSource} 
             style={styles.selectedImage}
-            resizeMode="cover"
+            resizeMode="contain"
             onLoad={() => console.log('Image loaded successfully')}
             onError={(error) => console.error('Image load error:', error.nativeEvent)}
           />
           {onRemoveImage && (
             <Pressable style={styles.removeButton} onPress={onRemoveImage}>
-              <X size={16} color={theme.colors.white} />
+              <Ionicons name="close" size={16} color={theme.colors.white} />
             </Pressable>
           )}
         </View>
@@ -57,10 +57,10 @@ export const UploadZone = memo(({
     <View style={styles.container}>
       <View style={styles.buttonRow}>
         <Pressable style={styles.actionButton} onPress={onCameraPress}>
-          <Camera size={24} color={theme.colors.neutral[600]} />
+          <Ionicons name="camera" size={24} color={theme.colors.neutral[600]} />
         </Pressable>
         <Pressable style={styles.actionButton} onPress={onLibraryPress}>
-          <Upload size={24} color={theme.colors.neutral[600]} />
+          <Ionicons name="cloud-upload" size={24} color={theme.colors.neutral[600]} />
         </Pressable>
       </View>
     </View>

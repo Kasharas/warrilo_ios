@@ -218,7 +218,7 @@ const checkStorageVersion = async (): Promise<{ needsMigration: boolean; current
       ? storage.getItem(STORAGE_KEYS.VERSION)
       : await storage.getItem(STORAGE_KEYS.VERSION);
     
-    const currentVersion = versionData || null;
+    const currentVersion = (versionData instanceof Promise ? await versionData : versionData) || null;
     const needsMigration = currentVersion !== STORAGE_VERSION;
     
     console.log('Storage version check:', {
@@ -320,9 +320,11 @@ const migrateFrom090To100 = async (): Promise<boolean> => {
       ? storage.getItem(STORAGE_KEYS.DEVICES)
       : await storage.getItem(STORAGE_KEYS.DEVICES);
     
-    if (devicesData) {
+    const actualDevicesData = devicesData instanceof Promise ? await devicesData : devicesData;
+    
+    if (actualDevicesData) {
       try {
-        const devices = JSON.parse(devicesData);
+        const devices = JSON.parse(actualDevicesData);
         if (Array.isArray(devices)) {
           console.log('Validating existing devices data during migration:', {
             deviceCount: devices.length,
@@ -530,10 +532,10 @@ export class DeviceLocalStorage {
    * Store a new device locally
    */
   static async storeDevice(device: Omit<LocalDevice, 'sync_status' | 'local_id'>): Promise<string> {
+    // Generate local ID
+    const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     try {
-      // Generate local ID
-      const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
       const localDevice: LocalDevice = {
         ...device,
         sync_status: 'pending',
@@ -577,36 +579,37 @@ export class DeviceLocalStorage {
       
     } catch (error) {
       handlePlatformStorageError(error, 'storeDevice', {
-        deviceName: localDevice.name,
-        deviceId: localDevice.id,
-        localId: localDevice.local_id,
+        deviceName: device.name,
+        deviceId: device.id,
+        localId: localId || 'unknown',
         asyncStorageAvailable: typeof AsyncStorage !== 'undefined' && typeof AsyncStorage.setItem === 'function'
       });
       
       // If it's a quota error, try to clear storage and retry
       if (error instanceof Error && error.message.includes('quota')) {
         console.log('Quota exceeded, clearing storage and retrying...');
+        // Create localDevice for retry
+        const retryLocalDevice: LocalDevice = {
+          ...device,
+          sync_status: 'pending',
+          local_id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
         try {
           await this.clearAll();
           // Try storing just the new device
-          const localDevice: LocalDevice = {
-            ...device,
-            sync_status: 'pending',
-            local_id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          };
           const storage = getStorage();
           if (Platform.OS === 'web') {
-            storage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify([localDevice]));
+            storage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify([retryLocalDevice]));
           } else {
-            await storage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify([localDevice]));
+            await storage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify([retryLocalDevice]));
           }
           await this.updateSyncStatus();
-          return localDevice.local_id!;
+          return retryLocalDevice.local_id!;
         } catch (retryError) {
           handlePlatformStorageError(retryError, 'storeDevice_retry', {
-            deviceName: localDevice.name,
-            deviceId: localDevice.id,
-            localId: localDevice.local_id,
+            deviceName: retryLocalDevice.name,
+            deviceId: retryLocalDevice.id,
+            localId: retryLocalDevice.local_id,
             originalError: error,
             asyncStorageAvailable: typeof AsyncStorage !== 'undefined' && typeof AsyncStorage.setItem === 'function'
           });
@@ -627,22 +630,24 @@ export class DeviceLocalStorage {
       const devicesJson = Platform.OS === 'web' 
         ? storage.getItem(STORAGE_KEYS.DEVICES)
         : await storage.getItem(STORAGE_KEYS.DEVICES);
-      console.log('Retrieved devices from storage:', devicesJson ? devicesJson.length : 0, 'characters');
       
-      if (!devicesJson) {
+      const actualDevicesJson = devicesJson instanceof Promise ? await devicesJson : devicesJson;
+      console.log('Retrieved devices from storage:', actualDevicesJson ? actualDevicesJson.length : 0, 'characters');
+      
+      if (!actualDevicesJson) {
         return [];
       }
       
       // Parse JSON data
       let parsedDevices;
       try {
-        parsedDevices = JSON.parse(devicesJson);
+        parsedDevices = JSON.parse(actualDevicesJson);
       } catch (parseError) {
         console.error('JSON parse error in getDevices:', {
           message: parseError instanceof Error ? parseError.message : 'Unknown parse error',
           stack: parseError instanceof Error ? parseError.stack : undefined,
           platform: Platform.OS,
-          rawData: devicesJson.substring(0, 200) + (devicesJson.length > 200 ? '...' : ''),
+          rawData: actualDevicesJson.substring(0, 200) + (actualDevicesJson.length > 200 ? '...' : ''),
           error: parseError
         });
         // Clear corrupted data and return empty array
@@ -813,8 +818,10 @@ export class DeviceLocalStorage {
       const statusJson = Platform.OS === 'web' 
         ? storage.getItem(STORAGE_KEYS.SYNC_STATUS)
         : await storage.getItem(STORAGE_KEYS.SYNC_STATUS);
-      if (statusJson) {
-        return JSON.parse(statusJson);
+      
+      const actualStatusJson = statusJson instanceof Promise ? await statusJson : statusJson;
+      if (actualStatusJson) {
+        return JSON.parse(actualStatusJson);
       }
       
       // Return default status
@@ -1043,7 +1050,9 @@ export class DeviceLocalStorage {
         retrievedValue = await storage.getItem(testKey);
       }
       
-      if (!retrievedValue) {
+      const actualRetrievedValue = retrievedValue instanceof Promise ? await retrievedValue : retrievedValue;
+      
+      if (!actualRetrievedValue) {
         console.error('Health check failed: Get item returned null/undefined');
         return false;
       }
@@ -1052,11 +1061,11 @@ export class DeviceLocalStorage {
       // Test 3: Verify data integrity
       let parsedValue;
       try {
-        parsedValue = JSON.parse(retrievedValue);
+        parsedValue = JSON.parse(actualRetrievedValue);
       } catch (parseError) {
         console.error('Health check failed: JSON parse error', {
           message: parseError instanceof Error ? parseError.message : 'Unknown parse error',
-          retrievedValue: retrievedValue.substring(0, 100) + (retrievedValue.length > 100 ? '...' : ''),
+          retrievedValue: actualRetrievedValue.substring(0, 100) + (actualRetrievedValue.length > 100 ? '...' : ''),
           error: parseError
         });
         return false;

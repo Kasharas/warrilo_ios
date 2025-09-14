@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Modal, Platform, Alert } from 'react-native';
-import { LogOut, Users } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -27,6 +27,16 @@ export default function ProfileScreen() {
       loadDeviceData();
     }
   }, [user]);
+
+  // Debug modal state changes
+  useEffect(() => {
+    console.log('🔘 Profile: Modal visibility changed:', showSignOutModal);
+  }, [showSignOutModal]);
+
+  // Debug loading state changes
+  useEffect(() => {
+    console.log('🔘 Profile: Sign out loading state changed:', isSigningOut);
+  }, [isSigningOut]);
 
   const loadDeviceData = async () => {
     try {
@@ -61,22 +71,33 @@ export default function ProfileScreen() {
 
   const handleSignOut = () => {
     console.log('🔘 Profile: Sign out button clicked');
+    console.log('🔘 Profile: Current user state:', { user: !!user, userId: user?.id });
+    console.log('🔘 Profile: Current loading state:', isSigningOut);
+    console.log('🔘 Profile: Setting modal to visible');
     setShowSignOutModal(true);
   };
 
   const performSignOut = async () => {
     try {
       console.log('🔄 Profile: Starting sign out process...');
+      console.log('🔄 Profile: Current user before sign out:', { user: !!user, userId: user?.id });
+      console.log('🔄 Profile: Setting loading state to true');
       setIsSigningOut(true);
+      console.log('🔄 Profile: Closing modal');
       setShowSignOutModal(false);
       
+      console.log('🔄 Profile: Calling AuthContext signOut function...');
       await signOut();
       console.log('✅ Profile: Sign out completed successfully');
+      console.log('✅ Profile: User after sign out:', { user: !!user, userId: user?.id });
       
+      console.log('🔄 Profile: Attempting navigation to welcome screen...');
       router.replace('/welcome');
+      console.log('✅ Profile: Navigation command sent');
       
     } catch (error) {
       console.error('❌ Profile: Sign out error:', error);
+      console.log('🔄 Profile: Resetting loading state due to error');
       setIsSigningOut(false);
       
       if (Platform.OS === 'web') {
@@ -89,6 +110,7 @@ export default function ProfileScreen() {
 
   const cancelSignOut = () => {
     console.log('❌ Profile: Sign out cancelled');
+    console.log('❌ Profile: Closing modal');
     setShowSignOutModal(false);
   };
 
@@ -161,7 +183,7 @@ export default function ProfileScreen() {
         <View style={styles.familyCard}>
           <Text style={styles.cardTitle}>Family Sharing</Text>
           <Pressable style={styles.inviteButton} onPress={() => router.push('/plan-selection')}>
-            <Users size={16} color="#007AFF" />
+            <Ionicons name="people" size={16} color={"#007AFF"} />
             <Text style={styles.inviteButtonText}>Invite Family Member</Text>
           </Pressable>
         </View>
@@ -173,10 +195,14 @@ export default function ProfileScreen() {
               styles.signOutButton, 
               isSigningOut && styles.signOutButtonDisabled
             ]} 
-            onPress={handleSignOut} 
+            onPress={() => {
+              console.log('🔘 Profile: Pressable onPress triggered');
+              console.log('🔘 Profile: Button disabled state:', isSigningOut);
+              handleSignOut();
+            }} 
             disabled={isSigningOut}
           >
-            <LogOut size={20} color={theme.colors.systemRed} />
+            <Ionicons name="log-out" size={20} color={theme.colors.systemRed} />
             <Text style={styles.signOutText}>
               {isSigningOut ? 'Signing Out...' : 'Sign Out'}
             </Text>
@@ -194,17 +220,26 @@ export default function ProfileScreen() {
         visible={showSignOutModal}
         transparent={true}
         animationType="fade"
-        onRequestClose={cancelSignOut}
+        onRequestClose={() => {
+          console.log('🔘 Profile: Modal onRequestClose triggered');
+          cancelSignOut();
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Sign Out</Text>
             <Text style={styles.modalMessage}>Are you sure you want to sign out?</Text>
             <View style={styles.modalButtons}>
-              <Pressable style={styles.modalButton} onPress={cancelSignOut}>
+              <Pressable style={styles.modalButton} onPress={() => {
+                console.log('🔘 Profile: Modal Cancel button pressed');
+                cancelSignOut();
+              }}>
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </Pressable>
-              <Pressable style={styles.modalButton} onPress={performSignOut}>
+              <Pressable style={styles.modalButton} onPress={() => {
+                console.log('🔘 Profile: Modal Sign Out button pressed');
+                performSignOut();
+              }}>
                 <Text style={styles.modalButtonText}>Sign Out</Text>
               </Pressable>
             </View>

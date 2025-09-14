@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabaseClient'
 import { AddDeviceFormData, DeviceFileData, DeviceUploadResult } from '../types/device'
 import { uploadDevicePhoto } from '../utils/uploadDevicePhoto'
 import { uploadReceiptPhoto } from '../utils/uploadReceiptPhoto'

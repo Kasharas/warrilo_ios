@@ -3,15 +3,15 @@
 
 export const materialColors = {
   // Primary Colors
-  primary: '#6750A4',
+  primary: '#2563eb',
   onPrimary: '#FFFFFF',
-  primaryContainer: '#EADDFF',
-  onPrimaryContainer: '#21005D',
+  primaryContainer: '#dbeafe',
+  onPrimaryContainer: '#1e40af',
   
   // Secondary Colors
   secondary: '#625B71',
   onSecondary: '#FFFFFF',
-  secondaryContainer: '#E8DEF8',
+  secondaryContainer: '#dbeafe',
   onSecondaryContainer: '#1D192B',
   
   // Tertiary Colors
@@ -57,13 +57,13 @@ export const materialColors = {
   scrim: '#000000',
   
   // Legacy Colors (for compatibility)
-  systemBlue: '#6750A4',
+  systemBlue: '#2563eb',
   systemGreen: '#4CAF50',
   systemRed: '#BA1A1A',
   systemOrange: '#FF9800',
   systemYellow: '#FFC107',
   systemPink: '#E91E63',
-  systemPurple: '#9C27B0',
+  systemPurple: '#2563eb',
   systemGray: '#9E9E9E',
   systemGray2: '#BDBDBD',
   systemGray3: '#E0E0E0',

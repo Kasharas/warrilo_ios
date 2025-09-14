@@ -1,44 +1,190 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, Alert, ActivityIndicator } from 'react-native';
-import { Shield, Eye, EyeOff } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import * as Linking from 'expo-linking';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signInWithGoogle, loading: isLoading } = useAuth();
+  const { signInWithGoogle, signIn, resetPassword, resendVerification, loading: isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Form validation functions
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidPassword = (password: string) => {
+    return password.length >= 6;
+  };
+
   const handleLogin = async () => {
+    console.log('=== EMAIL LOGIN DEBUG START ===');
+    console.log('1. Email login button clicked');
+    console.log('2. Email:', email);
+    console.log('3. Password length:', password.length);
+    console.log('4. Current loading state:', loading);
+    
+    // Prevent multiple simultaneous login attempts
+    if (loading) {
+      console.log('4. Login already in progress, ignoring duplicate call');
+      return;
+    }
+    
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      console.log('4. Validation failed: Missing email or password');
+      setError('Please fill in all fields');
       return;
     }
 
+    if (!isValidEmail(email)) {
+      console.log('4. Validation failed: Invalid email format');
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      console.log('4. Validation failed: Password too short');
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    console.log('4. Validation passed, starting login process...');
     setLoading(true);
+    setError(null);
+    
     try {
-      // For now, show a message that email/password login is not implemented in new system
-      Alert.alert('Info', 'Email/password login will be implemented in the new auth system');
+      console.log('5. Calling signIn function from AuthContext...');
+      const { error, needsVerification, needsGoogleAuth } = await signIn(email, password);
+      
+      if (needsVerification) {
+        console.log('6. Email needs verification - showing verification popup');
+        Alert.alert(
+          'Email Verification Required',
+          'Your account exists but your email address has not been verified. We\'ve sent you a new verification email.',
+          [
+            {
+              text: 'Resend Verification',
+              onPress: () => handleResendVerification(email)
+            },
+            {
+              text: 'OK',
+              style: 'default'
+            }
+          ]
+        );
+      } else if (needsGoogleAuth) {
+        console.log('6. User exists but uses Google OAuth - showing Google auth popup');
+        Alert.alert(
+          'Account Created with Google',
+          'This account was created using Google Sign-In. Please use the "Sign in with Google" button instead.',
+          [
+            {
+              text: 'Use Google Sign-In',
+              onPress: () => handleGoogleLogin()
+            },
+            {
+              text: 'OK',
+              style: 'default'
+            }
+          ]
+        );
+      } else if (error) {
+        console.error('6. SignIn error:', error.message);
+        setError(error.message);
+      } else {
+        console.log('6. SignIn successful - user will be redirected automatically');
+        // Success - user will be redirected automatically by AuthContext
+      }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      console.error('7. Unexpected error during signIn:', error);
+      setError('An unexpected error occurred');
     } finally {
+      console.log('8. Login process completed, setting loading to false');
       setLoading(false);
     }
+    
+    console.log('=== EMAIL LOGIN DEBUG END ===');
   };
 
-  const handleForgotPassword = () => {
-    Alert.alert(
-      'Password Reset',
-      'Password reset functionality is currently a stub. In the full app, you would receive an email with reset instructions.',
-      [{ text: 'OK' }]
-    );
+  const handleResendVerification = async (email: string) => {
+    console.log('=== RESEND VERIFICATION DEBUG START ===');
+    console.log('1. Resend verification requested for email:', email);
+    
+    setLoading(true);
+    
+    try {
+      const { error } = await resendVerification(email);
+      
+      if (error) {
+        console.error('2. Resend verification error:', error.message);
+        Alert.alert('Error', error.message);
+      } else {
+        console.log('2. Verification email resent successfully');
+        Alert.alert(
+          'Verification Email Sent',
+          'A new verification email has been sent to your email address. Please check your inbox and click the verification link.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('3. Unexpected error during resend verification:', error);
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      console.log('4. Resend verification process completed');
+      setLoading(false);
+    }
+    
+    console.log('=== RESEND VERIFICATION DEBUG END ===');
+  };
+
+  const handleForgotPassword = async () => {
+    console.log('=== FORGOT PASSWORD DEBUG START ===');
+    console.log('1. Forgot password clicked for email:', email);
+    
+    if (!email) {
+      console.log('2. No email provided, showing alert');
+      Alert.alert(
+        'Email Required',
+        'Please enter your email address first, then tap "Forgot password?"',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    console.log('3. Email provided, starting password reset...');
+    setLoading(true);
+    
+    try {
+      const { error } = await resetPassword(email);
+      
+      if (error) {
+        console.error('4. Password reset error:', error.message);
+        Alert.alert('Error', error.message);
+      } else {
+        console.log('4. Password reset email sent successfully');
+        Alert.alert(
+          'Password Reset',
+          'A password reset link has been sent to your email address.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('5. Unexpected error during password reset:', error);
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      console.log('6. Password reset process completed');
+      setLoading(false);
+    }
+    
+    console.log('=== FORGOT PASSWORD DEBUG END ===');
   };
 
   const handleGoogleLogin = async () => {
@@ -66,15 +212,6 @@ export default function LoginScreen() {
     console.log('=== GOOGLE LOGIN DEBUG END ===');
   };
 
-  const testDeepLink = () => {
-    const testUrl = 'com.warrilo.mobile://auth-callback?code=test123&state=test';
-    console.log('🧪 TESTING DEEP LINK:', testUrl);
-    Alert.alert('Testing Deep Link', testUrl);
-    Linking.openURL(testUrl).catch(err => {
-      console.error('🧪 DEEP LINK TEST FAILED:', err);
-      Alert.alert('Deep Link Test Failed', err.message);
-    });
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -82,7 +219,7 @@ export default function LoginScreen() {
         {/* Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logo}>
-            <Shield size={40} color="#007AFF" />
+            <Ionicons name="shield" size={40} color={"#007AFF"} />
           </View>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
@@ -116,9 +253,9 @@ export default function LoginScreen() {
               onPress={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
-                <EyeOff size={20} color="#007AFF" />
+                <Ionicons name="eye-off" size={20} color={"#007AFF"} />
               ) : (
-                                  <Eye size={20} color="#007AFF" />
+                                  <Ionicons name="eye" size={20} color={"#007AFF"} />
               )}
             </Pressable>
           </View>
@@ -168,16 +305,6 @@ export default function LoginScreen() {
             </Text>
           )}
 
-          {/* Add this test button */}
-          <Pressable onPress={testDeepLink} style={{ 
-            padding: 10, 
-            backgroundColor: '#f0f0f0', 
-            margin: 10, 
-            borderRadius: 8,
-            alignItems: 'center'
-          }}>
-            <Text style={{ fontSize: 14, color: '#666' }}>🧪 Test Deep Link</Text>
-          </Pressable>
 
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Don't have an account? </Text>

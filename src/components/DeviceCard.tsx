@@ -34,8 +34,8 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
   // Helper function to check if image URL is valid
   const isValidImageUrl = (url?: string) => {
     if (!url) return false;
-    // Check if it's a base64 data URL or a valid HTTP/HTTPS URL
-    return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://');
+    // Check if it's a base64 data URL, HTTP/HTTPS URL, or local file URI
+    return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('file://');
   };
 
   // Helper function to get image source
@@ -49,6 +49,11 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
     
     // If it's a Supabase Storage URL, use it
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return { uri: imageUrl };
+    }
+    
+    // If it's a local file URI, use it
+    if (imageUrl.startsWith('file://')) {
       return { uri: imageUrl };
     }
     
@@ -105,7 +110,13 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
       console.log('=== TESTING IMAGE ACCESSIBILITY ===');
       console.log('Testing URL:', device.photo_irl);
       
-      // Test fetch to see if image is accessible
+      // For local file URIs, we don't need to test accessibility via fetch
+      if (device.photo_irl.startsWith('file://')) {
+        console.log('Local file URI detected, skipping fetch test');
+        return;
+      }
+      
+      // Test fetch to see if image is accessible (only for HTTP/HTTPS URLs)
       fetch(device.photo_irl)
         .then(response => {
           console.log('Image fetch response status:', response.status);
@@ -176,7 +187,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
               {device.name}
             </Text>
             <Text style={styles.compactDeviceBrand} numberOfLines={1}>
-              {device.brand || 'Unknown Brand'}
+              {device.supplier || 'Unknown Brand'}
             </Text>
           </View>
           <View style={styles.compactCardRight}>
@@ -222,7 +233,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
             <Image
               source={getImageSource(device.photo_irl)!}
               style={styles.deviceImage}
-              resizeMode="cover"
+              resizeMode="contain"
               onError={() => setImageLoadError(true)}
             />
           ) : (
@@ -242,9 +253,9 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
             {device.name}
           </Text>
           
-          {device.brand && (
+          {device.supplier && (
             <Text style={styles.deviceBrand} numberOfLines={1}>
-              {device.brand}
+              {device.supplier}
             </Text>
           )}
         </View>

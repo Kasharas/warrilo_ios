@@ -1,11 +1,9 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { Shield, Check } from 'lucide-react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeInUp } from 'react-native-reanimated';
-import { AuthTestComponent } from '@/components/AuthTestComponent';
 import { useAuth } from '@/contexts/AuthContext';
 
 const features = [
@@ -19,6 +17,10 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const isAuthenticated = !!user;
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
   // Handle authentication redirect in useEffect to prevent render-time navigation
   useEffect(() => {
@@ -27,6 +29,22 @@ export default function WelcomeScreen() {
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, user, router]);
+
+  // Start animations on mount
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const handleGetStarted = () => {
     // User is not logged in (welcome screen only shows for unauthenticated users)
@@ -44,18 +62,28 @@ export default function WelcomeScreen() {
       <View style={styles.content}>
         {/* Logo */}
         <Animated.View 
-          entering={FadeInUp.delay(200).duration(600)}
-          style={styles.logoContainer}
+          style={[
+            styles.logoContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
           <View style={styles.logo}>
-            <Shield size={60} color="#007AFF" />
+            <Ionicons name="shield" size={60} color="#007AFF" />
           </View>
         </Animated.View>
 
         {/* Title and Subtitle */}
         <Animated.View 
-          entering={FadeInUp.delay(400).duration(600)}
-          style={styles.titleContainer}
+          style={[
+            styles.titleContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
           <Text style={styles.title}>Warrilo</Text>
           <Text style={styles.subtitle}>
@@ -65,30 +93,43 @@ export default function WelcomeScreen() {
 
         {/* Feature List */}
         <Animated.View 
-          entering={FadeInUp.delay(600).duration(600)}
-          style={styles.featureList}
+          style={[
+            styles.featureList,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
           {features.map((feature, index) => (
             <Animated.View
               key={index}
-              entering={FadeInUp.delay(800 + index * 100).duration(600)}
-              style={styles.featureItem}
+              style={[
+                styles.featureItem,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
             >
               <View style={styles.featureIcon}>
-                <Check size={20} color={theme.colors.white} />
+                <Ionicons name="checkmark" size={20} color={theme.colors.white} />
               </View>
               <Text style={styles.featureText}>{feature}</Text>
             </Animated.View>
           ))}
         </Animated.View>
 
-        {/* Auth Test Component */}
-        <AuthTestComponent />
 
         {/* Action Buttons */}
         <Animated.View 
-          entering={FadeInUp.delay(1200).duration(600)}
-          style={styles.buttonContainer}
+          style={[
+            styles.buttonContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
           <Pressable 
             style={styles.primaryButton}
@@ -103,6 +144,7 @@ export default function WelcomeScreen() {
           >
             <Text style={styles.secondaryButtonText}>Already have an account?</Text>
           </Pressable>
+          
         </Animated.View>
       </View>
     </SafeAreaView>

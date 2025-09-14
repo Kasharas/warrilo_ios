@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, Pressable, RefreshControl, Image } from 'react-native';
-import { Plus, Eye, Clock, Smartphone, Laptop, Watch, Headphones, AlertTriangle } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+// Icon components for different categories
+const Smartphone = (props: any) => <Ionicons name="phone-portrait" {...props} />;
+const Laptop = (props: any) => <Ionicons name="laptop" {...props} />;
+const Watch = (props: any) => <Ionicons name="watch" {...props} />;
 import { theme } from '@/src/styles/theme';
 
 import { FabButton } from '@/src/components/FabButton';
@@ -222,7 +227,7 @@ export default function DashboardScreen() {
         <View style={styles.alertCard}>
           <View style={styles.alertHeader}>
             <View style={styles.alertIconContainer}>
-              <AlertTriangle size={24} color="#FF9500" />
+              <Ionicons name="warning" size={24} color={"#FF9500"} />
             </View>
             <View style={styles.alertTitleContainer}>
               <Text style={styles.alertTitle}>Warranty Expiring Soon</Text>
@@ -236,11 +241,11 @@ export default function DashboardScreen() {
           </View>
           <View style={styles.alertActions}>
             <Pressable style={styles.alertButton}>
-              <Eye size={18} color="#FFFFFF" />
+              <Ionicons name="eye" size={18} color={"#FFFFFF"} />
               <Text style={styles.alertButtonText}>View Details</Text>
             </Pressable>
             <Pressable style={styles.alertButtonSecondary}>
-              <Clock size={18} color="#FF9500" />
+              <Ionicons name="time" size={18} color={"#FF9500"} />
               <Text style={styles.alertButtonSecondaryText}>Remind Later</Text>
             </Pressable>
           </View>
@@ -323,7 +328,7 @@ export default function DashboardScreen() {
                         <Image 
                           source={{ uri: device.photo_irl }} 
                           style={styles.deviceImage}
-                          resizeMode="cover"
+                          resizeMode="contain"
                         />
                       </View>
                     ) : (

@@ -1,5 +1,0 @@
-warning: in the working copy of 'app/(tabs)/profile.tsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'contexts/AuthContext.tsx', LF will be replaced by CRLF the next time Git touches it
-app/(tabs)/profile.tsx
-contexts/AuthContext.tsx
-lib/config.ts

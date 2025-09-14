@@ -9,7 +9,7 @@ export const iosColors = {
   systemOrange: '#FF9500',
   systemYellow: '#FFCC00',
   systemPink: '#FF2D92',
-  systemPurple: '#AF52DE',
+  systemPurple: '#007AFF',
 
   // Grays
   systemGray: '#8E8E93',

@@ -1,9 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
-import { SUPABASE_CONFIG } from '../../lib/config';
-
-// ✅ CREATE FRESH SUPABASE CLIENT to avoid corruption
-const warrantySupabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+import { supabase } from '../../lib/supabaseClient';
 
 export interface SupabaseWarrantyAlert {
   id?: string;
@@ -37,7 +33,7 @@ export const warrantyAlertService = {
     }
     
     try {
-      const { data, error } = await warrantySupabase
+      const { data, error } = await supabase
         .from('warranty_reminders')
         .select('id, device_id, user_id, reminder_date, warranty_expire_date, created_at')
         .eq('user_id', userId)
@@ -85,7 +81,7 @@ export const warrantyAlertService = {
       console.log(`📝 Inserting ${validAlerts.length} valid alerts...`);
       
       // ✅ SIMPLIFIED INSERT - NO .select() to avoid URL corruption
-      const { data, error } = await warrantySupabase
+      const { data, error } = await supabase
         .from('warranty_reminders')
         .insert(validAlerts);
       
@@ -96,12 +92,12 @@ export const warrantyAlertService = {
       }
       
       console.log('✅ Successfully created warranty alerts in Supabase');
-      console.log('📊 Created alerts count:', data?.length || 0);
+      console.log('📊 Created alerts count:', validAlerts.length);
       
-      // Return the alerts with generated IDs
+      // Return the alerts with generated IDs (since we didn't select, we generate temp IDs)
       return validAlerts.map((alert, index) => ({
         ...alert,
-        id: data?.[index]?.id || `temp_${Date.now()}_${index}`
+        id: `temp_${Date.now()}_${index}`
       }));
       
     } catch (error) {

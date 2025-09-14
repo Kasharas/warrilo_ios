@@ -11,9 +11,11 @@ interface AuthContextType {
   loading: boolean;
   syncReady: boolean; // NEW: Indicates when sync can safely run
   lastSyncTime: Date | null; // NEW: Track sync status
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any; needsVerification?: boolean; needsGoogleAuth?: boolean }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: (options?: { redirectTo?: string }) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  resendVerification: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -54,147 +56,131 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('=== AUTH CONTEXT INITIALIZATION ===');
       console.log('1. Getting initial session...');
       
-              // Handle OAuth callback first - now delegated to dedicated screen
-        const handleAuthCallback = async () => {
+      try {
+        // Regular session check
+        console.log('4. Checking regular session...');
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('DEBUG: Initial session check:', session?.user?.id || 'No session');
+        console.log('DEBUG: Session access token exists:', !!session?.access_token);
+        console.log('DEBUG: Full session:', session);
+
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+
+        // NEW: Validate session before marking sync as ready
+        if (session?.user?.id) {
+          console.log('Mobile auth: Regular session found, validating for sync readiness...', {
+            userId: session.user.id,
+            platform: 'mobile'
+          });
+
           try {
-            // OAuth processing is now handled by auth-callback.tsx
-            console.log('AuthContext: OAuth processing delegated to auth-callback.tsx');
+            const sessionValidation = await validateSupabaseSession();
 
-            // Regular session check
-            console.log('4. Checking regular session...');
-            const { data: { session } } = await supabase.auth.getSession();
-            console.log('DEBUG: Initial session check:', session?.user?.id || 'No session');
-            console.log('DEBUG: Session access token exists:', !!session?.access_token);
-            console.log('DEBUG: Full session:', session);
-
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-
-            // NEW: Validate session before marking sync as ready
-            if (session?.user?.id) {
-              console.log('Mobile auth: Regular session found, validating for sync readiness...', {
+            if (sessionValidation.isValid) {
+              console.log('Mobile auth: Session validated successfully - enabling sync', {
                 userId: session.user.id,
+                syncReady: true,
                 platform: 'mobile'
               });
-
-              try {
-                const sessionValidation = await validateSupabaseSession();
-
-                if (sessionValidation.isValid) {
-                  console.log('Mobile auth: Session validated successfully - enabling sync', {
-                    userId: session.user.id,
-                    syncReady: true,
-                    platform: 'mobile'
-                  });
-                  setSyncReady(true);
-                } else {
-                  console.error('Mobile auth: Session validation failed for regular session:', {
-                    error: sessionValidation.error,
-                    userId: session.user.id,
-                    syncReady: false,
-                    platform: 'mobile'
-                  });
-                  setSyncReady(false);
-                }
-              } catch (validationError) {
-                console.error('Mobile auth: Session validation exception for regular session:', {
-                  error: validationError instanceof Error ? validationError.message : 'Unknown error',
-                  userId: session.user.id,
-                  platform: 'mobile'
-                });
-                setSyncReady(false);
-              }
+              setSyncReady(true);
+            } else {
+              console.error('Mobile auth: Session validation failed for regular session:', {
+                error: sessionValidation.error,
+                userId: session.user.id,
+                syncReady: false,
+                platform: 'mobile'
+              });
+              setSyncReady(false);
             }
-
-            console.log('5. Initial session set, user:', session?.user?.id || 'No user');
-          } catch (error) {
-            console.error('AuthContext: Error during regular session check:', error);
+          } catch (validationError) {
+            console.error('Mobile auth: Session validation exception for regular session:', {
+              error: validationError instanceof Error ? validationError.message : 'Unknown error',
+              userId: session.user.id,
+              platform: 'mobile'
+            });
+            setSyncReady(false);
           }
-        };
+        }
 
-      // Add a small delay to ensure URL is fully loaded
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+        console.log('5. Initial session set, user:', session?.user?.id || 'No user');
+      } catch (error) {
+        console.error('AuthContext: Error during regular session check:', error);
+        setLoading(false);
+      }
+    };
+
+    // Add a small delay to ensure URL is fully loaded
+    setTimeout(() => {
       // Debug Supabase client state
       console.log('1a. Supabase client available:', !!supabase);
       console.log('1b. Supabase auth available:', !!supabase.auth);
       console.log('1c. Supabase auth methods:', Object.keys(supabase.auth || {}));
-      console.log('1d. exchangeCodeForSession available:', !!supabase.auth?.exchangeCodeForSession);
+      console.log('1d. Supabase auth methods ready');
       
-      await handleAuthCallback();
-    };
-
-    getInitialSession();
+      getInitialSession();
+    }, 100);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('=== AUTH STATE CHANGE ===');
         console.log('🔄 AUTH STATE CHANGE DETECTED 🔄');
-        // Only update state if there's an actual change
-        const currentUserId = user?.id;
-        const newUserId = session?.user?.id;
         console.log('Event type:', event);
-        console.log('Previous user ID:', currentUserId);
-        console.log('New user ID:', newUserId);
-        console.log('State will update:', currentUserId !== newUserId || event === 'SIGNED_OUT');
-        console.log('DEBUG: Auth state changed:', event);
-        console.log('DEBUG: New session user ID:', session?.user?.id || 'No user');
-        console.log('DEBUG: New session access token exists:', !!session?.access_token);
-        console.log('DEBUG: Full new session:', session);
-        console.log('DEBUG: Event type:', event);
+        console.log('Session exists:', !!session);
+        console.log('User ID:', session?.user?.id || 'No user');
+        console.log('User email:', session?.user?.email || 'No email');
+        console.log('Access token exists:', !!session?.access_token);
         
-        if (currentUserId !== newUserId || event === 'SIGNED_OUT') {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
+        // Always update state for auth state changes
+        console.log('Updating AuthContext state for event:', event);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
 
-          // NEW: Update sync readiness based on auth state with session validation
-          if (session?.user?.id) {
-            console.log('Mobile auth: Auth state change - validating session for sync readiness...', {
-              userId: session.user.id,
-              platform: 'mobile'
-            });
+        // Update sync readiness based on auth state
+        if (session?.user?.id) {
+          console.log('Mobile auth: Auth state change - validating session for sync readiness...', {
+            userId: session.user.id,
+            platform: 'mobile'
+          });
+          
+          try {
+            const sessionValidation = await validateSupabaseSession();
             
-            try {
-              const sessionValidation = await validateSupabaseSession();
-              
-              if (sessionValidation.isValid) {
-                console.log('Mobile auth: Session validated successfully - enabling sync', {
-                  userId: session.user.id,
-                  syncReady: true,
-                  platform: 'mobile'
-                });
-                setSyncReady(true);
-              } else {
-                console.error('Mobile auth: Session validation failed in auth state change:', {
-                  error: sessionValidation.error,
-                  userId: session.user.id,
-                  syncReady: false,
-                  platform: 'mobile'
-                });
-                setSyncReady(false);
-              }
-            } catch (validationError) {
-              console.error('Mobile auth: Session validation exception in auth state change:', {
-                error: validationError instanceof Error ? validationError.message : 'Unknown error',
+            if (sessionValidation.isValid) {
+              console.log('Mobile auth: Session validated successfully - enabling sync', {
                 userId: session.user.id,
+                syncReady: true,
+                platform: 'mobile'
+              });
+              setSyncReady(true);
+            } else {
+              console.error('Mobile auth: Session validation failed in auth state change:', {
+                error: sessionValidation.error,
+                userId: session.user.id,
+                syncReady: false,
                 platform: 'mobile'
               });
               setSyncReady(false);
             }
-          } else {
-            setSyncReady(false);
-            console.log('Mobile auth: Sync marked as not ready - no user session', {
+          } catch (validationError) {
+            console.error('Mobile auth: Session validation exception in auth state change:', {
+              error: validationError instanceof Error ? validationError.message : 'Unknown error',
+              userId: session.user.id,
               platform: 'mobile'
             });
+            setSyncReady(false);
           }
         } else {
-          console.log('DEBUG: No user change detected, skipping state update');
+          setSyncReady(false);
+          console.log('Mobile auth: Sync marked as not ready - no user session', {
+            platform: 'mobile'
+          });
         }
 
         // Handle user preferences creation
-        if (event === 'SIGNED_IN' && session?.user && !loading) {
+        if (event === 'SIGNED_IN' && session?.user) {
           console.log('DEBUG: User signed in, creating preferences for:', session.user.id);
           await createUserPreferencesIfNeeded(session.user.id);
         }
@@ -239,24 +225,162 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    console.log('=== SUPABASE SIGNIN DEBUG START ===');
+    console.log('1. Calling supabase.auth.signInWithPassword with email:', email);
+    console.log('1a. AUTH CONTEXT VERSION: Enhanced with detailed logging');
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      console.log('2. Supabase signIn response data:', data);
+      console.log('3. Supabase signIn response error:', error);
+      
+      if (error) {
+        console.error('4. SignIn failed with error:', error.message);
+        console.log('5. Error details:', {
+          message: error.message,
+          status: error.status,
+          statusText: (error as any).statusText || 'Unknown error'
+        });
+        
+        // Check if the error is due to unconfirmed email or Google OAuth user
+        if (error.message === 'Invalid login credentials') {
+          console.log('6. Checking if user exists but has different auth method...');
+          try {
+            // First try password reset - if it works, user exists (could be Google OAuth or unconfirmed)
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: 'com.warrilo.mobile://reset-password',
+            });
+            
+            if (!resetError) {
+              console.log('7. User exists - checking if email is confirmed...');
+              
+              // Try to resend verification - if it fails, email is already confirmed (likely Google OAuth)
+              const { error: resendError } = await supabase.auth.resend({
+                type: 'signup',
+                email: email
+              });
+              
+              if (resendError) {
+                console.log('8. User exists but email is already confirmed - likely Google OAuth user');
+                return { error: null, needsGoogleAuth: true };
+              } else {
+                console.log('8. User exists but email is not confirmed - resend verification sent');
+                return { error: null, needsVerification: true };
+              }
+            } else {
+              console.log('7. User likely does not exist');
+            }
+          } catch (checkError) {
+            console.log('7. Could not check user status, treating as invalid credentials');
+          }
+        }
+        
+        return { error };
+      } else {
+        console.log('4. SignIn successful');
+        console.log('5. User ID:', data.user?.id || 'No ID');
+        console.log('6. User email confirmed:', data.user?.email_confirmed_at ? 'Yes' : 'No');
+        console.log('7. Session created:', data.session ? 'Yes' : 'No');
+        return { error: null };
+      }
+    } catch (error) {
+      console.error('5. Unexpected error during signIn:', error);
+      return { error };
+    } finally {
+      console.log('=== SUPABASE SIGNIN DEBUG END ===');
+    }
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return { error };
+    console.log('=== SUPABASE SIGNUP DEBUG START ===');
+    console.log('1. Calling supabase.auth.signUp with email:', email);
+    console.log('1a. AUTH CONTEXT VERSION: Enhanced with detailed logging');
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      console.log('2. Supabase signUp response data:', data);
+      console.log('3. Supabase signUp response error:', error);
+      
+      if (error) {
+        console.error('4. SignUp failed with error:', error.message);
+        return { error };
+      } else {
+        console.log('4. SignUp successful');
+        console.log('5. User created:', data.user ? 'Yes' : 'No');
+        console.log('6. User ID:', data.user?.id || 'No ID');
+        console.log('7. User email confirmed:', data.user?.email_confirmed_at ? 'Yes' : 'No');
+        console.log('8. Session created:', data.session ? 'Yes' : 'No');
+        console.log('9. Confirmation email sent:', data.user?.email_confirmed_at ? 'No (already confirmed)' : 'Yes (pending confirmation)');
+        return { error: null };
+      }
+    } catch (error) {
+      console.error('5. Unexpected error during signUp:', error);
+      return { error };
+    } finally {
+      console.log('=== SUPABASE SIGNUP DEBUG END ===');
+    }
   };
 
   const signInWithGoogle = async (options?: { redirectTo?: string }) => {
-    const { error } = await supabaseSignInWithGoogle(options);
+    const { error } = await supabaseSignInWithGoogle();
     return { error };
+  };
+
+  const resetPassword = async (email: string) => {
+    console.log('=== PASSWORD RESET DEBUG START ===');
+    console.log('1. Password reset requested for email:', email);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'com.warrilo.mobile://reset-password',
+      });
+      
+      if (error) {
+        console.error('2. Password reset error:', error.message);
+        return { error };
+      } else {
+        console.log('2. Password reset email sent successfully');
+        return { error: null };
+      }
+    } catch (error) {
+      console.error('3. Unexpected error during password reset:', error);
+      return { error };
+    } finally {
+      console.log('=== PASSWORD RESET DEBUG END ===');
+    }
+  };
+
+  const resendVerification = async (email: string) => {
+    console.log('=== RESEND VERIFICATION DEBUG START ===');
+    console.log('1. Resend verification requested for email:', email);
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email
+      });
+      
+      if (error) {
+        console.error('2. Resend verification error:', error.message);
+        return { error };
+      } else {
+        console.log('2. Verification email resent successfully');
+        return { error: null };
+      }
+    } catch (error) {
+      console.error('3. Unexpected error during resend verification:', error);
+      return { error };
+    } finally {
+      console.log('=== RESEND VERIFICATION DEBUG END ===');
+    }
   };
 
   const signOut = async () => {
@@ -317,6 +441,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signInWithGoogle,
+    resetPassword,
+    resendVerification,
     signOut,
   };
 

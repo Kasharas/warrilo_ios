@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabaseClient'
 
 interface PhotoUploadOptions {
   userId: string
@@ -31,23 +31,15 @@ export const uploadDevicePhoto = async ({
     // Generate unique filename (always JPEG after compression)
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
 
-    // Convert compressed URI to blob for upload
-    const response = await fetch(imageUriForUpload)
-    const blob = await response.blob()
-
-    // Check file size (10MB limit)
-    if (blob.size > 10 * 1024 * 1024) {
-      return { 
-        success: false, 
-        error: 'File size too large. Maximum size is 10MB.' 
-      }
-    }
+    // For React Native, we need to read the file as ArrayBuffer directly
+    const response = await fetch(imageUriForUpload);
+    const arrayBuffer = await response.arrayBuffer();
 
     // Upload to Supabase storage
     const { error: uploadError } = await supabase.storage
       .from('device-photos')
-      .upload(fileName, blob, {
-        contentType: 'image/jpeg', // Always JPEG after compression
+      .upload(fileName, arrayBuffer, {
+        contentType: 'image/jpeg',
         upsert: false
       })
 

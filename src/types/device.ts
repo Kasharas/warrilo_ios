@@ -40,6 +40,7 @@ export interface DeviceUploadResult {
   success: boolean
   deviceId?: string
   error?: string
+  details?: string
 }
 
 export interface FileUploadResult {

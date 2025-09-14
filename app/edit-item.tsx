@@ -1,16 +1,18 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator, Switch, Image, Modal, Dimensions } from 'react-native';
-import { ArrowLeft, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, ActivityIndicator, Switch, Image, Modal, Dimensions, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+import Constants from 'expo-constants';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDeviceUpload } from '@/src/hooks/useDeviceUpload';
 import { AddDeviceFormData, DeviceFileData } from '@/src/types/device';
 import { addMonths } from 'date-fns';
+import { requestImagePermissions } from '@/src/utils/permissions';
 
 
 export default function EditItemScreen() {
@@ -131,7 +133,10 @@ export default function EditItemScreen() {
       
       // Parse and set warranty expiry date
       if (params.warranty_end_date) {
-        const date = new Date(params.warranty_end_date);
+        const warrantyDate = Array.isArray(params.warranty_end_date) 
+          ? params.warranty_end_date[0] 
+          : params.warranty_end_date;
+        const date = new Date(warrantyDate);
         setSelectedDate(date);
         setTempDate(date);
       }
@@ -154,24 +159,248 @@ export default function EditItemScreen() {
   };
 
   const pickImage = async (type: 'device' | 'receipt') => {
+    // This function is kept for backward compatibility but now just calls library
+    await pickImageFromLibrary(type);
+  };
+
+  const pickImageFromCamera = async (type: 'device' | 'receipt') => {
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
+      console.log('📸 Starting camera for:', type);
+      
+      // Request image permissions
+      const hasPermissions = await requestImagePermissions();
+      if (!hasPermissions) {
+        return;
+      }
+      
+      // Always use camera directly - no emulator workaround needed
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct API
+        allowsEditing: false, // No cropping - use full image
+        quality: 0.8, // Higher quality like library picker
+        exif: false,
+        base64: false,
       });
 
-      if (!result.canceled && result.assets[0]) {
-        if (type === 'device') {
-          setDeviceImage(result.assets[0].uri);
+      console.log('📸 Camera result:', {
+        canceled: result.canceled,
+        assets: result.assets ? result.assets.length : 0,
+        hasAssets: !!result.assets
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        console.log('📸 Camera asset captured:', {
+          uri: asset.uri,
+          type: asset.type,
+          fileName: asset.fileName,
+          fileSize: asset.fileSize,
+          width: asset.width,
+          height: asset.height
+        });
+        
+        // Set the image directly without validation to avoid type deduction
+        if (asset.uri) {
+          if (type === 'device') {
+            setDeviceImage(asset.uri);
+            console.log('✅ Device image set successfully');
+          } else {
+            setReceiptImage(asset.uri);
+            console.log('✅ Receipt image set successfully');
+          }
         } else {
-          setReceiptImage(result.assets[0].uri);
+          console.error('❌ No URI found in captured asset');
+          Alert.alert('Error', 'Failed to capture image. Please try again.');
         }
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
+      console.error('Error in pickImageFromCamera:', error);
+      Alert.alert('Error', 'Failed to open camera. Please try again.');
+    }
+  };
+
+  const pickImageFromLibrary = async (type: 'device' | 'receipt') => {
+    try {
+      console.log('🖼️ Starting library picker for:', type);
+      
+      // Request image permissions
+      const hasPermissions = await requestImagePermissions();
+      if (!hasPermissions) {
+        return;
+      }
+      
+      await launchImageLibrary(type);
+    } catch (error) {
+      console.error('Error in pickImageFromLibrary:', error);
+      Alert.alert('Error', 'Failed to open photo library. Please try again.');
+    }
+  };
+
+  const launchCamera = async (type: 'device' | 'receipt') => {
+    try {
+      // Use the most basic configuration possible to avoid type deduction issues
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct API
+        allowsEditing: true, // Forces consistent format processing
+        aspect: [1, 1], // Helps Android understand it's an image
+        quality: 0.5, // Very low quality to minimize processing
+        exif: false,
+        base64: false,
+      });
+
+      console.log('📸 Camera result:', {
+        canceled: result.canceled,
+        assets: result.assets ? result.assets.length : 0,
+        hasAssets: !!result.assets
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        console.log('📸 Camera asset captured:', {
+          uri: asset.uri,
+          type: asset.type,
+          fileName: asset.fileName,
+          fileSize: asset.fileSize,
+          width: asset.width,
+          height: asset.height
+        });
+        
+        // Set the image directly without validation to avoid type deduction
+        if (asset.uri) {
+          if (type === 'device') {
+            setDeviceImage(asset.uri);
+            console.log('✅ Device image set successfully');
+          } else {
+            setReceiptImage(asset.uri);
+            console.log('✅ Receipt image set successfully');
+          }
+        } else {
+          console.error('❌ No URI found in captured asset');
+          Alert.alert('Error', 'Failed to capture image. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Error launching camera:', error);
+      Alert.alert('Error', 'Failed to open camera. Please try again.');
+    }
+  };
+
+  const launchImageLibrary = async (type: 'device' | 'receipt') => {
+    try {
+      console.log('📱 Opening image library...');
+      
+      // Try to open image library first - no emulator workaround
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct API
+        allowsEditing: false, // Allow full image without cropping
+        quality: 0.8, // Higher quality since we'll compress later
+        exif: false,
+        base64: false,
+        allowsMultipleSelection: false,
+      });
+
+      console.log('📸 ImagePicker result:', {
+        canceled: result.canceled,
+        assets: result.assets ? result.assets.length : 0,
+        hasAssets: !!result.assets
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        console.log('📸 Library asset selected:', {
+          uri: asset.uri,
+          type: asset.type,
+          fileName: asset.fileName,
+          fileSize: asset.fileSize,
+          width: asset.width,
+          height: asset.height
+        });
+        
+        // Use handleImageSelection to compress the image
+        if (asset.uri) {
+          await handleImageSelection(asset, type);
+        } else {
+          console.error('❌ No URI found in selected asset');
+          Alert.alert('Error', 'No image data found. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Error launching image library:', error);
+      
+      // Check if this is an emulator and offer camera fallback
+      const isEmulator = !Constants.isDevice;
+      if (isEmulator && Platform.OS === 'android') {
+        console.log('📱 Library picker failed in emulator, offering camera fallback...');
+        Alert.alert(
+          'Library Unavailable',
+          'Image library is not working in emulator. Would you like to use camera instead?',
+          [
+            {
+              text: 'Use Camera',
+              onPress: () => launchCamera(type),
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Error', 'Failed to open photo library. Please try again.');
+      }
+    }
+  };
+
+  const handleImageSelection = async (selectedAsset: any, type: 'device' | 'receipt') => {
+    try {
+      console.log('📸 Image selected:', {
+        uri: selectedAsset.uri,
+        type: selectedAsset.type,
+        fileName: selectedAsset.fileName,
+        fileSize: selectedAsset.fileSize,
+        width: selectedAsset.width,
+        height: selectedAsset.height
+      });
+      
+      // Validate the URI before setting it
+      if (selectedAsset.uri) {
+        // Quick validation to ensure it's not HTML
+        if (selectedAsset.uri.includes('<!DOCTYPE html>') || selectedAsset.uri.includes('<html')) {
+          console.error('❌ Selected image contains HTML content - this is invalid');
+          Alert.alert('Error', 'Invalid image selected. Please try again.');
+          return;
+        }
+        
+        // Compress the image immediately after selection
+        console.log(`🔄 Compressing ${type} image...`);
+        const { compressDevicePhoto, compressReceipt } = await import('@/src/lib/imageCompression');
+        
+        let compressedUri: string;
+        if (type === 'device') {
+          const result = await compressDevicePhoto(selectedAsset.uri, selectedAsset);
+          compressedUri = result.compressedUri;
+          console.log(`✅ Device photo compressed: ${result.originalSizeKB}KB → ${result.compressedSizeKB}KB`);
+        } else {
+          const result = await compressReceipt(selectedAsset.uri, selectedAsset);
+          compressedUri = result.compressedUri;
+          console.log(`✅ Receipt photo compressed: ${result.originalSizeKB}KB → ${result.compressedSizeKB}KB`);
+        }
+        
+        // Set the compressed image based on type
+        if (type === 'device') {
+          setDeviceImage(compressedUri);
+        } else {
+          setReceiptImage(compressedUri);
+        }
+        
+        console.log('✅ Compressed image set successfully for', type);
+      } else {
+        console.error('❌ No URI found in selected asset');
+        Alert.alert('Error', 'No image data found. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error handling image selection:', error);
+      Alert.alert('Error', 'Failed to process selected image. Please try again.');
     }
   };
 
@@ -223,11 +452,17 @@ export default function EditItemScreen() {
         purchaseDate: selectedDate,
         warrantyMonths: warrantyDuration,
         purchasePrice: purchasePrice.trim(),
-        receipt: { uri: receiptImage || params.receipt_irl || '', type: 'library' as const },
+        receipt: { 
+          uri: Array.isArray(receiptImage) ? receiptImage[0] : (receiptImage || params.receipt_irl || ''), 
+          type: 'library' as const 
+        },
         serialNumber: serialNumber.trim(),
         storeName: storeName.trim(),
         category: selectedCategory || '', // Add category field
-        devicePhoto: { uri: deviceImage || params.photo_irl || '', type: 'library' as const },
+        devicePhoto: { 
+          uri: Array.isArray(deviceImage) ? deviceImage[0] : (deviceImage || params.photo_irl || ''), 
+          type: 'library' as const 
+        },
       };
 
       console.log('Updating device with form data:', formData);
@@ -368,7 +603,7 @@ export default function EditItemScreen() {
         
         // Validate and compress device photo if exists (new or existing)
         if (deviceImage || params.photo_irl) {
-          const photoToCompress = deviceImage || params.photo_irl;
+          const photoToCompress = Array.isArray(deviceImage) ? deviceImage[0] : (deviceImage || params.photo_irl);
           console.log('🔍 Validating device photo URI...');
           setCompressionStatus('Validating device photo...');
           
@@ -417,7 +652,7 @@ export default function EditItemScreen() {
         
         // Validate and compress receipt if exists (new or existing)
         if (receiptImage || params.receipt_irl) {
-          const receiptToCompress = receiptImage || params.receipt_irl;
+          const receiptToCompress = Array.isArray(receiptImage) ? receiptImage[0] : (receiptImage || params.receipt_irl);
           console.log('🔍 Validating receipt URI...');
           setCompressionStatus('Validating receipt...');
           
@@ -580,7 +815,7 @@ export default function EditItemScreen() {
         
         if (!isNaN(duration)) {
           const expiryDate = addMonths(purchase, duration);
-          setWarrantyExpiryDate(expiryDate.toLocaleDateString());
+          setWarrantyExpiryDate(expiryDate.toISOString().split('T')[0]);
         } else {
           setWarrantyExpiryDate('');
         }
@@ -668,7 +903,7 @@ export default function EditItemScreen() {
                    style={styles.backButton}
                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                  >
-                   <ArrowLeft size={20} color={theme.colors.neutral[600]} />
+                   <Ionicons name="arrow-back" size={20} color={theme.colors.neutral[600]} />
                  </Pressable>
         <Text style={styles.headerTitle}>Edit Item</Text>
         <View style={styles.headerActions} />
@@ -704,15 +939,15 @@ export default function EditItemScreen() {
               </View>
             ) : (
              <View style={styles.uploadRow}>
-               <Pressable style={styles.uploadZone} onPress={() => pickImage('device')}>
+               <Pressable style={styles.uploadZone} onPress={() => pickImageFromCamera('device')}>
                  <View style={styles.uploadContent}>
-                   <Camera size={32} color={theme.colors.neutral[400]} />
+                   <Ionicons name="camera" size={32} color={theme.colors.neutral[400]} />
                    <Text style={styles.uploadText}>Take a photo</Text>
                  </View>
                </Pressable>
-               <Pressable style={styles.uploadZone} onPress={() => pickImage('device')}>
+               <Pressable style={styles.uploadZone} onPress={() => pickImageFromLibrary('device')}>
                  <View style={styles.uploadContent}>
-                   <FolderOpen size={32} color={theme.colors.neutral[400]} />
+                   <Ionicons name="folder-open" size={32} color={theme.colors.neutral[400]} />
                    <Text style={styles.uploadText}>Choose from library</Text>
                  </View>
                </Pressable>
@@ -737,15 +972,15 @@ export default function EditItemScreen() {
               </View>
             ) : (
              <View style={styles.uploadRow}>
-                               <Pressable style={styles.uploadZone} onPress={() => pickImage('receipt')}>
+                               <Pressable style={styles.uploadZone} onPress={() => pickImageFromCamera('receipt')}>
                   <View style={styles.uploadContent}>
-                    <Camera size={32} color={theme.colors.neutral[400]} />
+                    <Ionicons name="camera" size={32} color={theme.colors.neutral[400]} />
                     <Text style={styles.uploadText}>Take a photo</Text>
                   </View>
                 </Pressable>
-                <Pressable style={styles.uploadZone} onPress={() => pickImage('receipt')}>
+                <Pressable style={styles.uploadZone} onPress={() => pickImageFromLibrary('receipt')}>
                   <View style={styles.uploadContent}>
-                    <FolderOpen size={32} color={theme.colors.neutral[400]} />
+                    <Ionicons name="folder-open" size={32} color={theme.colors.neutral[400]} />
                     <Text style={styles.uploadText}>Add from library</Text>
                   </View>
                 </Pressable>
@@ -755,7 +990,7 @@ export default function EditItemScreen() {
           {/* PRO Feature Toggle */}
           <View style={styles.proFeatureRow}>
             <View style={styles.proFeatureInfo}>
-              <Lightbulb size={20} color={theme.colors.warning[500]} />
+              <Ionicons name="bulb" size={20} color={theme.colors.warning[500]} />
               <Text style={styles.proFeatureText}>Auto receipt extraction</Text>
             </View>
             <Text style={styles.proBadge}>PRO</Text>
@@ -817,7 +1052,7 @@ export default function EditItemScreen() {
                ]}>
                  {selectedCategory || 'Choose category'}
                </Text>
-               <ChevronDown size={20} color="#999" />
+               <Ionicons name="chevron-down" size={20} color={"#999"} />
              </Pressable>
            </View>
         </View>
@@ -846,7 +1081,7 @@ export default function EditItemScreen() {
                    year: 'numeric'
                  }) : 'Purchase date'}
                </Text>
-               <Calendar size={20} color="#999" />
+               <Ionicons name="calendar" size={20} color={"#999"} />
              </Pressable>
            </View>
 
@@ -1180,6 +1415,9 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.title1,
     fontWeight: theme.fontWeight.bold,
     color: theme.colors.label,
+  },
+  headerActions: {
+    width: 40, // Same width as back button for balance
   },
   saveButton: {
     fontSize: theme.fontSize.base,
@@ -1639,7 +1877,7 @@ const styles = StyleSheet.create({
        pickerOptionText: {
       fontSize: theme.fontSize.title3,
       color: theme.colors.label,
-      fontWeight: theme.fontWeight.regular,
+      fontWeight: theme.fontWeight.normal,
     },
        pickerOptionTextSelected: {
       color: theme.colors.systemBackground,
@@ -1707,7 +1945,7 @@ const styles = StyleSheet.create({
        wheelOptionText: {
       fontSize: theme.fontSize.title3,
       color: theme.colors.label,
-      fontWeight: theme.fontWeight.regular,
+      fontWeight: theme.fontWeight.normal,
     },
                wheelOptionTextSelected: {
       color: theme.colors.systemBackground,

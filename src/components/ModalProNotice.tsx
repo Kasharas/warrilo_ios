@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, Pressable } from 'react-native';
-import { X } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 
 interface ModalProNoticeProps {
@@ -22,7 +22,7 @@ export function ModalProNotice({ visible, onClose, onViewPlans }: ModalProNotice
           <View style={styles.header}>
             <Text style={styles.title}>Feature available in Warrilo Pro</Text>
             <Pressable style={styles.closeButton} onPress={onClose}>
-              <X size={24} color={theme.colors.neutral[600]} />
+              <Ionicons name="close" size={24} color={theme.colors.neutral[600]} />
             </Pressable>
           </View>
           

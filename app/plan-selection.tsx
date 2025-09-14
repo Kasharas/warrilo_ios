@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
-import { ArrowLeft, Check, Shield } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -53,7 +53,7 @@ export default function PlanSelectionScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
-          <ArrowLeft size={24} color={theme.colors.neutral[900]} />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.neutral[900]} />
         </Pressable>
         <Text style={styles.headerTitle}>Choose Your Plan</Text>
         <View style={{ width: 24 }} />
@@ -63,7 +63,7 @@ export default function PlanSelectionScreen() {
         {/* Logo and Title */}
         <View style={styles.titleSection}>
           <View style={styles.logo}>
-            <Shield size={40} color={theme.colors.systemBlue} />
+            <Ionicons name="shield" size={40} color={theme.colors.systemBlue} />
           </View>
           <Text style={styles.title}>Select Your Plan</Text>
           <Text style={styles.subtitle}>Choose the plan that works best for you</Text>
@@ -122,7 +122,7 @@ export default function PlanSelectionScreen() {
             {plans.pro.features.map((feature, index) => (
               <View key={index} style={styles.featureItem}>
                 <View style={styles.featureIcon}>
-                  <Check size={12} color={theme.colors.white} />
+                  <Ionicons name="checkmark" size={12} color={theme.colors.white} />
                 </View>
                 <Text style={styles.featureText}>{feature}</Text>
               </View>
@@ -159,7 +159,7 @@ export default function PlanSelectionScreen() {
             {plans.free.features.map((feature, index) => (
               <View key={index} style={styles.featureItem}>
                 <View style={styles.featureIcon}>
-                  <Check size={12} color={theme.colors.white} />
+                  <Ionicons name="checkmark" size={12} color={theme.colors.white} />
                 </View>
                 <Text style={styles.featureText}>{feature}</Text>
               </View>

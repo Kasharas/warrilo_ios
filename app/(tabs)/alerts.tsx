@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ScrollView, Pressable, ActivityIndicator, TextInput, RefreshControl } from 'react-native';
-import { Search, Bell, Filter, AlertTriangle, CheckCircle, Clock } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -151,11 +151,11 @@ export default function AlertsScreen() {
   const getAlertIcon = (type: string) => {
     switch (type) {
       case 'expired_warranty':
-        return <AlertTriangle size={20} color={theme.colors.error[500]} />;
+        return <Ionicons name="warning" size={20} color={theme.colors.error[500]} />;
       case 'expire_soon':
-        return <Clock size={20} color={theme.colors.warning[500]} />;
+        return <Ionicons name="time" size={20} color={theme.colors.warning[500]} />;
       default:
-        return <Bell size={20} color={theme.colors.neutral[500]} />;
+        return <Ionicons name="notifications" size={20} color={theme.colors.neutral[500]} />;
     }
   };
 
@@ -212,7 +212,7 @@ export default function AlertsScreen() {
         styles.searchContainer,
         isSearchFocused && styles.searchContainerFocused
       ]}>
-        <Search size={20} color={theme.colors.neutral[400]} style={styles.searchIcon} />
+        <Ionicons name="search" size={20} color={theme.colors.neutral[400]} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search alerts..."
@@ -259,7 +259,7 @@ export default function AlertsScreen() {
       {warrantyAlerts.length === 0 && filteredAlerts.length === 0 ? (
         // Empty state within the main layout
         <View style={styles.emptyContainer}>
-          <Bell size={64} color={theme.colors.neutral[300]} style={styles.emptyIcon} />
+          <Ionicons name="notifications" size={64} color={theme.colors.neutral[300]} />
           <Text style={styles.emptyText}>No alerts found</Text>
           <Text style={styles.emptySubtext}>
             {searchQuery || selectedFilter !== 'All' 
@@ -403,7 +403,6 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.md,
     borderWidth: 0,
     borderColor: 'transparent',
-    outlineStyle: 'none',
   },
   filtersContainer: {
     marginBottom: theme.spacing.lg,

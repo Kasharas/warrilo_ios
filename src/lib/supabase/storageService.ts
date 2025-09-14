@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../../lib/supabaseClient';
 import { compressDevicePhoto, compressReceipt } from '../imageCompression';
 
 // Updated device photo upload with compression
@@ -13,7 +13,7 @@ export const uploadDevicePhoto = async (photoUri: string, userId: string): Promi
     console.log('Compressed image ready for upload');
     
     // Convert compressed base64 to blob
-    const blob = dataURLtoBlob(compressedImage);
+    const blob = await dataURLtoBlob(compressedImage.compressedUri!);
     
     const fileName = `${userId}/${Date.now()}-device-${Math.random().toString(36).substr(2, 9)}.jpg`;
     
@@ -43,7 +43,7 @@ export const uploadReceipt = async (receiptUri: string, userId: string): Promise
     
     console.log('Compressed receipt ready for upload');
     
-    const blob = dataURLtoBlob(compressedImage);
+    const blob = await dataURLtoBlob(compressedImage.compressedUri!);
     
     const fileName = `${userId}/${Date.now()}-invoice-${Math.random().toString(36).substr(2, 9)}.jpg`;
     
@@ -63,15 +63,9 @@ export const uploadReceipt = async (receiptUri: string, userId: string): Promise
   }
 };
 
-// Helper function to convert base64 to blob
-const dataURLtoBlob = (dataURL: string): Blob => {
-  const arr = dataURL.split(',');
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new Blob([u8arr], { type: mime });
+// Helper function to convert base64 to blob (React Native compatible)
+const dataURLtoBlob = async (dataURL: string): Promise<Blob> => {
+  // For React Native, we need to use fetch to convert the data URL to blob
+  const response = await fetch(dataURL);
+  return response.blob();
 };

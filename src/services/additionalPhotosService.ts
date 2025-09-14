@@ -1,5 +1,6 @@
-import { supabase, Database } from '../lib/supabase'
+import { supabase } from '../../lib/supabaseClient'
 import { uploadDevicePhoto } from '../utils/uploadDevicePhoto'
+import { Database } from '../lib/supabase'
 
 type DevicePhotoInsert = Database['public']['Tables']['device_photos']['Insert']
 

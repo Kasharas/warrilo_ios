@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabaseClient'
 // ✅ FIXED: Removed unused import since we're no longer compressing here
 
 interface ReceiptUploadOptions {
@@ -34,22 +34,14 @@ export const uploadReceiptPhoto = async ({
       // Generate unique filename for PDF
       const fileName = `${userId}/${Date.now()}-invoice-${Math.random().toString(36).substring(7)}.pdf`
       
-      // Convert URI to blob for upload
-      const response = await fetch(receipt.uri)
-      const blob = await response.blob()
-      
-      // Check file size (25MB limit for receipts)
-      if (blob.size > 25 * 1024 * 1024) {
-        return { 
-          success: false, 
-          error: 'File size too large. Maximum size is 25MB.' 
-        }
-      }
+      // For React Native, read the file as ArrayBuffer directly
+      const response = await fetch(receipt.uri);
+      const arrayBuffer = await response.arrayBuffer();
 
       // Upload PDF to Supabase storage
       const { error: uploadError } = await supabase.storage
         .from('device-invoices')
-        .upload(fileName, blob, {
+        .upload(fileName, arrayBuffer, {
           contentType: receipt.type,
           upsert: false
         })
@@ -82,22 +74,14 @@ export const uploadReceiptPhoto = async ({
     const fileExtension = 'jpg' // Always JPEG after compression
     const fileName = `${userId}/${Date.now()}-invoice-${Math.random().toString(36).substring(7)}.${fileExtension}`
 
-    // Convert compressed URI to blob for upload
-    const response = await fetch(imageUriForUpload)
-    const blob = await response.blob()
-
-    // Check file size (25MB limit for receipts)
-    if (blob.size > 25 * 1024 * 1024) {
-      return { 
-        success: false, 
-        error: 'File size too large. Maximum size is 25MB.' 
-      }
-    }
+    // For React Native, read the file as ArrayBuffer directly
+    const response = await fetch(imageUriForUpload);
+    const arrayBuffer = await response.arrayBuffer();
 
     // Upload to Supabase storage
     const { error: uploadError } = await supabase.storage
       .from('device-invoices')
-      .upload(fileName, blob, {
+      .upload(fileName, arrayBuffer, {
         contentType: 'image/jpeg', // Always JPEG after compression
         upsert: false
       })

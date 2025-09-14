@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View, Text } from 'react-native';
-import { ChartBar as BarChart3, Shield, Bell, User } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 
 export default function TabLayout() {
@@ -49,10 +49,7 @@ export default function TabLayout() {
             borderWidth: 1,
             borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
           }}>
-            <BarChart3 
-              size={40} 
-              color={focused ? theme.colors.white : theme.colors.neutral[500]} 
-            />
+            <Ionicons name="bar-chart" size={40} color={focused ? theme.colors.white : theme.colors.neutral[500]} />
           </View>
         ),
         }}
@@ -78,10 +75,7 @@ export default function TabLayout() {
               borderWidth: 1,
               borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
             }}>
-              <Shield 
-                size={40} 
-                color={focused ? theme.colors.white : theme.colors.neutral[500]} 
-              />
+              <Ionicons name="shield" size={40} color={focused ? theme.colors.white : theme.colors.neutral[500]} />
             </View>
           ),
         }}
@@ -107,10 +101,7 @@ export default function TabLayout() {
               borderWidth: 1,
               borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
             }}>
-              <Bell 
-                size={40} 
-                color={focused ? theme.colors.white : theme.colors.neutral[500]} 
-              />
+              <Ionicons name="notifications" size={40} color={focused ? theme.colors.white : theme.colors.neutral[500]} />
             </View>
           ),
         }}
@@ -136,10 +127,7 @@ export default function TabLayout() {
               borderWidth: 1,
               borderColor: focused ? theme.colors.systemBlue : theme.colors.neutral[200],
             }}>
-              <User 
-                size={40} 
-                color={focused ? theme.colors.white : theme.colors.neutral[500]} 
-              />
+              <Ionicons name="person" size={40} color={focused ? theme.colors.white : theme.colors.neutral[500]} />
             </View>
           ),
         }}

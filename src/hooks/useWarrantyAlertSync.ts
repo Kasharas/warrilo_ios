@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { useAuth } from '../hooks/useAuth'; // Your existing auth hook - DO NOT MODIFY
+import { useAuth } from '../../contexts/AuthContext'; // Your existing auth hook - DO NOT MODIFY
 import { useWarrantyAlertStore } from '../stores/warrantyAlertStore';
 import { warrantyAlertService } from '../services/warrantyAlertService';
 

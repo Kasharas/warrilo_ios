@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { RefreshCw, AlertCircle, CheckCircle, Clock } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 
 export interface SyncStatusBarProps {
@@ -52,10 +52,10 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
   };
 
   const getStatusIcon = () => {
-    if (isSyncing) return <RefreshCw size={16} color="#007AFF" />;
-    if (failed > 0) return <AlertCircle size={16} color={theme.colors.error[500]} />;
-    if (pending > 0) return <Clock size={16} color={theme.colors.warning[500]} />;
-    return <CheckCircle size={16} color={theme.colors.success[500]} />;
+    if (isSyncing) return <Ionicons name="refresh" size={16} color={"#007AFF"} />;
+    if (failed > 0) return <Ionicons name="alert-circle" size={16} color={theme.colors.error[500]} />;
+    if (pending > 0) return <Ionicons name="time" size={16} color={theme.colors.warning[500]} />;
+    return <Ionicons name="checkmark-circle" size={16} color={theme.colors.success[500]} />;
   };
 
   const getStatusText = () => {
@@ -111,7 +111,7 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
       <View style={styles.details}>
         {pending > 0 && (
           <View style={styles.detailRow}>
-            <Clock size={16} color={theme.colors.warning[500]} />
+            <Ionicons name="time" size={16} color={theme.colors.warning[500]} />
             <Text style={styles.detailText}>
               {pending} device{pending !== 1 ? 's' : ''} pending sync
             </Text>
@@ -120,7 +120,7 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
         
         {failed > 0 && (
           <View style={styles.detailRow}>
-            <AlertCircle size={16} color={theme.colors.error[500]} />
+            <Ionicons name="alert-circle" size={16} color={theme.colors.error[500]} />
             <Text style={styles.detailText}>
               {failed} device{failed !== 1 ? 's' : ''} failed to sync
             </Text>
@@ -129,7 +129,7 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
         
         {isSyncing && (
           <View style={styles.detailRow}>
-            <RefreshCw size={16} color="#007AFF" />
+            <Ionicons name="refresh" size={16} color={"#007AFF"} />
             <Text style={styles.detailText}>Synchronizing with database...</Text>
           </View>
         )}

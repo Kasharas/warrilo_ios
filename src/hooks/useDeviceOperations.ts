@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { DeviceLocalStorage } from '@/src/lib/localStorage';
-import { supabase } from '@/src/lib/supabase';
+import { supabase } from '../../lib/supabaseClient';
 import { LocalDevice } from '@/src/lib/localStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSync } from '@/contexts/SyncContext';

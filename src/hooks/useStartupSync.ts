@@ -24,7 +24,7 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
   const { user, loading: authLoading } = useAuth()
   
   const retryCountRef = useRef(0)
-  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const syncIntervalRef = useRef<number | null>(null)
   const hasInitialSyncedRef = useRef(false)
 
   // Main sync function with retry logic

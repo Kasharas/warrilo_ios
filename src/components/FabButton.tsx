@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Pressable } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 
 interface FabButtonProps {
@@ -10,7 +10,7 @@ interface FabButtonProps {
 export function FabButton({ onPress }: FabButtonProps) {
   return (
     <Pressable style={styles.fab} onPress={onPress}>
-      <Plus size={28} color={theme.colors.white} />
+      <Ionicons name="add" size={28} color={theme.colors.white} />
     </Pressable>
   );
 }

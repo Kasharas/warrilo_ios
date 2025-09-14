@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator, RefreshControl } from 'react-native';
-import { ArrowLeft, Edit, Camera, Lightbulb, ChevronDown, Calendar, FolderOpen } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -11,7 +11,8 @@ import { useDeviceOperations } from '@/src/hooks/useDeviceOperations';
 
 export default function DeviceDetailsScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, deviceId } = useLocalSearchParams();
+  const deviceIdToUse = deviceId || id;
   const { user } = useAuth();
   const { getLocalDevices } = useDeviceSync();
   const { deleteDevice } = useDeviceOperations();
@@ -24,18 +25,18 @@ export default function DeviceDetailsScreen() {
 
   useEffect(() => {
     loadDeviceData();
-  }, [id]);
+  }, [deviceIdToUse]);
 
   const loadDeviceData = async () => {
     try {
       setLoading(true);
       const devices = await getLocalDevices();
-      const foundDevice = devices.find(d => d.local_id === id || d.id === id);
+      const foundDevice = devices.find(d => d.local_id === deviceIdToUse || d.id === deviceIdToUse);
       
       if (foundDevice) {
         setDevice(foundDevice);
       } else {
-        console.error('Device not found with ID:', id);
+        console.error('Device not found with ID:', deviceIdToUse);
       }
     } catch (error) {
       console.error('Error loading device data:', error);
@@ -170,7 +171,7 @@ export default function DeviceDetailsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Pressable onPress={handleBackPress}>
-            <ArrowLeft size={24} color={theme.colors.label} />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.label} />
           </Pressable>
           <Text style={styles.headerTitle}>Item Details</Text>
         </View>
@@ -190,12 +191,12 @@ export default function DeviceDetailsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={handleBackPress}>
-          <ArrowLeft size={24} color={theme.colors.label} />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.label} />
         </Pressable>
         <Text style={styles.headerTitle}>Item Details</Text>
         <View style={styles.headerActions}>
           <Pressable style={styles.actionButton} onPress={handleEditDevice}>
-            <Edit size={20} color={theme.colors.systemBlue} />
+            <Ionicons name="create" size={20} color={theme.colors.systemBlue} />
           </Pressable>
         </View>
       </View>
@@ -224,12 +225,12 @@ export default function DeviceDetailsScreen() {
                   <Image 
                     source={{ uri: device.photo_irl }} 
                     style={styles.imagePreview}
-                    resizeMode="cover"
+                    resizeMode="contain"
                   />
                 </View>
               ) : (
                 <View style={styles.uploadContent}>
-                  <Camera size={32} color={theme.colors.systemGray} />
+                  <Ionicons name="camera" size={32} color={theme.colors.neutral[400]} />
                   <Text style={styles.uploadText}>No Device Image</Text>
                 </View>
               )}
@@ -242,12 +243,12 @@ export default function DeviceDetailsScreen() {
                   <Image 
                     source={{ uri: device.invoice_url }} 
                     style={styles.imagePreview}
-                    resizeMode="cover"
+                    resizeMode="contain"
                   />
                 </View>
               ) : (
                 <View style={styles.uploadContent}>
-                  <FolderOpen size={32} color={theme.colors.systemGray} />
+                  <Ionicons name="folder-open" size={32} color={theme.colors.neutral[400]} />
                   <Text style={styles.uploadText}>No Receipt</Text>
                 </View>
               )}
@@ -382,8 +383,7 @@ export default function DeviceDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.systemBackground,
-    paddingHorizontal: theme.spacing.lg,
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -393,8 +393,8 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.lg,
   },
   headerTitle: {
-    fontSize: theme.fontSize.title2,
-    fontWeight: theme.fontWeight.semibold,
+    fontSize: theme.fontSize.title1,
+    fontWeight: theme.fontWeight.bold,
     color: theme.colors.label,
   },
   headerActions: {
@@ -406,17 +406,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    paddingHorizontal: theme.spacing.lg,
   },
   section: {
-    backgroundColor: theme.colors.systemBackground,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.xl,
-    marginBottom: theme.spacing.lg,
-    shadowColor: theme.colors.label,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
+    marginBottom: theme.spacing['3xl'],
   },
   sectionTitle: {
     fontSize: theme.fontSize.title3,
@@ -425,12 +418,12 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
   },
   uploadRow: {
-    flexDirection: 'column',
-    gap: theme.spacing.lg,
+    flexDirection: 'row',
+    gap: theme.spacing.md,
   },
   uploadZone: {
-    width: '100%',
-    backgroundColor: theme.colors.systemBackground,
+    flex: 1,
+    backgroundColor: theme.colors.neutral[100],
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.lg,
     borderWidth: 1,
@@ -459,7 +452,7 @@ const styles = StyleSheet.create({
   },
   imagePreview: {
     width: '100%',
-    height: 180,
+    height: 200,
     borderRadius: theme.borderRadius.md,
   },
   uploadContent: {
@@ -467,7 +460,7 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     fontSize: theme.fontSize.body,
-    color: theme.colors.systemGray,
+    color: theme.colors.neutral[400],
     marginTop: theme.spacing.sm,
     textAlign: 'center',
   },
@@ -584,18 +577,18 @@ const styles = StyleSheet.create({
     color: theme.colors.systemBackground,
   },
   deleteButtonContainer: {
-    marginTop: -30, // Move button 30px up
-    marginBottom: theme.spacing.xl,
+    marginTop: theme.spacing.xl,
+    marginBottom: theme.spacing.xxxl,
   },
   deleteButton: {
     backgroundColor: theme.colors.systemRed,
     borderRadius: theme.borderRadius.md,
-    paddingVertical: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
     alignItems: 'center',
-    shadowColor: theme.colors.systemRed,
+    shadowColor: theme.colors.label,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 3,
   },
   deleteButtonText: {

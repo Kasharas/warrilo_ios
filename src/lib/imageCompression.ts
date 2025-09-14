@@ -127,7 +127,8 @@ const webCompression = async (
  */
 const mobileCompression = async (
   uri: string, 
-  options: CompressionOptions
+  options: CompressionOptions,
+  originalAsset?: any
 ): Promise<CompressionResult> => {
   try {
     console.log(`[${Platform.OS}] Starting native image compression...`);
@@ -135,24 +136,35 @@ const mobileCompression = async (
     // Dynamic import to avoid bundling issues
     const ImageManipulator = require('expo-image-manipulator');
     
-    // Calculate dimensions
+    // Get actual image dimensions first
+    const imageInfo = await ImageManipulator.manipulateAsync(
+      uri,
+      [],
+      { format: ImageManipulator.SaveFormat.JPEG }
+    );
+    
+    // Calculate dimensions based on actual image size
     const { width, height } = calculateDimensions(
-      1920, // Default width, will be updated with actual image dimensions
-      1080, // Default height, will be updated with actual image dimensions
+      imageInfo.width,
+      imageInfo.height,
       options.maxWidth,
       options.maxHeight
     );
     
+    // Only resize if dimensions actually need to change (not for 9999 values)
+    const needsResize = (options.maxWidth < 9999 && options.maxHeight < 9999) && 
+                       (width !== imageInfo.width || height !== imageInfo.height);
+    
     const result = await ImageManipulator.manipulateAsync(
       uri,
-      [
+      needsResize ? [
         { 
           resize: { 
             width: Math.round(width), 
             height: Math.round(height) 
           } 
         }
-      ],
+      ] : [], // No resize operation if dimensions are fine
       {
         compress: options.quality,
         format: ImageManipulator.SaveFormat.JPEG,
@@ -161,11 +173,36 @@ const mobileCompression = async (
     );
     
     // Calculate compression metrics
-    const originalSizeKB = 0; // Will be updated when we implement size detection
-    const compressedSizeKB = 0; // Will be updated when we implement size detection
-    const compressionRatio = 0; // Will be calculated
+    const originalSizeKB = Math.round((originalAsset?.fileSize || 0) / 1024);
+    
+    // Get compressed file size by reading the file
+    let compressedSizeKB = 0;
+    try {
+      // For local file URIs, we need to use a different approach
+      if (result.uri.startsWith('file://')) {
+        // Use FileSystem to get file size
+        const FileSystem = require('expo-file-system');
+        const fileInfo = await FileSystem.getInfoAsync(result.uri);
+        if (fileInfo.exists) {
+          compressedSizeKB = Math.round((fileInfo.size || 0) / 1024);
+        }
+      } else {
+        // For remote URIs, use fetch
+        const response = await fetch(result.uri);
+        const blob = await response.blob();
+        compressedSizeKB = Math.round(blob.size / 1024);
+      }
+    } catch (error) {
+      console.warn(`[${Platform.OS}] Could not get compressed file size:`, error);
+    }
+    
+    const compressionRatio = originalSizeKB > 0 ? Math.round((1 - compressedSizeKB / originalSizeKB) * 100) : 0;
     
     console.log(`[${Platform.OS}] Native compression complete`);
+    console.log(`[${Platform.OS}] Target: ${options.maxWidth}x${options.maxHeight}, Quality: ${options.quality}, MaxSize: ${options.maxSizeKB}KB`);
+    console.log(`[${Platform.OS}] Original: ${imageInfo.width}x${imageInfo.height}, Compressed: ${width}x${height}`);
+    console.log(`[${Platform.OS}] Result object:`, JSON.stringify(result, null, 2));
+    console.log(`[${Platform.OS}] Result URI:`, result.uri);
     
     return {
       success: true,
@@ -203,6 +240,15 @@ const calculateDimensions = (
   maxWidth: number, 
   maxHeight: number
 ) => {
+  // For no-resize cases (9999 values), keep original dimensions
+  if (maxWidth >= 9999 || maxHeight >= 9999) {
+    return {
+      width: originalWidth,
+      height: originalHeight
+    };
+  }
+  
+  // For other cases, maintain aspect ratio
   const ratio = Math.min(maxWidth / originalWidth, maxHeight / originalHeight);
   return {
     width: Math.round(originalWidth * ratio),
@@ -252,7 +298,8 @@ const compressToTargetSize = async (
  */
 export const compressImage = async (
   imageUri: string, 
-  options: Partial<CompressionOptions> = {}
+  options: Partial<CompressionOptions> = {},
+  originalAsset?: any
 ): Promise<CompressionResult> => {
   const opts = { ...DEFAULT_COMPRESSION_OPTIONS, ...options };
   
@@ -263,7 +310,7 @@ export const compressImage = async (
     if (isWeb) {
       return await webCompression(imageUri, opts);
     } else if (isMobile) {
-      return await mobileCompression(imageUri, opts);
+      return await mobileCompression(imageUri, opts, originalAsset);
     } else {
       throw new Error(`Unsupported platform: ${Platform.OS}`);
     }
@@ -289,27 +336,27 @@ export const compressImage = async (
 /**
  * Compress device photos with optimized settings
  */
-export const compressDevicePhoto = async (imageUri: string): Promise<CompressionResult> => {
+export const compressDevicePhoto = async (imageUri: string, originalAsset?: any): Promise<CompressionResult> => {
   return compressImage(imageUri, {
-    maxSizeKB: 50,
-    maxWidth: 600,
-    maxHeight: 600,
-    quality: 0.85,
+    maxSizeKB: 150, // Target 150KB or less
+    maxWidth: 9999, // No resizing - keep original width
+    maxHeight: 9999, // No resizing - keep original height
+    quality: 0.3,    // Very aggressive compression (30% quality)
     format: 'jpeg'
-  });
+  }, originalAsset);
 };
 
 /**
  * Compress receipt photos with text-optimized settings
  */
-export const compressReceipt = async (imageUri: string): Promise<CompressionResult> => {
+export const compressReceipt = async (imageUri: string, originalAsset?: any): Promise<CompressionResult> => {
   return compressImage(imageUri, {
-    maxSizeKB: 50,
-    maxWidth: 800,    // Receipts might need more width for text
-    maxHeight: 1200,  // Receipts are usually tall
-    quality: 0.9,     // Higher quality for text readability
+    maxSizeKB: 150, // Target 150KB or less
+    maxWidth: 9999, // No resizing - keep original width
+    maxHeight: 9999, // No resizing - keep original height
+    quality: 0.3,    // Very aggressive compression (30% quality)
     format: 'jpeg'
-  });
+  }, originalAsset);
 };
 
 /**

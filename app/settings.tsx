@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, Pressable, Alert, ScrollView } from 'react-native';
-import { Shield, Bell, User, ArrowLeft, Info, FileText, Mail } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -40,7 +40,7 @@ export default function SettingsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={handleBackPress}>
-          <ArrowLeft size={24} color={theme.colors.neutral[900]} />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.neutral[900]} />
         </Pressable>
         <Text style={styles.headerTitle}>Settings</Text>
         <View style={{ width: 24 }} />
@@ -54,7 +54,7 @@ export default function SettingsScreen() {
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <User size={20} color={theme.colors.systemBlue} />
+                <Ionicons name="person" size={20} color={theme.colors.systemBlue} />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Email</Text>
@@ -66,7 +66,7 @@ export default function SettingsScreen() {
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <Shield size={20} color={theme.colors.success[600]} />
+                <Ionicons name="shield" size={20} color={theme.colors.success[600]} />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Account Status</Text>
@@ -83,7 +83,7 @@ export default function SettingsScreen() {
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <Bell size={20} color={theme.colors.warning[600]} />
+                <Ionicons name="notifications" size={20} color={theme.colors.warning[600]} />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Push Notifications</Text>
@@ -106,7 +106,7 @@ export default function SettingsScreen() {
           <Pressable style={styles.settingRow} onPress={handlePrivacyPolicy}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <Shield size={20} color={theme.colors.neutral[600]} />
+                <Ionicons name="shield" size={20} color={theme.colors.neutral[600]} />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Privacy Policy</Text>
@@ -120,7 +120,7 @@ export default function SettingsScreen() {
           <Pressable style={styles.settingRow} onPress={handleTermsOfService}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <FileText size={20} color={theme.colors.neutral[600]} />
+                <Ionicons name="document-text" size={20} color={theme.colors.neutral[600]} />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Terms of Service</Text>
@@ -134,7 +134,7 @@ export default function SettingsScreen() {
           <Pressable style={styles.settingRow} onPress={handleSupport}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <Mail size={20} color={theme.colors.systemBlue} />
+                <Ionicons name="mail" size={20} color={theme.colors.systemBlue} />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Contact Support</Text>
@@ -148,7 +148,7 @@ export default function SettingsScreen() {
           <Pressable style={styles.settingRow} onPress={handleAbout}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
-                <Info size={20} color={theme.colors.neutral[600]} />
+                <Ionicons name="information-circle" size={20} color={theme.colors.neutral[600]} />
               </View>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>About</Text>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable, Alert, ActivityIndicator } from 'react-native';
-import { Shield, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -17,39 +17,42 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    console.log('Signup attempt started'); // Debug log
+    console.log('=== EMAIL SIGNUP DEBUG START ===');
+    console.log('1. Signup button clicked');
+    console.log('2. Email:', email);
+    console.log('3. Password length:', password.length);
+    console.log('4. Confirm password length:', confirmPassword.length);
     
     if (!email || !password || !confirmPassword) {
-      console.log('Validation failed: missing fields'); // Debug log
+      console.log('5. Validation failed: Missing fields');
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      console.log('Validation failed: passwords do not match'); // Debug log
+      console.log('5. Validation failed: Passwords do not match');
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      console.log('Validation failed: password too short'); // Debug log
+      console.log('5. Validation failed: Password too short');
       Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
     }
 
-    console.log('Starting signup process...'); // Debug log
+    console.log('5. Validation passed, starting signup process...');
     setLoading(true);
     
     try {
-      console.log('Calling signUp function...'); // Debug log
+      console.log('6. Calling signUp function from AuthContext...');
       const { error } = await signUp(email, password);
-      console.log('SignUp result:', { error }); // Debug log
       
       if (error) {
-        console.log('Signup failed:', error.message); // Debug log
+        console.error('7. SignUp error:', error.message);
         Alert.alert('Signup Failed', error.message);
       } else {
-        console.log('Signup successful!'); // Debug log
+        console.log('7. SignUp successful - user will receive confirmation email');
         Alert.alert(
           'Success', 
           'Account created successfully! Please check your email to verify your account.',
@@ -57,11 +60,14 @@ export default function SignupScreen() {
         );
       }
     } catch (error) {
-      console.log('Signup error caught:', error); // Debug log
+      console.error('8. Unexpected error during signup:', error);
       Alert.alert('Error', 'An unexpected error occurred');
     } finally {
+      console.log('9. Signup process completed, setting loading to false');
       setLoading(false);
     }
+    
+    console.log('=== EMAIL SIGNUP DEBUG END ===');
   };
 
   return (
@@ -69,13 +75,13 @@ export default function SignupScreen() {
       <View style={styles.content}>
         {/* Header */}
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ArrowLeft size={24} color={theme.colors.neutral[600]} />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.neutral[600]} />
         </Pressable>
 
         {/* Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logo}>
-            <Shield size={40} color="#007AFF" />
+            <Ionicons name="shield" size={40} color={"#007AFF"} />
           </View>
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Sign up to get started</Text>
@@ -107,9 +113,9 @@ export default function SignupScreen() {
               onPress={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
-                <EyeOff size={20} color={theme.colors.neutral[400]} />
+                <Ionicons name="eye-off" size={20} color={theme.colors.neutral[400]} />
               ) : (
-                <Eye size={20} color={theme.colors.neutral[400]} />
+                <Ionicons name="eye" size={20} color={theme.colors.neutral[400]} />
               )}
             </Pressable>
           </View>
@@ -129,9 +135,9 @@ export default function SignupScreen() {
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               {showConfirmPassword ? (
-                <EyeOff size={20} color={theme.colors.neutral[400]} />
+                <Ionicons name="eye-off" size={20} color={theme.colors.neutral[400]} />
               ) : (
-                <Eye size={20} color={theme.colors.neutral[400]} />
+                <Ionicons name="eye" size={20} color={theme.colors.neutral[400]} />
               )}
             </Pressable>
           </View>

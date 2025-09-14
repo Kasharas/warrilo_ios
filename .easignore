@@ -1,0 +1,76 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+android/app/build/
+android/build/
+android/.gradle/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/app/debug.keystore
+
+# iOS build artifacts
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Test files
+**/*.test.*
+**/*.spec.*
+src/tests/
+
+# Documentation
+docs/
+*.md
+README.md
+
+# Large files that might cause tar issues
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Files with special characters or very long names
+election when changing months, prevent auto-alignment after user interaction
+Gitbingit.exe config core.pager 
+h origin development
+how --name-only
+ign out functionality Add web-compatible confirmation dialog, debug logging, and automatic navigation to welcome screen
+tatus

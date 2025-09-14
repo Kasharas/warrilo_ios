@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, Alert, ActivityIndicator, TextInput, Modal, RefreshControl, Button } from 'react-native';
-import { Plus, Search, Filter, Shield } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -83,7 +83,7 @@ export default function DeviceListScreen() {
 
   const filteredDevices = devices.filter(device => {
     const matchesSearch = device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (device.brand && device.brand.toLowerCase().includes(searchQuery.toLowerCase()));
+                          (device.supplier && device.supplier.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesFilter = selectedFilter === 'All' || device.category === selectedFilter;
     return matchesSearch && matchesFilter;
   });
@@ -133,9 +133,6 @@ export default function DeviceListScreen() {
       
       // Remove from local state
       setDevices(devices.filter(d => d.id !== deviceToDelete));
-      
-      // Show success message
-      Alert.alert('Success', 'Item deleted successfully!');
       
     } catch (error) {
       console.error('❌ Devices Screen: Error deleting device:', error);
@@ -195,23 +192,13 @@ export default function DeviceListScreen() {
         </View>
       </View>
 
-      {/* Test Deep Link Button */}
-      <View style={{ padding: 16, backgroundColor: '#f0f0f0' }}>
-        <Button
-          title="Test Auth Callback"
-          onPress={() => {
-            console.log('🧪 Testing navigation to auth-callback...');
-            router.push('/auth-callback?code=test123&state=test456');
-          }}
-        />
-      </View>
 
       {/* Search Bar */}
       <View style={[
         styles.searchContainer,
         isSearchFocused && styles.searchContainerFocused
       ]}>
-                 <Search size={20} color={theme.colors.neutral[500]} style={styles.searchIcon} />
+                 <Ionicons name="search" size={20} color={theme.colors.neutral[500]} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search items..."
@@ -323,7 +310,7 @@ export default function DeviceListScreen() {
                 onPress={cancelDelete}
                 disabled={deleting}
               >
-                                 <Text style={[styles.modalButtonText, { color: theme.colors.label }]}>No, Keep It</Text>
+                                 <Text style={[styles.modalButtonText, { color: theme.colors.label }]}>No</Text>
               </Pressable>
               <Pressable 
                 style={[
@@ -340,7 +327,7 @@ export default function DeviceListScreen() {
                     <Text style={[styles.modalButtonText, { marginLeft: 8 }]}>Deleting...</Text>
                   </View>
                 ) : (
-                  <Text style={styles.modalButtonText}>Yes, Delete It</Text>
+                  <Text style={styles.modalButtonText}>Yes</Text>
                 )}
               </Pressable>
             </View>
@@ -401,7 +388,6 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.md,
     borderWidth: 0,
     borderColor: 'transparent',
-    outlineStyle: 'none',
   },
   filtersContainer: {
     marginBottom: theme.spacing.lg,

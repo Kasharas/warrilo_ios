@@ -134,9 +134,11 @@ export const uploadDevice = async (
       // Create 3 warranty alerts (30, 7, 1 day before expiry)
       const warrantyAlerts = createWarrantyAlerts({
         deviceId: device.id,
+        localDeviceId: formData.localDeviceId, // Include local device ID for local storage
         userId: userId,
         purchaseDate: formData.purchaseDate || '',
-        warrantyMonths: formData.warrantyMonths || 0
+        warrantyMonths: formData.warrantyMonths || 0,
+        deviceName: formData.deviceName // Include device name for local storage
       });
       
       console.log('📅 Warranty alerts created locally:', warrantyAlerts);
@@ -170,6 +172,41 @@ export const uploadDevice = async (
       if (alertError && typeof alertError === 'object') {
         console.error('❌ Alert error details:', JSON.stringify(alertError, null, 2));
       }
+    }
+
+    // ✅ STEP 2: Update local device with Supabase ID
+    try {
+      console.log('🔄 Updating local device with Supabase ID:', device.id);
+      
+      // Get the original local device data
+      const devicesData = await AsyncStorage.getItem('devices');
+      if (devicesData) {
+        const devices = JSON.parse(devicesData);
+        // Find device by matching name and purchase date (most reliable way)
+        const localDeviceIndex = devices.findIndex((d: any) => 
+          d.name === formData.deviceName && 
+          d.purchase_date === formData.purchaseDate &&
+          d.sync_status === 'pending' // Only update devices that haven't been synced yet
+        );
+        
+        if (localDeviceIndex >= 0) {
+          // Update the local device with Supabase ID
+          devices[localDeviceIndex] = {
+            ...devices[localDeviceIndex],
+            id: device.id, // Update with Supabase ID
+            sync_status: 'synced',
+            last_sync: new Date().toISOString()
+          };
+          
+          await AsyncStorage.setItem('devices', JSON.stringify(devices));
+          console.log('✅ Local device updated with Supabase ID:', device.id);
+        } else {
+          console.warn('⚠️ Local device not found for name:', formData.deviceName, 'date:', formData.purchaseDate);
+        }
+      }
+    } catch (updateError) {
+      console.error('❌ Error updating local device with Supabase ID:', updateError);
+      // Don't fail the entire upload for this
     }
 
     return { 

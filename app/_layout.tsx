@@ -17,6 +17,14 @@ function AppContent() {
   const { user, syncReady, loading } = useAuth();
   const router = useRouter();
   
+  // Debug auth state changes
+  useEffect(() => {
+    console.log('🔐 APP CONTENT: Auth state changed');
+    console.log('🔐 APP CONTENT: User:', user ? `ID: ${user.id}` : 'null');
+    console.log('🔐 APP CONTENT: Loading:', loading);
+    console.log('🔐 APP CONTENT: SyncReady:', syncReady);
+  }, [user, loading, syncReady]);
+  
   // Auth-driven navigation guard
   useEffect(() => {
     console.log('🔐 AUTH GUARD: Checking auth state for navigation...');
@@ -38,6 +46,14 @@ function AppContent() {
     } else {
       console.log('🔐 AUTH GUARD: No user, redirecting to welcome');
       // User is not logged in, redirect to welcome
+      router.replace('/welcome');
+    }
+  }, [user, loading, router]);
+  
+  // Additional effect to catch sign out specifically
+  useEffect(() => {
+    if (!loading && !user) {
+      console.log('🔐 AUTH GUARD: Sign out detected, forcing navigation to welcome');
       router.replace('/welcome');
     }
   }, [user, loading, router]);

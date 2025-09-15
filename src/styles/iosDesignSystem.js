@@ -5,7 +5,7 @@ export const iosColors = {
   // Primary System Colors
   systemBlue: '#007AFF',
   systemGreen: '#34C759',
-  systemRed: '#FF3B30',
+  systemRed: '#FF4A4A',
   systemOrange: '#FF9500',
   systemYellow: '#FFCC00',
   systemPink: '#FF2D92',
@@ -41,7 +41,7 @@ export const iosColors = {
   // Status Colors
   statusSuccess: '#10b981',
   statusWarning: '#f59e0b',
-  statusError: '#ef4444',
+  statusError: '#FF4A4A',
 
   // Background Variants
   backgroundLight: '#f9fafb',
@@ -50,7 +50,7 @@ export const iosColors = {
 
   // Text Variants
   textMediumGray: '#6b7280',
-  textErrorRed: '#dc2626',
+  textErrorRed: '#FF4A4A',
   textDarkBlue: '#0369a1',
 };
 

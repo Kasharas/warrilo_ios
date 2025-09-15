@@ -20,7 +20,11 @@ export const useDeviceOperations = () => {
       
       if (alertsData) {
         const alerts = JSON.parse(alertsData);
-        const filteredAlerts = alerts.filter((alert: any) => alert.device_id !== deviceId);
+        // Filter out alerts that match either the local ID or the Supabase ID
+        const filteredAlerts = alerts.filter((alert: any) => {
+          // Check both local_id and device_id fields
+          return alert.device_id !== deviceId && alert.local_device_id !== deviceId;
+        });
         
         if (filteredAlerts.length !== alerts.length) {
           await AsyncStorage.setItem('warranty_alerts', JSON.stringify(filteredAlerts));
@@ -102,33 +106,39 @@ export const useDeviceOperations = () => {
         console.log('🎯 FLOW TEST: Step 3/4 - Supabase delete starting...');
         console.log('☁️ Phase 3: Deleting from Supabase...');
         
-        // Delete warranty alerts first
-        try {
-          await warrantyAlertService.deleteAlertsByDeviceId(device.id);
-          console.log('✅ Warranty alerts deleted from Supabase');
-        } catch (alertError) {
-          console.error('⚠️ Warning: Failed to delete warranty alerts from Supabase:', alertError);
-          // Don't fail the entire deletion for alert cleanup issues
+        // Delete warranty alerts first (only if device has a valid Supabase ID)
+        if (device.id && !device.id.startsWith('temp_')) {
+          try {
+            await warrantyAlertService.deleteAlertsByDeviceId(device.id);
+            console.log('✅ Warranty alerts deleted from Supabase');
+          } catch (alertError) {
+            console.error('⚠️ Warning: Failed to delete warranty alerts from Supabase:', alertError);
+            // Don't fail the entire deletion for alert cleanup issues
+          }
+        } else {
+          console.log('ℹ️ Skipping Supabase warranty alert deletion - device has local ID only:', device.id);
         }
         
-        const { error } = await supabase
-          .from('devices')
-          .delete()
-          .eq('id', device.id);
+        // Only attempt Supabase deletion if device has a valid Supabase ID
+        if (device.id && !device.id.startsWith('temp_')) {
+          const { error } = await supabase
+            .from('devices')
+            .delete()
+            .eq('id', device.id);
         
-        // Phase 4: Rollback on error
-        if (error) {
-          console.error('Supabase delete failed:', error);
-          
-          // Restore device to local storage
-          const currentDevices = await DeviceLocalStorage.getDevices();
-          const restored = [...currentDevices, device];
-          await DeviceLocalStorage.saveDevices(restored);
-          
-          // Show error notification (could be enhanced with toast/alert)
-          console.warn('Device deletion failed on server, restored locally');
-        } else {
-          console.log('✅ Device successfully deleted from Supabase');
+          // Phase 4: Rollback on error
+          if (error) {
+            console.error('Supabase delete failed:', error);
+            
+            // Restore device to local storage
+            const currentDevices = await DeviceLocalStorage.getDevices();
+            const restored = [...currentDevices, device];
+            await DeviceLocalStorage.saveDevices(restored);
+            
+            // Show error notification (could be enhanced with toast/alert)
+            console.warn('Device deletion failed on server, restored locally');
+          } else {
+            console.log('✅ Device successfully deleted from Supabase');
           console.log('🔍 VERIFICATION: Supabase delete completed for device:', device.id);
           
           // Phase 4: Clean up device photos from storage
@@ -249,6 +259,9 @@ export const useDeviceOperations = () => {
           console.log('🧪 COMPLETE FLOW TEST: === DELETE VERIFICATION COMPLETED ===');
           console.log('🧪 FLOW TEST: Expected result: 1 device removed, device photos cleaned, receipt photos cleaned, no sync restoration');
           console.log('🧪 FLOW TEST: Actual result logged above in verification section');
+          }
+        } else {
+          console.log('ℹ️ Device has local ID only, skipping Supabase operations:', device.id);
         }
       } else {
         console.log('Device was local only, no Supabase sync needed');

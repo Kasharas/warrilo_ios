@@ -1,8 +1,19 @@
 import { AddDeviceFormData } from '../types/device'
 import { Database } from '../lib/supabase'
-import { addMonths } from 'date-fns'
+import { addMonths, parseISO, isValid } from 'date-fns'
 
 type DeviceInsert = Database['public']['Tables']['devices']['Insert']
+
+// Safe date parsing function (same as in warrantyAlertUtils.ts)
+const parseDate = (dateString: string): Date => {
+  if (!dateString) return new Date();
+  
+  const isoDate = parseISO(dateString);
+  if (isValid(isoDate)) return isoDate;
+  
+  const fallbackDate = new Date(dateString);
+  return isValid(fallbackDate) ? fallbackDate : new Date();
+};
 
 export const prepareDeviceData = (
   formData: AddDeviceFormData,
@@ -10,10 +21,10 @@ export const prepareDeviceData = (
   receiptUrl: string | null,
   userId: string
 ): DeviceInsert => {
-  // Calculate warranty end date
+  // Calculate warranty end date using the same method as warrantyAlertUtils
   let warrantyEndDate: string | null = null
   if (formData.purchaseDate && formData.warrantyMonths) {
-    const purchaseDate = new Date(formData.purchaseDate)
+    const purchaseDate = parseDate(formData.purchaseDate)
     const endDate = addMonths(purchaseDate, formData.warrantyMonths)
     warrantyEndDate = endDate.toISOString().split('T')[0]
   }

@@ -8,7 +8,7 @@ interface WarrantyAlert {
   user_id: string;
   reminder_date: string;
   warranty_expire_date: string;
-
+  device_name?: string; // Optional device name for local storage
   created_at: string;
 }
 

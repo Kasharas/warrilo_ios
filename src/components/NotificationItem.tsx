@@ -17,7 +17,7 @@ export function NotificationItem({ title, message, timestamp, type }: Notificati
       case 'success':
         return theme.colors.success[500];
       case 'error':
-        return theme.colors.error[500];
+        return theme.colors.systemRed;
       case 'info':
         return theme.colors.secondary[500];
       default:

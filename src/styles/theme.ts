@@ -60,11 +60,11 @@ export const theme = {
       200: '#fecaca',
       300: '#fca5a5',
       400: '#f87171',
-      500: '#ef4444', // Error red
-      600: '#dc2626',
-      700: '#b91c1c',
-      800: '#991b1b',
-      900: '#7f1d1d',
+      500: '#FF4A4A', // Balanced iOS red
+      600: '#FF4A4A',
+      700: '#FF4A4A',
+      800: '#FF4A4A',
+      900: '#FF4A4A',
     },
     neutral: {
       50: '#f9fafb',

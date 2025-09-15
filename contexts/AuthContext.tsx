@@ -409,25 +409,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('✅ AuthContext: Supabase sign out completed successfully');
       
-      // Reset local state
-      console.log('🔄 AuthContext: Resetting local state...');
-      setUser(null);
-      setSession(null);
-      setSyncReady(false);
-      setLastSyncTime(null);
-      
-      console.log('✅ AuthContext: Sign out completed successfully - user state reset');
-      console.log('✅ AuthContext: User is now:', user);
-      console.log('✅ AuthContext: Session is now:', session);
+      console.log('✅ AuthContext: Supabase sign out completed - auth state listener will handle state updates');
       
     } catch (error) {
       console.error('❌ AuthContext: Error during sign out:', error);
-      // Even if there's an error, try to reset the user state
-      console.log('🔄 AuthContext: Attempting to reset state despite error...');
-      setUser(null);
-      setSession(null);
-      setSyncReady(false);
-      setLastSyncTime(null);
       throw error;
     }
   };

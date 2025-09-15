@@ -201,7 +201,6 @@ export default function ProfileScreen() {
             }} 
             disabled={isSigningOut}
           >
-            <Ionicons name="log-out" size={20} color={theme.colors.systemRed} />
             <Text style={styles.signOutText}>
               {isSigningOut ? 'Signing Out...' : 'Sign Out'}
             </Text>
@@ -437,14 +436,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   signOutButton: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.error[500],
+    backgroundColor: theme.colors.systemRed,
     paddingVertical: theme.spacing.buttonY,
     paddingHorizontal: theme.spacing.buttonX,
     borderRadius: theme.borderRadius.md,
-    gap: 8,
+    minHeight: 44,
   },
   signOutButtonDisabled: {
     opacity: 0.7,

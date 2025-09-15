@@ -7,6 +7,7 @@ export interface SupabaseWarrantyAlert {
   user_id: string;
   reminder_date: string;
   warranty_expire_date: string;
+  device_name?: string; // Optional device name for local storage
 }
 
 // Web-safe network check
@@ -73,17 +74,23 @@ export const warrantyAlertService = {
         return isValid;
       });
       
+      // ✅ PREPARE DATA FOR SUPABASE (remove device_name as it's not in the schema)
+      const supabaseAlerts = validAlerts.map(alert => {
+        const { device_name, ...supabaseAlert } = alert;
+        return supabaseAlert;
+      });
+      
       if (validAlerts.length === 0) {
         console.warn('⚠️ No valid alerts to insert');
         return [];
       }
       
-      console.log(`📝 Inserting ${validAlerts.length} valid alerts...`);
+      console.log(`📝 Inserting ${supabaseAlerts.length} valid alerts...`);
       
       // ✅ SIMPLIFIED INSERT - NO .select() to avoid URL corruption
       const { data, error } = await supabase
         .from('warranty_reminders')
-        .insert(validAlerts);
+        .insert(supabaseAlerts);
       
       if (error) {
         console.error('❌ Supabase insert error:', error);
@@ -92,9 +99,10 @@ export const warrantyAlertService = {
       }
       
       console.log('✅ Successfully created warranty alerts in Supabase');
-      console.log('📊 Created alerts count:', validAlerts.length);
+      console.log('📊 Created alerts count:', supabaseAlerts.length);
       
       // Return the alerts with generated IDs (since we didn't select, we generate temp IDs)
+      // Include device_name from original alerts for local storage
       return validAlerts.map((alert, index) => ({
         ...alert,
         id: `temp_${Date.now()}_${index}`
@@ -126,6 +134,7 @@ export const warrantyAlertService = {
     
     try {
       console.log('🗑️ Deleting warranty alerts for device:', deviceId);
+      
       const { error } = await supabase
         .from('warranty_reminders')
         .delete()

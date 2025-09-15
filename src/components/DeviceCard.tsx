@@ -170,7 +170,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
     const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
     if (daysUntilExpiry < 0) {
-      return { status: 'Expired', color: theme.colors.error[500] };
+      return { status: 'Expired', color: theme.colors.systemRed };
     } else if (daysUntilExpiry <= 30) {
       return { status: 'Expiring', color: theme.colors.warning[500] };
     } else {
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   },
 
   deleteButton: {
-    backgroundColor: theme.colors.error?.[500] || '#ef4444', // Fallback to hex color
+    backgroundColor: theme.colors.systemRed, // Use consistent system red
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     minWidth: 80,
     height: 40,
     borderWidth: 2,
-    borderColor: theme.colors.error?.[500] || '#ef4444', // Same red for border
+    borderColor: theme.colors.systemRed, // Same red for border
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,

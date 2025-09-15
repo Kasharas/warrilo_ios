@@ -170,7 +170,10 @@ class LocalStorageSyncAdapter {
       
       if (alertsData) {
         const alerts = JSON.parse(alertsData)
-        const filteredAlerts = alerts.filter((alert: any) => alert.device_id !== deviceId)
+        // Filter out alerts that match either the local ID or the Supabase ID
+        const filteredAlerts = alerts.filter((alert: any) => {
+          return alert.device_id !== deviceId && alert.local_device_id !== deviceId;
+        })
         
         if (filteredAlerts.length !== alerts.length) {
           await AsyncStorage.setItem('warranty_alerts', JSON.stringify(filteredAlerts))

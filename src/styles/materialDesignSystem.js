@@ -59,7 +59,7 @@ export const materialColors = {
   // Legacy Colors (for compatibility)
   systemBlue: '#2563eb',
   systemGreen: '#4CAF50',
-  systemRed: '#BA1A1A',
+  systemRed: '#FF4A4A',
   systemOrange: '#FF9800',
   systemYellow: '#FFC107',
   systemPink: '#E91E63',
@@ -87,7 +87,7 @@ export const materialColors = {
   // Status Colors
   statusSuccess: '#10b981',
   statusWarning: '#f59e0b',
-  statusError: '#ef4444',
+  statusError: '#FF4A4A',
 
   // Background Variants
   backgroundLight: '#f9fafb',
@@ -96,7 +96,7 @@ export const materialColors = {
 
   // Text Variants
   textMediumGray: '#6b7280',
-  textErrorRed: '#dc2626',
+  textErrorRed: '#FF4A4A',
   textDarkBlue: '#0369a1',
 };
 

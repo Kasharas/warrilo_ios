@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView, Pressable, ActivityIndicator, TextInput, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ScrollView, Pressable, ActivityIndicator, TextInput, RefreshControl, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
+import { warrantyAlertService } from '@/src/services/warrantyAlertService';
 
 export default function AlertsScreen() {
   const router = useRouter();
@@ -24,6 +25,10 @@ export default function AlertsScreen() {
   // Filters removed
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
 
   // Add inside AlertsScreen component, at the top after existing state
   const [warrantyAlerts, setWarrantyAlerts] = useState([]);
@@ -32,75 +37,96 @@ export default function AlertsScreen() {
   const [deviceIdToName, setDeviceIdToName] = useState<Record<string, string>>({});
 
   // Add inside AlertsScreen component after state declarations
+  // Move loadWarrantyAlerts outside useFocusEffect so it can be called by confirmDelete
+  const loadWarrantyAlerts = useCallback(async () => {
+    console.log('🔴 DEBUG: loadWarrantyAlerts called');
+    setLoadingAlerts(true);
+    setWarrantyAlertsError(null);
+    try {
+      console.log('🔴 DEBUG: Starting device mapping...');
+      // Load devices and build id -> name map
+      let deviceMap: Record<string, string> = {};
+      try {
+        const devices = await getLocalDevices();
+        console.log('🔴 DEBUG: Retrieved devices:', devices.length);
+        devices.forEach((d: any) => {
+          if (d?.id) deviceMap[d.id] = d.name || 'Unknown device';
+          if ((d as any)?.local_id) deviceMap[(d as any).local_id] = d.name || 'Unknown device';
+        });
+        setDeviceIdToName(deviceMap);
+        console.log('🔍 Alerts: Device mapping built:', deviceMap);
+      } catch (e) {
+        // Non-fatal; alerts can still render
+        console.log('Alerts: Failed to load devices for name mapping', e);
+      }
+
+      console.log('🔴 DEBUG: Reading warranty alerts...');
+      const alerts = await readWarrantyAlerts();
+      console.log('🔴 DEBUG: Retrieved alerts:', alerts.length);
+      
+      // Enrich ALL alerts with device_name (don't filter here - let getLatestWarrantyAlertsByDevice handle filtering)
+      const enriched = alerts.map((a: any) => ({
+        ...a,
+        device_name: a.device_name || a.deviceName || deviceMap[a.device_id || a.deviceId] || 'Unknown device',
+      }));
+      console.log('🔍 Alerts: Enriched alerts with device names:', enriched);
+      setWarrantyAlerts(enriched);
+      console.log('🔴 DEBUG: loadWarrantyAlerts completed successfully');
+    } catch (error) {
+      console.error('Failed to load warranty alerts:', error);
+      console.log('🔴 DEBUG: loadWarrantyAlerts error:', error.message, error.stack);
+      setWarrantyAlertsError('Failed to load warranty alerts');
+    } finally {
+      console.log('🔴 DEBUG: Setting loadingAlerts to false');
+      setLoadingAlerts(false);
+    }
+  }, [getLocalDevices]);
+
   useFocusEffect(
     useCallback(() => {
-      const loadWarrantyAlerts = async () => {
-        setLoadingAlerts(true);
-        setWarrantyAlertsError(null);
-        try {
-          // Load devices and build id -> name map
-          try {
-            const devices = await getLocalDevices();
-            const map: Record<string, string> = {};
-            devices.forEach((d: any) => {
-              if (d?.id) map[d.id] = d.name || 'Unknown device';
-              if ((d as any)?.local_id) map[(d as any).local_id] = d.name || 'Unknown device';
-            });
-            setDeviceIdToName(map);
-          } catch (e) {
-            // Non-fatal; alerts can still render
-            console.log('Alerts: Failed to load devices for name mapping', e);
-          }
-
-          const alerts = await readWarrantyAlerts();
-          const filteredAlerts = filterCurrentWarrantyAlerts(alerts);
-          // Enrich with device_name so UI always has it
-          const enriched = filteredAlerts.map((a: any) => ({
-            ...a,
-            device_name: a.device_name || a.deviceName || deviceIdToName[a.device_id || a.deviceId] || 'Unknown device',
-          }));
-          console.log('Filtered warranty alerts:', filteredAlerts);
-          setWarrantyAlerts(enriched);
-        } catch (error) {
-          console.error('Failed to load warranty alerts:', error);
-          setWarrantyAlertsError('Failed to load warranty alerts');
-        } finally {
-          setLoadingAlerts(false);
-        }
-      };
-
       loadWarrantyAlerts();
-    }, [])
+    }, [loadWarrantyAlerts])
   );
 
   // Add this function inside AlertsScreen component (don't call it yet)
   const readWarrantyAlerts = async () => {
     try {
+      console.log('🔴 DEBUG: readWarrantyAlerts called');
       console.log('📖 Reading warranty alerts from local storage...');
       const alertsData = await AsyncStorage.getItem('warranty_alerts');
+      console.log('🔴 DEBUG: AsyncStorage.getItem result:', alertsData ? 'data exists' : 'no data');
       
       if (alertsData) {
         const alerts = JSON.parse(alertsData);
         console.log(`Found ${alerts.length} warranty alerts in local storage`);
+        console.log('🔴 DEBUG: Parsed alerts:', alerts);
         return alerts;
       }
       
       console.log('No warranty alerts found in local storage');
+      console.log('🔴 DEBUG: Returning empty array');
       return [];
     } catch (error) {
       console.error('Error reading warranty alerts:', error);
+      console.log('🔴 DEBUG: readWarrantyAlerts error:', error.message, error.stack);
       return [];
     }
   };
 
-  // Add inside AlertsScreen component
-  const filterCurrentWarrantyAlerts = (alerts) => {
+  // Date filtering is now handled inside getLatestWarrantyAlertsByDevice
+
+  // Keep only the latest alert per device_id (by reminder_date) that is due today or in the past
+  const getLatestWarrantyAlertsByDevice = (alerts) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
-    return alerts.filter(alert => {
-      // Use snake_case property names from Supabase
-      if (!alert.reminder_date) return false;
+    const deviceIdToLatest = new Map();
+    for (const alert of alerts) {
+      const key = alert.device_id || alert.deviceId;
+      if (!key) continue;
+      
+      // Check if alert is due (reminder_date <= today)
+      if (!alert.reminder_date) continue;
       
       const reminderDate = new Date(alert.reminder_date);
       const alertDate = new Date(
@@ -109,26 +135,24 @@ export default function AlertsScreen() {
         reminderDate.getDate()
       );
       
-      console.log(`Alert check: ${alert.reminder_date} <= ${today.toDateString()} = ${alertDate <= today}`);
+      // Only consider alerts that are due today or in the past
+      if (alertDate > today) continue;
       
-      // Show alerts for today and past dates only (not future dates)
-      return alertDate <= today;
-    });
-  };
-
-  // Keep only the latest alert per device_id (by reminder_date)
-  const getLatestWarrantyAlertsByDevice = (alerts) => {
-    const deviceIdToLatest = new Map();
-    for (const alert of alerts) {
-      const key = alert.device_id || alert.deviceId;
-      if (!key) continue;
       const existing = deviceIdToLatest.get(key);
       const currentDate = alert.reminder_date ? new Date(alert.reminder_date) : new Date(0);
       const existingDate = existing && existing.reminder_date ? new Date(existing.reminder_date) : new Date(0);
+      
+      // Keep the most recent alert that's due for each device
       if (!existing || currentDate > existingDate) {
         deviceIdToLatest.set(key, alert);
       }
     }
+    
+    console.log(`🔍 getLatestWarrantyAlertsByDevice called with alerts: ${alerts.length}`);
+    console.log(`🔍 Alert device IDs:`, alerts.map(a => ({ device_id: a.device_id, device_name: a.device_name })));
+    console.log(`🔍 getLatestWarrantyAlertsByDevice result: ${deviceIdToLatest.size} alerts`);
+    console.log(`🔍 Result device IDs:`, Array.from(deviceIdToLatest.values()).map(a => ({ device_id: a.device_id, device_name: a.device_name })));
+    
     // Return most recent first
     return Array.from(deviceIdToLatest.values()).sort((a, b) => {
       const da = a.reminder_date ? new Date(a.reminder_date).getTime() : 0;
@@ -139,39 +163,87 @@ export default function AlertsScreen() {
 
   // Add inside AlertsScreen component
   const renderWarrantyAlert = (alert, index) => (
-    <Pressable 
-      key={`warranty-${index}`} 
-      style={styles.notificationItem}
-      onPress={() => {
-        console.log('Warranty alert pressed, navigating to device details for device_id:', alert.device_id);
-        router.push({
-          pathname: '/device-details',
-          params: { deviceId: alert.device_id }
-        });
-      }}
-    >
-      <View style={[styles.notificationIcon, { backgroundColor: '#f59e0b' }]}>
-        <Text style={{ color: 'white', fontSize: theme.fontSize.lg }}>!</Text>
-      </View>
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationTitle}>🚨 Warranty Alert</Text>
-        {(() => {
-          const deviceName = alert.device_name || alert.deviceName || 'Unknown device';
-          return (
-            <Text style={styles.notificationMessage}>{deviceName}</Text>
-          );
-        })()}
-        <Text style={[styles.notificationTime, { color: theme.colors.neutral[900], fontWeight: 'bold' }]}>
-          Expires: {alert.warranty_expire_date ? new Date(alert.warranty_expire_date).toLocaleDateString() : 'Unknown'}
-        </Text>
-      </View>
-    </Pressable>
+    <View key={`warranty-${index}`} style={styles.notificationItem}>
+      <Pressable 
+        style={styles.notificationContentWrapper}
+        onPress={() => {
+          console.log('Warranty alert pressed, navigating to device details for device_id:', alert.device_id);
+          router.push({
+            pathname: '/device-details',
+            params: { deviceId: alert.device_id }
+          });
+        }}
+      >
+        <View style={[styles.notificationIcon, { backgroundColor: '#f59e0b' }]}>
+          <Text style={{ color: 'white', fontSize: theme.fontSize.lg }}>!</Text>
+        </View>
+        <View style={styles.notificationContent}>
+          <Text style={styles.notificationTitle}>🚨 Warranty Alert</Text>
+          {(() => {
+            const deviceName = alert.device_name || alert.deviceName || 'Unknown device';
+            return (
+              <Text style={styles.notificationMessage}>{deviceName}</Text>
+            );
+          })()}
+          <Text style={[styles.notificationTime, { color: theme.colors.systemRed, fontWeight: 'bold' }]}>
+            Expires: {alert.warranty_expire_date ? new Date(alert.warranty_expire_date).toLocaleDateString() : 'Unknown'}
+          </Text>
+        </View>
+      </Pressable>
+      <Pressable 
+        style={styles.alertDeleteButton}
+        onPress={() => handleDeleteAlert(alert)}
+      >
+        <Text style={styles.alertDeleteButtonText}>Delete</Text>
+      </Pressable>
+    </View>
   );
 
   const handleRefresh = async () => {
     setLoading(true);
     // Simulate refresh delay
     setTimeout(() => setLoading(false), 1000);
+  };
+
+  const handleDeleteAlert = (alert) => {
+    setSelectedAlert(alert);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedAlert) return;
+    
+    setDeleting(true);
+    
+    try {
+      // Delete from Supabase first
+      await warrantyAlertService.deleteAlertsByDeviceId(selectedAlert.device_id);
+      
+      // Only delete from local storage if Supabase deletion succeeded
+      const alertsData = await AsyncStorage.getItem('warranty_alerts');
+      if (alertsData) {
+        const alerts = JSON.parse(alertsData);
+        const filteredAlerts = alerts.filter(a => a.device_id !== selectedAlert.device_id);
+        await AsyncStorage.setItem('warranty_alerts', JSON.stringify(filteredAlerts));
+      }
+      
+      // Refresh the alerts list
+      await loadWarrantyAlerts();
+      
+      console.log('✅ Successfully deleted warranty alerts for device:', selectedAlert.device_id);
+    } catch (error) {
+      console.error('❌ Error deleting warranty alerts:', error);
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+      setSelectedAlert(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    if (deleting) return;
+    setShowDeleteModal(false);
+    setSelectedAlert(null);
   };
 
   const filters = [
@@ -198,7 +270,7 @@ export default function AlertsScreen() {
   const getAlertIcon = (type: string) => {
     switch (type) {
       case 'expired_warranty':
-        return <Ionicons name="warning" size={20} color={theme.colors.error[500]} />;
+        return <Ionicons name="warning" size={20} color={theme.colors.systemRed} />;
       case 'expire_soon':
         return <Ionicons name="time" size={20} color={theme.colors.warning[500]} />;
       default:
@@ -209,7 +281,7 @@ export default function AlertsScreen() {
   const getAlertColor = (type: string) => {
     switch (type) {
       case 'expired_warranty':
-        return theme.colors.error[100];
+        return theme.colors.systemRed;
       case 'expire_soon':
         return theme.colors.warning[100];
       default:
@@ -342,7 +414,7 @@ export default function AlertsScreen() {
               borderRadius: 12,
               marginBottom: 12
             }}>
-              <Text style={{ color: theme.colors.error[600], fontSize: theme.fontSize.sm, textAlign: 'center' }}>
+              <Text style={{ color: theme.colors.systemRed, fontSize: theme.fontSize.sm, textAlign: 'center' }}>
                 {warrantyAlertsError}
               </Text>
             </View>
@@ -367,6 +439,54 @@ export default function AlertsScreen() {
           ))}
         </ScrollView>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!deleting) {
+            setShowDeleteModal(false);
+          }
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Confirm Deletion</Text>
+            <Text style={styles.modalMessage}>
+              Are you absolutely sure you want to delete this warranty alert? This action cannot be undone and all warranty alerts for this device will be permanently lost.
+            </Text>
+            <View style={styles.modalButtons}>
+              <Pressable 
+                style={[styles.modalButton, styles.modalButtonCancel]} 
+                onPress={cancelDelete}
+                disabled={deleting}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.colors.label }]}>No</Text>
+              </Pressable>
+              <Pressable 
+                style={[
+                  styles.modalButton, 
+                  styles.modalButtonConfirm,
+                  deleting && styles.modalButtonDisabled
+                ]} 
+                onPress={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <View style={styles.loadingButtonContent}>
+                    <ActivityIndicator size="small" color={theme.colors.systemBackground} />
+                    <Text style={[styles.modalButtonText, { marginLeft: 8, color: theme.colors.white }]}>Deleting...</Text>
+                  </View>
+                ) : (
+                  <Text style={[styles.modalButtonText, { color: theme.colors.white }]}>Yes</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -584,13 +704,101 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   notificationMessage: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.neutral[700],
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.label,
     marginBottom: theme.spacing.xs,
     lineHeight: 20,
   },
   notificationTime: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.neutral[500],
+  },
+  notificationContentWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  alertDeleteButton: {
+    backgroundColor: theme.colors.systemRed,
+    borderRadius: theme.borderRadius.md,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 80,
+    height: 40,
+    borderWidth: 2,
+    borderColor: theme.colors.systemRed,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  alertDeleteButtonText: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.white,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.blackA50,
+  },
+  modalContent: {
+    backgroundColor: theme.colors.systemBackground,
+    borderRadius: theme.borderRadius.xl,
+    padding: theme.spacing.lg,
+    width: '80%',
+    alignItems: 'center',
+    ...theme.shadows.md,
+  },
+  modalTitle: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.label,
+    marginBottom: theme.spacing.md,
+  },
+  modalMessage: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.neutral[600],
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    marginHorizontal: theme.spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalButtonText: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.semibold,
+    textAlign: 'center',
+  },
+  modalButtonCancel: {
+    backgroundColor: theme.colors.neutral[200],
+  },
+  modalButtonConfirm: {
+    backgroundColor: theme.colors.systemRed,
+  },
+  modalButtonDisabled: {
+    backgroundColor: theme.colors.neutral[400],
+    opacity: 0.6,
+  },
+  loadingButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

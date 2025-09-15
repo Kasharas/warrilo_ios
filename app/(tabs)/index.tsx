@@ -283,7 +283,7 @@ export default function DashboardScreen() {
       case 'warning':
         return theme.colors.warning[600];
       case 'error':
-        return theme.colors.error[600];
+        return theme.colors.systemRed;
       default:
         return theme.colors.neutral[600];
     }
@@ -431,7 +431,7 @@ export default function DashboardScreen() {
                   switch (status) {
                     case 'success': return theme.colors.success[500];
                     case 'warning': return theme.colors.warning[500];
-                    case 'error': return theme.colors.error[500];
+                    case 'error': return theme.colors.systemRed;
                     default: return theme.colors.neutral[500];
                   }
                 };

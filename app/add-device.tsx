@@ -9,11 +9,21 @@ import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addMonths } from 'date-fns';
+import { addMonths, parseISO, isValid } from 'date-fns';
 import { useDeviceUpload } from '@/src/hooks/useDeviceUpload';
 import { AddDeviceFormData, DeviceFileData } from '@/src/types/device';
 import { requestImagePermissions } from '@/src/utils/permissions';
 
+// Safe date parsing function (same as in warrantyAlertUtils.ts)
+const parseDate = (dateString: string): Date => {
+  if (!dateString) return new Date();
+  
+  const isoDate = parseISO(dateString);
+  if (isValid(isoDate)) return isoDate;
+  
+  const fallbackDate = new Date(dateString);
+  return isValid(fallbackDate) ? fallbackDate : new Date();
+};
 
 export default function AddDeviceScreen() {
   const router = useRouter();
@@ -46,12 +56,14 @@ export default function AddDeviceScreen() {
   // Image state
   const [deviceImage, setDeviceImage] = useState<string | null>(null);
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [deviceImageCompressing, setDeviceImageCompressing] = useState(false);
+  const [receiptImageCompressing, setReceiptImageCompressing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Feature toggles
   const [autoReceiptExtraction, setAutoReceiptExtraction] = useState(false);
   
-  // Loading state - now managed by sync system
-  const isSubmitting = isStoring;
+  // Loading state - now managed by our own state
   
   // Compression status state
   const [compressionStatus, setCompressionStatus] = useState('');
@@ -294,33 +306,21 @@ export default function AddDeviceScreen() {
           return;
         }
         
-        // Compress the image immediately after selection
-        console.log(`🔄 Compressing ${type} image...`);
-        const { compressDevicePhoto, compressReceipt } = await import('@/src/lib/imageCompression');
-        
-        let compressedUri: string;
+        // Show original image immediately for instant preview
+        console.log(`⚡ Showing original ${type} image immediately for instant preview`);
         if (type === 'device') {
-          const result = await compressDevicePhoto(selectedAsset.uri, selectedAsset);
-          compressedUri = result.compressedUri;
-          console.log(`✅ Device photo compressed: ${result.originalSizeKB}KB → ${result.compressedSizeKB}KB`);
+          setDeviceImage(selectedAsset.uri);
+          setDeviceImageCompressing(true);
+          console.log('🔍 Device image set to original URI for instant preview:', selectedAsset.uri);
         } else {
-          const result = await compressReceipt(selectedAsset.uri, selectedAsset);
-          compressedUri = result.compressedUri;
-          console.log(`✅ Receipt photo compressed: ${result.originalSizeKB}KB → ${result.compressedSizeKB}KB`);
+          setReceiptImage(selectedAsset.uri);
+          setReceiptImageCompressing(true);
+          console.log('🔍 Receipt image set to original URI for instant preview:', selectedAsset.uri);
         }
         
-        // Set the compressed image based on type
-        if (type === 'device') {
-          console.log('🔍 Setting device image to compressed URI:', compressedUri);
-          setDeviceImage(compressedUri);
-          console.log('🔍 Device image state set, current value:', compressedUri);
-        } else {
-          console.log('🔍 Setting receipt image to compressed URI:', compressedUri);
-          setReceiptImage(compressedUri);
-          console.log('🔍 Receipt image state set, current value:', compressedUri);
-        }
-        
-        console.log('✅ Compressed image set successfully for', type);
+        // Start background compression
+        console.log(`🔄 Starting background compression for ${type} image...`);
+        compressImageInBackground(selectedAsset, type);
       } else {
         console.error('❌ No URI found in selected asset');
         Alert.alert('Error', 'No image data found. Please try again.');
@@ -328,6 +328,43 @@ export default function AddDeviceScreen() {
     } catch (error) {
       console.error('Error handling image selection:', error);
       Alert.alert('Error', 'Failed to process selected image. Please try again.');
+    }
+  };
+
+  const compressImageInBackground = async (selectedAsset: any, type: 'device' | 'receipt') => {
+    try {
+      const { compressDevicePhoto, compressReceipt } = await import('@/src/lib/imageCompression');
+      
+      let compressedUri: string;
+      if (type === 'device') {
+        const result = await compressDevicePhoto(selectedAsset.uri, selectedAsset);
+        compressedUri = result.compressedUri;
+        console.log(`✅ Device photo compressed in background: ${result.originalSizeKB}KB → ${result.compressedSizeKB}KB`);
+        
+        // Update to compressed image
+        setDeviceImage(compressedUri);
+        setDeviceImageCompressing(false);
+        console.log('🔍 Device image updated to compressed URI:', compressedUri);
+      } else {
+        const result = await compressReceipt(selectedAsset.uri, selectedAsset);
+        compressedUri = result.compressedUri;
+        console.log(`✅ Receipt photo compressed in background: ${result.originalSizeKB}KB → ${result.compressedSizeKB}KB`);
+        
+        // Update to compressed image
+        setReceiptImage(compressedUri);
+        setReceiptImageCompressing(false);
+        console.log('🔍 Receipt image updated to compressed URI:', compressedUri);
+      }
+      
+      console.log('✅ Background compression completed for', type);
+    } catch (error) {
+      console.error('❌ Background compression failed:', error);
+      // Keep the original image if compression fails
+      if (type === 'device') {
+        setDeviceImageCompressing(false);
+      } else {
+        setReceiptImageCompressing(false);
+      }
     }
   };
 
@@ -360,6 +397,9 @@ export default function AddDeviceScreen() {
       Alert.alert('Error', 'Warranty duration is required');
       return;
     }
+
+    // Start loading overlay
+    setIsSubmitting(true);
 
     if (!receiptImage) {
       console.log('Validation failed: Receipt image is not selected');
@@ -488,30 +528,32 @@ export default function AddDeviceScreen() {
       return;
     }
     
-    // Validate required fields before proceeding
-    if (!deviceName.trim()) {
-      Alert.alert('Error', 'Item name is required');
-      return;
-    }
-    
-    if (!selectedDate) {
-      Alert.alert('Error', 'Purchase date is required');
-      return;
-    }
-    
-    if (!warrantyDuration) {
-      Alert.alert('Error', 'Warranty duration is empty');
-      return;
-    }
-    
-    if (!receiptImage) {
-      Alert.alert('Error', 'Receipt is required');
-      return;
-    }
-    
-    console.log('Validation passed, starting image compression...');
+    // Start loading overlay
+    setIsSubmitting(true);
     
     try {
+      // Validate required fields before proceeding
+      if (!deviceName.trim()) {
+        Alert.alert('Error', 'Item name is required');
+        return;
+      }
+      
+      if (!selectedDate) {
+        Alert.alert('Error', 'Purchase date is required');
+        return;
+      }
+      
+      if (!warrantyDuration) {
+        Alert.alert('Error', 'Warranty duration is empty');
+        return;
+      }
+      
+      if (!receiptImage) {
+        Alert.alert('Error', 'Receipt is required');
+        return;
+      }
+    
+      console.log('Validation passed, starting image compression...');
       // Step 1: Compress images BEFORE storing locally
       let compressedDevicePhoto = null;
       let compressedReceipt = null;
@@ -621,14 +663,14 @@ export default function AddDeviceScreen() {
       
       // Step 2: Store device locally with COMPRESSED images
       const localDeviceData = {
-        id: `temp_${Date.now()}`, // Temporary ID until Supabase sync
+        id: '', // Will be updated with Supabase ID after upload
         user_id: user.id,
         name: deviceName.trim(),
         supplier: storeName.trim(),
         category: selectedCategory || '',
         purchase_date: selectedDate.toISOString().split('T')[0],
         warranty_months: parseInt(warrantyDuration),
-        warranty_end_date: new Date(selectedDate.getTime() + (parseInt(warrantyDuration) * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+        warranty_end_date: addMonths(parseDate(selectedDate.toISOString().split('T')[0]), parseInt(warrantyDuration)).toISOString().split('T')[0],
         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
         location: null,
         photo_irl: compressedDevicePhoto, // Store COMPRESSED image
@@ -670,6 +712,7 @@ export default function AddDeviceScreen() {
         store: storeName || '',
         warrantyMonths: warrantyDuration ? parseInt(warrantyDuration) : 0,
         notes: notes || undefined,
+        localDeviceId: localDeviceData.local_id, // Pass local device ID for alert linking
       };
       
       console.log('Form data prepared for background upload:', formData);
@@ -713,6 +756,9 @@ export default function AddDeviceScreen() {
       console.error('Error in device save process:', error);
       setCompressionStatus('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
       Alert.alert('Error', 'Failed to save item. Please try again.');
+    } finally {
+      // Stop loading overlay
+      setIsSubmitting(false);
     }
   };
 
@@ -794,7 +840,8 @@ export default function AddDeviceScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
                  <Pressable 
@@ -839,9 +886,18 @@ export default function AddDeviceScreen() {
                 <View style={styles.imageWrapper}>
                   {console.log('🖼️ Rendering device image with URI:', deviceImage)}
                   <Image source={{ uri: deviceImage }} style={styles.imagePreview} />
+                  {deviceImageCompressing && (
+                    <View style={styles.compressionOverlay}>
+                      <ActivityIndicator size="small" color={theme.colors.white} />
+                      <Text style={styles.compressionText}>Compressing...</Text>
+                    </View>
+                  )}
                   <Pressable 
                     style={styles.removeImageButton} 
-                    onPress={() => setDeviceImage(null)}
+                    onPress={() => {
+                      setDeviceImage(null);
+                      setDeviceImageCompressing(false);
+                    }}
                   >
                     <Text style={styles.removeImageButtonText}>✕</Text>
                   </Pressable>
@@ -872,9 +928,18 @@ export default function AddDeviceScreen() {
               <View style={styles.imagePreviewContainer}>
                 <View style={styles.imageWrapper}>
                   <Image source={{ uri: receiptImage }} style={styles.imagePreview} />
+                  {receiptImageCompressing && (
+                    <View style={styles.compressionOverlay}>
+                      <ActivityIndicator size="small" color={theme.colors.white} />
+                      <Text style={styles.compressionText}>Compressing...</Text>
+                    </View>
+                  )}
                   <Pressable 
                     style={styles.removeImageButton} 
-                    onPress={() => setReceiptImage(null)}
+                    onPress={() => {
+                      setReceiptImage(null);
+                      setReceiptImageCompressing(false);
+                    }}
                   >
                     <Text style={styles.removeImageButtonText}>✕</Text>
                   </Pressable>
@@ -1313,7 +1378,19 @@ export default function AddDeviceScreen() {
              </View>
            </View>
          </Modal>
-       </SafeAreaView>
+      </SafeAreaView>
+      
+      {/* Loading Overlay */}
+      {isSubmitting && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.systemBlue} />
+            <Text style={styles.loadingText}>Adding Item...</Text>
+            <Text style={styles.loadingSubtext}>Please wait while we process your item</Text>
+          </View>
+        </View>
+      )}
+    </View>
      );
    }
 
@@ -1534,6 +1611,23 @@ const styles = StyleSheet.create({
    imageWrapper: {
      position: 'relative',
      width: '100%',
+   },
+   compressionOverlay: {
+     position: 'absolute',
+     top: 0,
+     left: 0,
+     right: 0,
+     bottom: 0,
+     backgroundColor: 'rgba(0, 0, 0, 0.6)',
+     justifyContent: 'center',
+     alignItems: 'center',
+     borderRadius: theme.borderRadius.md,
+   },
+   compressionText: {
+     color: theme.colors.white,
+     fontSize: theme.fontSize.sm,
+     marginTop: theme.spacing.xs,
+     fontWeight: '500',
    },
                removeImageButton: {
        position: 'absolute',
@@ -1907,8 +2001,37 @@ const styles = StyleSheet.create({
       color: theme.colors.success[700],
       fontWeight: theme.fontWeight.medium,
     },
-
-
-
- 
+    loadingOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
+    },
+    loadingContainer: {
+      backgroundColor: theme.colors.white,
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing['2xl'],
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 200,
+      ...theme.shadows.lg,
+    },
+    loadingText: {
+      fontSize: theme.fontSize.lg,
+      fontWeight: theme.fontWeight.semibold,
+      color: theme.colors.neutral[900],
+      marginTop: theme.spacing.md,
+      textAlign: 'center',
+    },
+    loadingSubtext: {
+      fontSize: theme.fontSize.sm,
+      color: theme.colors.neutral[600],
+      marginTop: theme.spacing.sm,
+      textAlign: 'center',
+    },
   });

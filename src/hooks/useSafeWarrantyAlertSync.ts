@@ -67,7 +67,7 @@ export const useSafeWarrantyAlertSync = () => {
       console.log('Safe sync: Fetching warranty alerts from Supabase...');
       const supabaseAlerts = await warrantyAlertService.fetchUserAlerts(auth.user.id);
       
-      // Convert to local format
+      // Convert to local format and enrich with device names
       const localAlerts = supabaseAlerts.map((alert: any) => {
         return {
           id: alert.id || `synced_${Date.now()}_${Math.random()}`,
@@ -75,6 +75,7 @@ export const useSafeWarrantyAlertSync = () => {
           user_id: alert.user_id,
           reminder_date: alert.reminder_date,
           warranty_expire_date: alert.warranty_expire_date,
+          device_name: alert.device_name || 'Unknown device', // Include device name if available
           created_at: new Date().toISOString()
         };
       });

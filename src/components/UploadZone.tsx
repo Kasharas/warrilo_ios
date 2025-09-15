@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: theme.colors.error[500],
+    backgroundColor: theme.colors.systemRed,
     justifyContent: 'center',
     alignItems: 'center',
     ...Platform.select({

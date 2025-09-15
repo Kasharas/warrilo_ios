@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator, RefreshControl, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +22,9 @@ export default function DeviceDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     loadDeviceData();
@@ -92,16 +95,42 @@ export default function DeviceDetailsScreen() {
 
   const handleDeleteDevice = () => {
     if (device) {
-      console.log('🎯 FLOW TEST: Delete button pressed for device:', device?.name);
-      console.log('🎯 FLOW TEST: Current navigation stack depth:', router.canGoBack());
-      
-      setDeleting(true);
-      setError(null); // Clear any previous errors
-      deleteDevice(device).catch((err) => {
-        setError(err.message || 'Failed to delete device');
-        setDeleting(false);
-      });
+      console.log('🎯 Device Details: Delete button pressed for device:', device?.name);
+      setShowDeleteModal(true);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!device) return;
+    
+    console.log('🎯 Device Details: User confirmed deletion for device:', device);
+    setDeleting(true);
+    setError(null); // Clear any previous errors
+    
+    try {
+      await deleteDevice(device);
+      console.log('✅ Device Details: Device deleted successfully');
+      
+      // Navigate back to previous screen after successful deletion
+      router.back();
+      
+    } catch (error) {
+      console.error('❌ Device Details: Error deleting device:', error);
+      setError(error.message || 'Failed to delete device');
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    if (deleting) {
+      console.log('Device Details: Cannot cancel during deletion');
+      return;
+    }
+    
+    console.log('Device Details: User chose to keep the item');
+    setShowDeleteModal(false);
   };
 
 
@@ -345,19 +374,17 @@ export default function DeviceDetailsScreen() {
             </Text>
           </View>
         </View>
-
-        <View style={styles.bottomSpacing} />
         
         {/* Error Display */}
         {error && (
           <View style={[styles.section, { 
             backgroundColor: theme.colors.systemBackground, 
-            borderColor: '#ef4444', 
+            borderColor: theme.colors.systemRed, 
             borderWidth: 1
           }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ 
-                color: theme.colors.error[600], 
+                color: theme.colors.systemRed, 
                 fontSize: theme.fontSize.sm,
                 flex: 1
               }}>{error}</Text>
@@ -376,6 +403,50 @@ export default function DeviceDetailsScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={cancelDelete}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Confirm Deletion</Text>
+            <Text style={styles.modalMessage}>
+              Are you absolutely sure you want to delete this item? This action cannot be undone and all warranty information will be permanently lost.
+            </Text>
+            <View style={styles.modalButtons}>
+              <Pressable 
+                style={[styles.modalButton, styles.modalButtonCancel]} 
+                onPress={cancelDelete}
+                disabled={deleting}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.colors.label }]}>No</Text>
+              </Pressable>
+              <Pressable 
+                style={[
+                  styles.modalButton, 
+                  styles.modalButtonConfirm,
+                  deleting && styles.modalButtonDisabled
+                ]} 
+                onPress={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <View style={styles.loadingButtonContent}>
+                    <ActivityIndicator size="small" color={theme.colors.systemBackground} />
+                    <Text style={[styles.modalButtonText, { marginLeft: 8 }]}>Deleting...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.modalButtonText}>Yes</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -531,9 +602,6 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.medium,
     color: theme.colors.placeholderText,
   },
-  bottomSpacing: {
-    height: theme.spacing.xxxl,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -577,7 +645,7 @@ const styles = StyleSheet.create({
     color: theme.colors.systemBackground,
   },
   deleteButtonContainer: {
-    marginTop: theme.spacing.xl,
+    marginTop: 0,
     marginBottom: theme.spacing.xxxl,
   },
   deleteButton: {
@@ -595,5 +663,74 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.body,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.systemBackground,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: theme.colors.blackA50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.lg,
+  },
+  modalContent: {
+    backgroundColor: theme.colors.systemBackground,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.xl,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: theme.colors.label,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: theme.fontSize.title2,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.label,
+    marginBottom: theme.spacing.md,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: theme.fontSize.body,
+    color: theme.colors.secondaryLabel,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xl,
+    lineHeight: 22,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: theme.spacing.md,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  modalButtonCancel: {
+    backgroundColor: theme.colors.systemGray5,
+    borderWidth: 1,
+    borderColor: theme.colors.systemGray3,
+  },
+  modalButtonConfirm: {
+    backgroundColor: theme.colors.systemRed,
+  },
+  modalButtonDisabled: {
+    opacity: 0.6,
+  },
+  modalButtonText: {
+    fontSize: theme.fontSize.body,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.systemBackground,
+  },
+  loadingButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

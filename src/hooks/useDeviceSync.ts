@@ -1,7 +1,18 @@
 import { useState, useCallback } from 'react';
 import { DeviceLocalStorage, LocalDevice } from '@/src/lib/localStorage';
 import { useAuth } from '@/contexts/AuthContext';
-import { addMonths } from 'date-fns';
+import { addMonths, parseISO, isValid } from 'date-fns';
+
+// Safe date parsing function (same as in warrantyAlertUtils.ts)
+const parseDate = (dateString: string): Date => {
+  if (!dateString) return new Date();
+  
+  const isoDate = parseISO(dateString);
+  if (isValid(isoDate)) return isoDate;
+  
+  const fallbackDate = new Date(dateString);
+  return isValid(fallbackDate) ? fallbackDate : new Date();
+};
 
 export interface DeviceFormData {
   // Mandatory fields (user must provide)
@@ -88,7 +99,7 @@ export const useDeviceSync = () => {
         return { success: false, message: 'Invalid warranty duration' };
       }
 
-      const purchaseDate = new Date(formData.purchaseDate);
+      const purchaseDate = parseDate(formData.purchaseDate.toISOString().split('T')[0]);
       const warrantyEndDate = addMonths(purchaseDate, warrantyMonths);
 
       // 1. Images are already compressed in the add device screen
@@ -176,7 +187,7 @@ export const useDeviceSync = () => {
         return { success: false, message: 'Invalid warranty duration' };
       }
 
-      const purchaseDate = new Date(formData.purchaseDate);
+      const purchaseDate = parseDate(formData.purchaseDate.toISOString().split('T')[0]);
       const warrantyEndDate = addMonths(purchaseDate, warrantyMonths);
 
       // 1. Images are already compressed in the edit device screen

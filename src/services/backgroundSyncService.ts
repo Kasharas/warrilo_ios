@@ -3,6 +3,8 @@ import { localStorageSyncAdapter } from './localStorageSyncAdapter'
 import { supabaseDataService } from './supabaseDataService'
 import { dataComparisonService, SyncPlan } from './dataComparisonService'
 import { validateSupabaseSession } from '../lib/sessionValidator'
+import { warrantyAlertService } from './warrantyAlertService'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export interface SyncResult {
   success: boolean
@@ -98,17 +100,22 @@ class BackgroundSyncService {
       // Clear pending sync since we're now online
       this.pendingSyncUserId = null
 
-      // Step 1: Check if sync is needed (unless forced)
+      // Step 1: Always sync warranty alerts (Supabase has master priority)
+      const alertsResult = await this.syncWarrantyAlerts(userId)
+      
+      // Step 2: Check if device sync is needed (unless forced)
       if (!force) {
         const syncNeeded = await dataComparisonService.isSyncNeeded(userId)
         if (!syncNeeded) {
-          console.log('No sync needed - data is already in sync')
+          console.log('No device sync needed - data is already in sync')
+          console.log(`Warranty alerts synced: ${alertsResult.alertsProcessed}`)
           syncStatusService.completeSync(true)
           return {
             success: true,
             operationsCompleted: 0,
             operationsFailed: 0,
-            duration: Date.now() - startTime
+            duration: Date.now() - startTime,
+            alertsProcessed: alertsResult.alertsProcessed
           }
         }
       }
@@ -168,13 +175,15 @@ class BackgroundSyncService {
       console.log(`Duration: ${duration}ms`)
       console.log(`Operations completed: ${result.operationsCompleted}`)
       console.log(`Operations failed: ${result.operationsFailed}`)
+      console.log(`Warranty alerts synced: ${alertsResult.alertsProcessed}`)
 
       syncStatusService.completeSync(result.success, result.error)
       
       return {
         ...result,
         syncPlan,
-        duration
+        duration,
+        alertsProcessed: alertsResult.alertsProcessed
       }
 
     } catch (error) {
@@ -336,6 +345,59 @@ class BackgroundSyncService {
       //     this.pendingSyncUserId = null
       //   }
       // })
+    }
+  }
+
+  // Sync warranty alerts from Supabase (master priority)
+  private async syncWarrantyAlerts(userId: string): Promise<{ alertsProcessed: number }> {
+    try {
+      console.log('🔄 Syncing warranty alerts from Supabase...')
+      
+      // Fetch alerts from Supabase
+      const supabaseAlerts = await warrantyAlertService.fetchUserAlerts(userId)
+      console.log(`📥 Fetched ${supabaseAlerts.length} warranty alerts from Supabase`)
+      
+      // Get current local alerts
+      const localAlertsData = await AsyncStorage.getItem('warranty_alerts')
+      const localAlerts = localAlertsData ? JSON.parse(localAlertsData) : []
+      console.log(`📱 Found ${localAlerts.length} warranty alerts in local storage`)
+      
+      // Build device ID -> name mapping from local devices
+      let deviceMap: Record<string, string> = {}
+      try {
+        const devices = await localStorageSyncAdapter.getUserDevices(userId)
+        devices.forEach((device: any) => {
+          if (device?.id) deviceMap[device.id] = device.name || 'Unknown device'
+          if (device?.local_id) deviceMap[device.local_id] = device.name || 'Unknown device'
+        })
+        console.log('🔍 Sync: Device mapping built:', deviceMap)
+      } catch (error) {
+        console.log('⚠️ Sync: Failed to load devices for name mapping:', error)
+      }
+      
+      // Convert Supabase alerts to local format and enrich with device names
+      const enrichedSupabaseAlerts = supabaseAlerts.map(alert => ({
+        id: alert.id,
+        device_id: alert.device_id,
+        user_id: alert.user_id,
+        reminder_date: alert.reminder_date,
+        warranty_expire_date: alert.warranty_expire_date,
+        device_name: deviceMap[alert.device_id] || 'Unknown device',
+        created_at: alert.created_at || new Date().toISOString()
+      }))
+      
+      // Update local storage with Supabase data (master priority)
+      await AsyncStorage.setItem('warranty_alerts', JSON.stringify(enrichedSupabaseAlerts))
+      
+      const alertsProcessed = enrichedSupabaseAlerts.length
+      console.log(`✅ Warranty alerts sync complete: ${alertsProcessed} alerts processed`)
+      
+      return { alertsProcessed }
+      
+    } catch (error) {
+      console.error('❌ Error syncing warranty alerts:', error)
+      // Don't fail the entire sync for alert sync issues
+      return { alertsProcessed: 0 }
     }
   }
 }

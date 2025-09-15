@@ -16,6 +16,7 @@ export interface AddDeviceFormData {
   
   // Optional
   notes?: string
+  localDeviceId?: string // Local device ID for linking alerts
 }
 
 export interface DeviceFileData {

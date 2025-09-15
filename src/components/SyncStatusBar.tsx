@@ -46,14 +46,14 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
   };
 
   const getStatusColor = () => {
-    if (failed > 0) return theme.colors.error[500];
+    if (failed > 0) return theme.colors.systemRed;
     if (pending > 0) return theme.colors.warning[500];
     return theme.colors.success[500];
   };
 
   const getStatusIcon = () => {
     if (isSyncing) return <Ionicons name="refresh" size={16} color={"#007AFF"} />;
-    if (failed > 0) return <Ionicons name="alert-circle" size={16} color={theme.colors.error[500]} />;
+    if (failed > 0) return <Ionicons name="alert-circle" size={16} color={theme.colors.systemRed} />;
     if (pending > 0) return <Ionicons name="time" size={16} color={theme.colors.warning[500]} />;
     return <Ionicons name="checkmark-circle" size={16} color={theme.colors.success[500]} />;
   };
@@ -120,7 +120,7 @@ export const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
         
         {failed > 0 && (
           <View style={styles.detailRow}>
-            <Ionicons name="alert-circle" size={16} color={theme.colors.error[500]} />
+            <Ionicons name="alert-circle" size={16} color={theme.colors.systemRed} />
             <Text style={styles.detailText}>
               {failed} device{failed !== 1 ? 's' : ''} failed to sync
             </Text>

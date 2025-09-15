@@ -14,7 +14,7 @@ export function WarrantyBadge({ status }: WarrantyBadgeProps) {
       case 'expiring':
         return theme.colors.warning[500];
       case 'expired':
-        return theme.colors.error[500];
+        return theme.colors.systemRed;
       default:
         return theme.colors.neutral[500];
     }

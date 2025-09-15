@@ -14,8 +14,33 @@ import { requestNotificationPermissions } from '@/src/utils/permissions';
 
 // Main app content component that can use auth context
 function AppContent() {
-  const { user, syncReady } = useAuth();
+  const { user, syncReady, loading } = useAuth();
   const router = useRouter();
+  
+  // Auth-driven navigation guard
+  useEffect(() => {
+    console.log('🔐 AUTH GUARD: Checking auth state for navigation...');
+    console.log('🔐 AUTH GUARD: Loading:', loading);
+    console.log('🔐 AUTH GUARD: User exists:', !!user);
+    console.log('🔐 AUTH GUARD: User ID:', user?.id || 'none');
+    
+    // Don't navigate while still loading
+    if (loading) {
+      console.log('🔐 AUTH GUARD: Still loading, waiting...');
+      return;
+    }
+    
+    // Navigate based on auth state
+    if (user) {
+      console.log('🔐 AUTH GUARD: User authenticated, ensuring in tabs');
+      // User is logged in, make sure they're in the tabs area
+      router.replace('/(tabs)');
+    } else {
+      console.log('🔐 AUTH GUARD: No user, redirecting to welcome');
+      // User is not logged in, redirect to welcome
+      router.replace('/welcome');
+    }
+  }, [user, loading, router]);
   
   // App initialization and deep link handling
   useEffect(() => {

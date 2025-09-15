@@ -198,13 +198,13 @@ export default function DeviceListScreen() {
         styles.searchContainer,
         isSearchFocused && styles.searchContainerFocused
       ]}>
-        <Ionicons name="search" size={theme.fontSize.xl} color={theme.colors.neutral[500]} />
+        <Ionicons name="search" size={20} color={theme.colors.neutral[400]} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search items..."
           value={searchQuery}
           onChangeText={setSearchQuery}
-                     placeholderTextColor={theme.colors.neutral[500]}
+                     placeholderTextColor={theme.colors.neutral[400]}
           onFocus={() => setIsSearchFocused(true)}
           onBlur={() => setIsSearchFocused(false)}
         />
@@ -365,8 +365,8 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.systemBackground,
-    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
     marginBottom: theme.spacing.md,
     // No horizontal margins - let it fill the full container width
     borderWidth: 1,
@@ -375,15 +375,15 @@ const styles = StyleSheet.create({
   },
   searchContainerFocused: {
     borderWidth: 2,
-            borderColor: theme.colors.systemBlue,
+            borderColor: theme.colors.neutral[900],
   },
   searchIcon: {
-    marginLeft: 10,
+    marginLeft: theme.spacing.lg,
   },
   searchInput: {
     flex: 1,
     fontSize: theme.fontSize.base,
-    color: theme.colors.label,
+    color: theme.colors.neutral[900],
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
     borderWidth: 0,
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   filterChipText: {
-    fontSize: theme.fontSize.xs,
+    fontSize: theme.fontSize.sm,
     color: theme.colors.neutral[500],
     fontWeight: '500',
   },

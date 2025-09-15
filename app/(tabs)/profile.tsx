@@ -91,9 +91,8 @@ export default function ProfileScreen() {
       console.log('✅ Profile: Sign out completed successfully');
       console.log('✅ Profile: User after sign out:', { user: !!user, userId: user?.id });
       
-      console.log('🔄 Profile: Attempting navigation to welcome screen...');
-      router.replace('/welcome');
-      console.log('✅ Profile: Navigation command sent');
+      // Navigation will be handled automatically by the auth guard in _layout.tsx
+      console.log('✅ Profile: Sign out completed - auth guard will handle navigation');
       
     } catch (error) {
       console.error('❌ Profile: Sign out error:', error);

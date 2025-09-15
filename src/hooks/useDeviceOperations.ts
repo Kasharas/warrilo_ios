@@ -4,11 +4,36 @@ import { supabase } from '../../lib/supabaseClient';
 import { LocalDevice } from '@/src/lib/localStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSync } from '@/contexts/SyncContext';
+import { warrantyAlertService } from '@/src/services/warrantyAlertService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useDeviceOperations = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { triggerSync } = useSync();
+
+  // Helper function to clean up local warranty alerts
+  const cleanupLocalWarrantyAlerts = async (deviceId: string) => {
+    try {
+      console.log('🧹 Cleaning up local warranty alerts for device:', deviceId);
+      const alertsData = await AsyncStorage.getItem('warranty_alerts');
+      
+      if (alertsData) {
+        const alerts = JSON.parse(alertsData);
+        const filteredAlerts = alerts.filter((alert: any) => alert.device_id !== deviceId);
+        
+        if (filteredAlerts.length !== alerts.length) {
+          await AsyncStorage.setItem('warranty_alerts', JSON.stringify(filteredAlerts));
+          console.log(`✅ Removed ${alerts.length - filteredAlerts.length} local warranty alerts for device:`, deviceId);
+        } else {
+          console.log('ℹ️ No local warranty alerts found for device:', deviceId);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error cleaning up local warranty alerts:', error);
+      // Don't throw - this shouldn't block device deletion
+    }
+  };
 
   const deleteDevice = async (device: LocalDevice) => {
     try {
@@ -34,6 +59,10 @@ export const useDeviceOperations = () => {
       // Phase 1: Local storage removal (optimistic update)
       console.log('🎯 FLOW TEST: Step 1/4 - Local storage update starting...');
       console.log('📱 Phase 1: Removing from local storage...');
+      
+      // Clean up local warranty alerts first
+      await cleanupLocalWarrantyAlerts(device.id);
+      
       const devices = await DeviceLocalStorage.getDevices();
       console.log('DEBUG: Devices before filter:', devices.length);
       console.log('DEBUG: Target device ID:', device.id);
@@ -72,6 +101,16 @@ export const useDeviceOperations = () => {
       if (device.id) { // Only delete from Supabase if device has a remote ID
         console.log('🎯 FLOW TEST: Step 3/4 - Supabase delete starting...');
         console.log('☁️ Phase 3: Deleting from Supabase...');
+        
+        // Delete warranty alerts first
+        try {
+          await warrantyAlertService.deleteAlertsByDeviceId(device.id);
+          console.log('✅ Warranty alerts deleted from Supabase');
+        } catch (alertError) {
+          console.error('⚠️ Warning: Failed to delete warranty alerts from Supabase:', alertError);
+          // Don't fail the entire deletion for alert cleanup issues
+        }
+        
         const { error } = await supabase
           .from('devices')
           .delete()

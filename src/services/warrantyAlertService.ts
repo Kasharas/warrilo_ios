@@ -125,14 +125,20 @@ export const warrantyAlertService = {
     }
     
     try {
-      const { error } = await warrantySupabase
+      console.log('🗑️ Deleting warranty alerts for device:', deviceId);
+      const { error } = await supabase
         .from('warranty_reminders')
         .delete()
         .eq('device_id', deviceId);
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error deleting warranty alerts:', error);
+        throw error;
+      }
+      
+      console.log('✅ Successfully deleted warranty alerts for device:', deviceId);
     } catch (error) {
-      console.error('Error deleting warranty alerts:', error);
+      console.error('❌ Error deleting warranty alerts:', error);
       throw error;
     }
   },

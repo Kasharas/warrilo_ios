@@ -9,16 +9,19 @@ import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 
 export default function AlertsScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { getLocalDevices } = useDeviceSync();
   
   // Mock data - no alerts yet
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  // Filters removed
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -26,6 +29,7 @@ export default function AlertsScreen() {
   const [warrantyAlerts, setWarrantyAlerts] = useState([]);
   const [loadingAlerts, setLoadingAlerts] = useState(false);
   const [warrantyAlertsError, setWarrantyAlertsError] = useState(null);
+  const [deviceIdToName, setDeviceIdToName] = useState<Record<string, string>>({});
 
   // Add inside AlertsScreen component after state declarations
   useFocusEffect(
@@ -34,10 +38,29 @@ export default function AlertsScreen() {
         setLoadingAlerts(true);
         setWarrantyAlertsError(null);
         try {
+          // Load devices and build id -> name map
+          try {
+            const devices = await getLocalDevices();
+            const map: Record<string, string> = {};
+            devices.forEach((d: any) => {
+              if (d?.id) map[d.id] = d.name || 'Unknown device';
+              if ((d as any)?.local_id) map[(d as any).local_id] = d.name || 'Unknown device';
+            });
+            setDeviceIdToName(map);
+          } catch (e) {
+            // Non-fatal; alerts can still render
+            console.log('Alerts: Failed to load devices for name mapping', e);
+          }
+
           const alerts = await readWarrantyAlerts();
           const filteredAlerts = filterCurrentWarrantyAlerts(alerts);
+          // Enrich with device_name so UI always has it
+          const enriched = filteredAlerts.map((a: any) => ({
+            ...a,
+            device_name: a.device_name || a.deviceName || deviceIdToName[a.device_id || a.deviceId] || 'Unknown device',
+          }));
           console.log('Filtered warranty alerts:', filteredAlerts);
-          setWarrantyAlerts(filteredAlerts);
+          setWarrantyAlerts(enriched);
         } catch (error) {
           console.error('Failed to load warranty alerts:', error);
           setWarrantyAlertsError('Failed to load warranty alerts');
@@ -93,6 +116,27 @@ export default function AlertsScreen() {
     });
   };
 
+  // Keep only the latest alert per device_id (by reminder_date)
+  const getLatestWarrantyAlertsByDevice = (alerts) => {
+    const deviceIdToLatest = new Map();
+    for (const alert of alerts) {
+      const key = alert.device_id || alert.deviceId;
+      if (!key) continue;
+      const existing = deviceIdToLatest.get(key);
+      const currentDate = alert.reminder_date ? new Date(alert.reminder_date) : new Date(0);
+      const existingDate = existing && existing.reminder_date ? new Date(existing.reminder_date) : new Date(0);
+      if (!existing || currentDate > existingDate) {
+        deviceIdToLatest.set(key, alert);
+      }
+    }
+    // Return most recent first
+    return Array.from(deviceIdToLatest.values()).sort((a, b) => {
+      const da = a.reminder_date ? new Date(a.reminder_date).getTime() : 0;
+      const db = b.reminder_date ? new Date(b.reminder_date).getTime() : 0;
+      return db - da;
+    });
+  };
+
   // Add inside AlertsScreen component
   const renderWarrantyAlert = (alert, index) => (
     <Pressable 
@@ -111,9 +155,12 @@ export default function AlertsScreen() {
       </View>
       <View style={styles.notificationContent}>
         <Text style={styles.notificationTitle}>🚨 Warranty Alert</Text>
-        <Text style={styles.notificationMessage}>
-          Your device warranty expires soon. Please take action to renew or extend your coverage.
-        </Text>
+        {(() => {
+          const deviceName = alert.device_name || alert.deviceName || 'Unknown device';
+          return (
+            <Text style={styles.notificationMessage}>{deviceName}</Text>
+          );
+        })()}
         <Text style={[styles.notificationTime, { color: theme.colors.neutral[900], fontWeight: 'bold' }]}>
           Expires: {alert.warranty_expire_date ? new Date(alert.warranty_expire_date).toLocaleDateString() : 'Unknown'}
         </Text>
@@ -193,7 +240,7 @@ export default function AlertsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Alerts & Notifications</Text>
+        <Text style={styles.headerTitle}>Alerts</Text>
         <View style={styles.headerRight}>
           <Pressable style={styles.menuButton} onPress={() => router.push({
             pathname: '/settings',
@@ -212,7 +259,7 @@ export default function AlertsScreen() {
         styles.searchContainer,
         isSearchFocused && styles.searchContainerFocused
       ]}>
-        <Ionicons name="search" size={20} color={theme.colors.neutral[400]} />
+        <Ionicons name="search" size={20} color={theme.colors.neutral[400]} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search alerts..."
@@ -224,36 +271,7 @@ export default function AlertsScreen() {
         />
       </View>
 
-      {/* Filters */}
-      <View style={styles.filtersContainer}>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={filters}
-          renderItem={({ item }) => (
-            <Pressable
-              key={item.label}
-              style={[
-                styles.filterChip,
-                selectedFilter === item.label && styles.filterChipActive
-              ]}
-              onPress={() => setSelectedFilter(item.label)}
-            >
-              <Text style={[
-                styles.filterChipText,
-                selectedFilter === item.label && styles.filterChipTextActive
-              ]}>
-                {item.label} ({item.count})
-              </Text>
-            </Pressable>
-          )}
-          keyExtractor={(item) => item.label}
-          contentContainerStyle={styles.filtersContent}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          bounces={false}
-        />
-      </View>
+      {/* Filters removed */}
 
       {/* Content Area - Show alerts list or empty state */}
       {warrantyAlerts.length === 0 && filteredAlerts.length === 0 ? (
@@ -282,8 +300,8 @@ export default function AlertsScreen() {
             />
           }
         >
-          {/* NEW: Add warranty alerts first */}
-          {warrantyAlerts.map((alert, index) => renderWarrantyAlert(alert, index))}
+          {/* NEW: Add warranty alerts first (latest per device) */}
+          {getLatestWarrantyAlertsByDevice(warrantyAlerts).map((alert, index) => renderWarrantyAlert(alert, index))}
           
           {/* Loading indicator for warranty alerts */}
           {loadingAlerts && (
@@ -331,7 +349,7 @@ export default function AlertsScreen() {
           )}
 
           {/* EXISTING: Keep all existing static notification items below */}
-          {filteredAlerts.map((item) => (
+          {alerts.map((item) => (
             <View key={item.id} style={[styles.alertCard, { backgroundColor: getAlertColor(item.type) }]}>
               <View style={styles.alertHeader}>
                 {getAlertIcon(item.type)}
@@ -393,7 +411,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.neutral[900],
   },
   searchIcon: {
-    marginLeft: 10,
+    marginLeft: theme.spacing.lg,
   },
   searchInput: {
     flex: 1,
@@ -436,7 +454,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   filterChipText: {
-    fontSize: theme.fontSize.xs,
+    fontSize: theme.fontSize.sm,
     color: theme.colors.neutral[500],
     fontWeight: '500',
   },

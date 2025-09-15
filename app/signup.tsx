@@ -219,6 +219,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.lg,
     fontSize: theme.fontSize.base,
     backgroundColor: theme.colors.white,
+    color: theme.colors.neutral[900],
     marginBottom: theme.spacing.lg,
   },
   passwordContainer: {
@@ -235,6 +236,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.lg,
     fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[900],
   },
   passwordToggle: {
     paddingHorizontal: theme.spacing.lg,

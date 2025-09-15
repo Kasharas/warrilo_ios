@@ -140,6 +140,16 @@ class LocalStorageSyncAdapter {
       
       console.log(`Removing ${deviceIds.length} devices from local storage:`, deviceIds)
       
+      // Clean up warranty alerts for each device being removed
+      for (const deviceId of deviceIds) {
+        try {
+          await this.cleanupWarrantyAlertsForDevice(deviceId)
+        } catch (error) {
+          console.error(`Error cleaning up warranty alerts for device ${deviceId}:`, error)
+          // Don't fail the entire operation for alert cleanup issues
+        }
+      }
+      
       const devices = await this.getAllDevices()
       const filteredDevices = devices.filter(device => !deviceIds.includes(device.id))
       
@@ -148,6 +158,27 @@ class LocalStorageSyncAdapter {
       console.log(`Successfully removed ${deviceIds.length} devices from local storage`)
     } catch (error) {
       console.error('Error removing devices from local storage:', error)
+      throw error
+    }
+  }
+
+  // Helper method to clean up warranty alerts for a specific device
+  private async cleanupWarrantyAlertsForDevice(deviceId: string): Promise<void> {
+    try {
+      console.log('🧹 Sync: Cleaning up warranty alerts for device:', deviceId)
+      const alertsData = await AsyncStorage.getItem('warranty_alerts')
+      
+      if (alertsData) {
+        const alerts = JSON.parse(alertsData)
+        const filteredAlerts = alerts.filter((alert: any) => alert.device_id !== deviceId)
+        
+        if (filteredAlerts.length !== alerts.length) {
+          await AsyncStorage.setItem('warranty_alerts', JSON.stringify(filteredAlerts))
+          console.log(`✅ Sync: Removed ${alerts.length - filteredAlerts.length} warranty alerts for device:`, deviceId)
+        }
+      }
+    } catch (error) {
+      console.error('❌ Sync: Error cleaning up warranty alerts:', error)
       throw error
     }
   }

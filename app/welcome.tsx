@@ -71,7 +71,7 @@ export default function WelcomeScreen() {
           ]}
         >
           <View style={styles.logo}>
-            <Ionicons name="shield" size={60} color="#007AFF" />
+            <Ionicons name="shield" size={60} color={theme.colors.systemBlue} />
           </View>
         </Animated.View>
 
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.lg,
     alignItems: 'center',

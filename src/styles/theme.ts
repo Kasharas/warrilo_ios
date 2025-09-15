@@ -81,6 +81,14 @@ export const theme = {
     background: '#ffffff',
     white: '#ffffff',
     black: '#000000',
+    // Alpha tokens for convenience
+    whiteA90: 'rgba(255, 255, 255, 0.9)',
+    whiteA30: 'rgba(255, 255, 255, 0.3)',
+    whiteA20: 'rgba(255, 255, 255, 0.2)',
+    whiteA15: 'rgba(255, 255, 255, 0.15)',
+    blackA50: 'rgba(0, 0, 0, 0.5)',
+    blackA40: 'rgba(0, 0, 0, 0.4)',
+    blackA10: 'rgba(0, 0, 0, 0.1)',
   },
   // Platform-adaptive spacing system
   spacing: {
@@ -97,6 +105,9 @@ export const theme = {
     '5xl': 48,
     '6xl': 56,
     '7xl': 64,
+    // Component-specific spacing
+    buttonY: 14,
+    buttonX: 24,
   },
   
   // Platform-adaptive border radius system
@@ -116,16 +127,16 @@ export const theme = {
   fontSize: {
     ...platformFonts,
     // Legacy font sizes (for backward compatibility)
-    xs: 12,
-    sm: 14,
-    base: 16,
-    lg: 18,
-    xl: 20,
-    '2xl': 24,
-    '3xl': 28,
-    '4xl': 32,
-    '5xl': 36,
-    '6xl': 48,
+    xs: 10,
+    sm: 12,
+    base: 14,
+    lg: 16,
+    xl: 18,
+    '2xl': 21,
+    '3xl': 24,
+    '4xl': 28,
+    '5xl': 32,
+    '6xl': 42,
   },
   
   fontWeight: {

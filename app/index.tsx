@@ -49,9 +49,9 @@ export default function Index() {
     }}>
               <ActivityIndicator size="large" color={theme.colors.systemBlue} />
       <Text style={{ 
-        marginTop: 16, 
+        marginTop: theme.spacing.base, 
         color: theme.colors.neutral[600],
-        fontSize: 16
+        fontSize: theme.fontSize.base
       }}>
         Loading Warrilo...
       </Text>

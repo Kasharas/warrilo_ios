@@ -16,6 +16,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSync } from '@/contexts/SyncContext';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import { LocalDevice } from '@/src/lib/localStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback } from 'react';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -29,6 +31,9 @@ export default function DashboardScreen() {
   const [devicesWithPrices, setDevicesWithPrices] = useState<LocalDevice[]>([]);
   const [isFocusRefresh, setIsFocusRefresh] = useState(false);
   
+  // Warranty alerts state
+  const [warrantyAlerts, setWarrantyAlerts] = useState<any[]>([]);
+  
   // Get navigation parameters to detect device addition
   const params = useLocalSearchParams();
 
@@ -36,10 +41,121 @@ export default function DashboardScreen() {
     router.push(`/device-details?id=${deviceId}`);
   };
 
+  // Function to read warranty alerts from AsyncStorage
+  const readWarrantyAlerts = async () => {
+    try {
+      console.log('📖 Dashboard: Reading warranty alerts from local storage...');
+      const alertsData = await AsyncStorage.getItem('warranty_alerts');
+      
+      if (alertsData) {
+        const alerts = JSON.parse(alertsData);
+        console.log(`📖 Dashboard: Found ${alerts.length} warranty alerts in local storage`);
+        return alerts;
+      }
+      
+      console.log('📖 Dashboard: No warranty alerts found in local storage');
+      return [];
+    } catch (error) {
+      console.error('📖 Dashboard: Error reading warranty alerts:', error);
+      return [];
+    }
+  };
+
+  // Function to filter current warranty alerts (same logic as alerts screen)
+  const filterCurrentWarrantyAlerts = (alerts: any[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return alerts.filter(alert => {
+      if (!alert.reminder_date) return false;
+      
+      const reminderDate = new Date(alert.reminder_date);
+      const alertDate = new Date(
+        reminderDate.getFullYear(), 
+        reminderDate.getMonth(), 
+        reminderDate.getDate()
+      );
+      
+      console.log(`📖 Dashboard: Alert check: ${alert.reminder_date} <= ${today.toDateString()} = ${alertDate <= today}`);
+      
+      return alertDate <= today;
+    });
+  };
+
+  // Function to get the most urgent warranty alert
+  const getMostUrgentWarrantyAlert = () => {
+    console.log(`📖 Dashboard: getMostUrgentWarrantyAlert called with ${warrantyAlerts?.length || 0} alerts`);
+    
+    if (!warrantyAlerts || warrantyAlerts.length === 0) {
+      console.log('📖 Dashboard: No warranty alerts available');
+      return null;
+    }
+
+    const urgentAlerts = filterCurrentWarrantyAlerts(warrantyAlerts);
+    console.log(`📖 Dashboard: Filtered warranty alerts:`, urgentAlerts);
+
+    // Sort by reminder date (most urgent first) and return the first one
+    const sortedAlerts = urgentAlerts.sort((a, b) => 
+      new Date(a.reminder_date).getTime() - new Date(b.reminder_date).getTime()
+    );
+
+    const mostUrgent = sortedAlerts.length > 0 ? sortedAlerts[0] : null;
+    console.log(`📖 Dashboard: Most urgent alert:`, mostUrgent);
+    
+    return mostUrgent;
+  };
+
+  // Function to get device name from device ID
+  const getDeviceNameFromAlert = (deviceId: string) => {
+    const device = devices.find(d => d.id === deviceId || d.local_id === deviceId);
+    return device?.name || 'Unknown Device';
+  };
+
+  // Function to calculate days until warranty expires
+  const getDaysUntilExpiry = (expiryDate: string) => {
+    const now = new Date();
+    const expiry = new Date(expiryDate);
+    const diffTime = expiry.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
   // Phase 1: Load local data first (fast UI)
   useEffect(() => {
     loadDevices();
   }, []);
+
+  // Function to load warranty alerts
+  const loadWarrantyAlerts = async () => {
+    try {
+      console.log('📖 Dashboard: Loading warranty alerts...');
+      const alerts = await readWarrantyAlerts();
+      console.log(`📖 Dashboard: Loaded ${alerts.length} warranty alerts`);
+      setWarrantyAlerts(alerts);
+    } catch (error) {
+      console.error('📖 Dashboard: Failed to load warranty alerts:', error);
+    }
+  };
+
+  // Load warranty alerts when component mounts and when devices change
+  useEffect(() => {
+    loadWarrantyAlerts();
+  }, []);
+
+  // Reload warranty alerts when devices change (in case new alerts were created)
+  useEffect(() => {
+    if (devices.length > 0) {
+      loadWarrantyAlerts();
+    }
+  }, [devices]);
+
+  // Reload warranty alerts when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      console.log('📖 Dashboard: Screen focused - reloading warranty alerts');
+      loadWarrantyAlerts();
+    }, [])
+  );
 
   // Additional refresh on mount to catch any new devices
   useEffect(() => {
@@ -182,8 +298,8 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={loading}
             onRefresh={handleRefresh}
-                          colors={['#007AFF']}
-              tintColor={'#007AFF'}
+            colors={[theme.colors.systemBlue]}
+            tintColor={theme.colors.systemBlue}
           />
         }
       >
@@ -223,33 +339,42 @@ export default function DashboardScreen() {
           </View>
         </View>
         
-        {/* Warranty Alert */}
-        <View style={styles.alertCard}>
-          <View style={styles.alertHeader}>
-            <View style={styles.alertIconContainer}>
-              <Ionicons name="warning" size={24} color={"#FF9500"} />
+        {/* Warranty Alert - Dynamic */}
+        {(() => {
+          const urgentAlert = getMostUrgentWarrantyAlert();
+          if (!urgentAlert) return null;
+
+          const deviceName = getDeviceNameFromAlert(urgentAlert.device_id);
+          const daysUntilExpiry = getDaysUntilExpiry(urgentAlert.warranty_expire_date);
+          
+          return (
+            <View style={styles.alertCard}>
+              <View style={styles.alertHeader}>
+                <View style={styles.alertIconContainer}>
+                  <Ionicons name="warning" size={24} color={theme.colors.warning[500]} />
+                </View>
+                <View style={styles.alertTitleContainer}>
+                  <Text style={styles.alertTitle}>Warranty Expiring Soon</Text>
+                  <Text style={styles.alertSubtitle}>Action Required</Text>
+                </View>
+              </View>
+              <View style={styles.alertContent}>
+                <Text style={styles.alertMessage}>
+                  Your {deviceName} warranty expires in {daysUntilExpiry} day{daysUntilExpiry !== 1 ? 's' : ''}
+                </Text>
+              </View>
+              <View style={styles.alertActions}>
+                <Pressable 
+                  style={styles.alertButton}
+                  onPress={() => handleDevicePress(urgentAlert.device_id)}
+                >
+                  <Ionicons name="eye" size={18} color={theme.colors.white} />
+                  <Text style={styles.alertButtonText}>View Details</Text>
+                </Pressable>
+              </View>
             </View>
-            <View style={styles.alertTitleContainer}>
-              <Text style={styles.alertTitle}>Warranty Expiring Soon</Text>
-              <Text style={styles.alertSubtitle}>Action Required</Text>
-            </View>
-          </View>
-          <View style={styles.alertContent}>
-            <Text style={styles.alertMessage}>
-              Your MacBook Pro warranty expires in 15 days
-            </Text>
-          </View>
-          <View style={styles.alertActions}>
-            <Pressable style={styles.alertButton}>
-              <Ionicons name="eye" size={18} color={"#FFFFFF"} />
-              <Text style={styles.alertButtonText}>View Details</Text>
-            </Pressable>
-            <Pressable style={styles.alertButtonSecondary}>
-              <Ionicons name="time" size={18} color={"#FF9500"} />
-              <Text style={styles.alertButtonSecondaryText}>Remind Later</Text>
-            </Pressable>
-          </View>
-        </View>
+          );
+        })()}
 
         {/* All Devices Section */}
         {devices.length > 0 && (
@@ -304,10 +429,10 @@ export default function DashboardScreen() {
                 // Map status color to iOS system colors
                 const getThemeColor = (status: string) => {
                   switch (status) {
-                    case 'success': return '#10b981'; // Same green as DeviceCard
-                    case 'warning': return '#f59e0b'; // Same orange as DeviceCard
-                    case 'error': return '#ef4444'; // Same red as DeviceCard
-                    default: return '#6b7280'; // Same gray as DeviceCard
+                    case 'success': return theme.colors.success[500];
+                    case 'warning': return theme.colors.warning[500];
+                    case 'error': return theme.colors.error[500];
+                    default: return theme.colors.neutral[500];
                   }
                 };
                 
@@ -333,7 +458,7 @@ export default function DashboardScreen() {
                       </View>
                     ) : (
                       <View style={styles.deviceIconContainer}>
-                        <IconComponent size={24} color="#007AFF" />
+                        <IconComponent size={24} color={theme.colors.systemBlue} />
                       </View>
                     )}
                     
@@ -426,45 +551,45 @@ const styles = StyleSheet.create({
   },
   warrantyValueCard: {
     backgroundColor: theme.colors.systemBlue,
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
     marginBottom: theme.spacing.lg,
-    elevation: 12,
+    elevation: 8,
     shadowColor: theme.colors.systemBlue,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 11,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   warrantyValueHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 11,
   },
   warrantyValueIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 8,
   },
   warrantyValueIcon: {
-    fontSize: 18,
+    fontSize: theme.fontSize.lg,
   },
   warrantyValueTitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: theme.fontWeight.medium,
+    fontSize: theme.fontSize.lg,
+    color: theme.colors.whiteA90,
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
   warrantyValueAmount: {
-    fontSize: 42,
+    fontSize: theme.fontSize['5xl'],
     fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 20,
+    color: theme.colors.white,
+    marginBottom: 14,
     textShadowColor: 'rgba(0, 0, 0, 0.1)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
@@ -475,149 +600,149 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   deviceCountBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: theme.colors.whiteA20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: theme.borderRadius.sm,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   deviceCountText: {
-    fontSize: 13,
-    color: '#FFFFFF',
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.white,
     fontWeight: '600',
   },
   priceCountBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: theme.colors.whiteA15,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: theme.borderRadius.sm,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   priceCountText: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.whiteA90,
     fontWeight: '500',
   },
   alertCard: {
-    backgroundColor: '#FFF9E6',
-    borderColor: '#FFE5B3',
+    backgroundColor: theme.colors.warning[50],
+    borderColor: theme.colors.warning[200],
     borderWidth: 1,
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
     marginBottom: theme.spacing.lg,
-    elevation: 12,
-    shadowColor: '#FF9500',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
+    elevation: 8,
+    shadowColor: theme.colors.warning[500],
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 11,
   },
   alertHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: 14,
   },
   alertIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FF9500',
+    width: 28,
+    height: 28,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.warning[500],
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
-    shadowColor: '#FF9500',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    marginRight: 11,
+    shadowColor: theme.colors.warning[500],
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   alertTitleContainer: {
     flex: 1,
   },
   alertTitle: {
-    fontSize: 18,
+    fontSize: theme.fontSize.lg,
     fontWeight: '700',
-    color: '#FF9500',
-    marginBottom: 4,
+    color: theme.colors.warning[500],
+    marginBottom: 3,
     letterSpacing: 0.3,
   },
   alertSubtitle: {
-    fontSize: 13,
+    fontSize: theme.fontSize.xs,
     fontWeight: '500',
-    color: '#FF9500',
+    color: theme.colors.warning[500],
     opacity: 0.8,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   alertContent: {
-    marginBottom: 20,
+    marginBottom: 14,
   },
   alertMessage: {
-    fontSize: 15,
-    color: '#8B4513',
-    marginBottom: 16,
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.warning[700],
+    marginBottom: 11,
     fontWeight: '500',
-    lineHeight: 22,
+    lineHeight: 15,
   },
   alertUrgencyBadge: {
-    backgroundColor: '#FF9500',
+    backgroundColor: theme.colors.warning[500],
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.md,
     alignSelf: 'flex-start',
-    shadowColor: '#FF9500',
+    shadowColor: theme.colors.warning[500],
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
   },
   alertUrgencyText: {
-    fontSize: 12,
-    color: '#FFFFFF',
+    fontSize: theme.fontSize.base,
+    color: theme.colors.white,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   alertActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
   },
   alertButton: {
-    backgroundColor: '#FF9500',
+    backgroundColor: theme.colors.warning[500],
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 16,
-    gap: 8,
-    minHeight: 44,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 11,
+    gap: 6,
+    minHeight: 31,
     shadowColor: '#FF9500',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   alertButtonSecondary: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: '#FF9500',
+    borderColor: theme.colors.warning[500],
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: theme.borderRadius.lg,
     gap: 8,
     minHeight: 44,
   },
   alertButtonText: {
-    fontSize: 15,
+    fontSize: theme.fontSize.sm,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.white,
     letterSpacing: 0.3,
   },
   alertButtonSecondaryText: {
-    color: '#FF9500',
-    fontSize: 15,
+    color: theme.colors.warning[500],
+    fontSize: 13,
     fontWeight: '600',
     letterSpacing: 0.3,
   },
@@ -698,7 +823,7 @@ const styles = StyleSheet.create({
     right: 8,
     paddingHorizontal: 4,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: theme.borderRadius.sm,
     minWidth: 60,
     alignItems: 'center',
     zIndex: 1,

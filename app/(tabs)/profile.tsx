@@ -175,7 +175,7 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Total Value Protected</Text>
-            <Text style={[styles.overviewValue, { color: '#007AFF' }]}>{formatCurrency(totalValue)}</Text>
+            <Text style={[styles.overviewValue, { color: theme.colors.systemBlue }]}>{formatCurrency(totalValue)}</Text>
           </View>
         </View>
         
@@ -183,7 +183,7 @@ export default function ProfileScreen() {
         <View style={styles.familyCard}>
           <Text style={styles.cardTitle}>Family Sharing</Text>
           <Pressable style={styles.inviteButton} onPress={() => router.push('/plan-selection')}>
-            <Ionicons name="people" size={16} color={"#007AFF"} />
+            <Ionicons name="people" size={16} color={theme.colors.systemBlue} />
             <Text style={styles.inviteButtonText}>Invite Family Member</Text>
           </Pressable>
         </View>
@@ -303,19 +303,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   avatarText: {
-    fontSize: 36,
+    fontSize: theme.fontSize['5xl'],
     fontWeight: '600',
     color: 'white',
   },
   userName: {
-    fontSize: 24,
+    fontSize: theme.fontSize['3xl'],
     fontWeight: '600',
     marginBottom: 8,
-    color: '#111827',
+    color: theme.colors.neutral[900],
   },
   userEmail: {
-    color: '#6b7280',
-    fontSize: 16,
+    color: theme.colors.neutral[500],
+    fontSize: theme.fontSize.base,
     marginBottom: 16,
   },
   planContainer: {
@@ -332,19 +332,19 @@ const styles = StyleSheet.create({
   },
   planText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: theme.fontSize.xs,
     fontWeight: '600',
   },
   planPrice: {
-    color: '#6b7280',
-    fontSize: 14,
+    color: theme.colors.neutral[500],
+    fontSize: theme.fontSize.sm,
   },
   overviewCard: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    marginHorizontal: 20,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
+    marginHorizontal: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -352,10 +352,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: theme.fontSize.lg,
     fontWeight: '600',
     marginBottom: 20,
-    color: '#111827',
+    color: theme.colors.neutral[900],
   },
   overviewRow: {
     flexDirection: 'row',
@@ -363,20 +363,20 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   overviewLabel: {
-    color: '#6b7280',
-    fontSize: 16,
+    color: theme.colors.neutral[500],
+    fontSize: theme.fontSize.base,
   },
   overviewValue: {
     fontWeight: '500',
-    fontSize: 16,
-    color: '#111827',
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[900],
   },
   familyCard: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    marginHorizontal: 20,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
+    marginHorizontal: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -398,8 +398,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   familyAvatarText: {
-    color: '#6b7280',
-    fontSize: 16,
+    color: theme.colors.neutral[500],
+    fontSize: theme.fontSize.base,
     fontWeight: '600',
   },
   familyInfo: {
@@ -408,12 +408,12 @@ const styles = StyleSheet.create({
   familyName: {
     fontWeight: '500',
     marginBottom: 2,
-    fontSize: 16,
-    color: '#111827',
+    fontSize: theme.fontSize.base,
+    color: theme.colors.neutral[900],
   },
   familyEmail: {
-    fontSize: 14,
-    color: '#6b7280',
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.neutral[500],
   },
   inviteButton: {
     flexDirection: 'row',
@@ -421,36 +421,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: theme.colors.systemBlue,
     borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    paddingVertical: theme.spacing.buttonY,
+    paddingHorizontal: theme.spacing.buttonX,
     gap: 8,
   },
   inviteButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
+    color: theme.colors.systemBlue,
+    fontSize: theme.fontSize.base,
     fontWeight: '600',
   },
   signOutSection: {
-    marginTop: 16,
-    marginBottom: 32,
-    paddingHorizontal: 20,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing['3xl'],
+    paddingHorizontal: 0,
   },
   signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ef4444',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: theme.colors.error[500],
+    paddingVertical: theme.spacing.buttonY,
+    paddingHorizontal: theme.spacing.buttonX,
+    borderRadius: theme.borderRadius.md,
     gap: 8,
   },
   signOutButtonDisabled: {
     opacity: 0.7,
   },
   signOutText: {
-    fontSize: 16,
+    fontSize: theme.fontSize.base,
     fontWeight: '600',
     color: 'white',
   },
@@ -459,8 +460,8 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   versionText: {
-    fontSize: 14,
-    color: '#6b7280',
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.neutral[500],
   },
   modalOverlay: {
     flex: 1,
@@ -471,7 +472,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     borderRadius: 16,
-    padding: 20,
+    padding: theme.spacing.xl,
     width: '80%',
     alignItems: 'center',
     shadowColor: '#000',

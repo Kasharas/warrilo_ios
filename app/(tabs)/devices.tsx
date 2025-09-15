@@ -198,7 +198,7 @@ export default function DeviceListScreen() {
         styles.searchContainer,
         isSearchFocused && styles.searchContainerFocused
       ]}>
-                 <Ionicons name="search" size={20} color={theme.colors.neutral[500]} />
+        <Ionicons name="search" size={theme.fontSize.xl} color={theme.colors.neutral[500]} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search items..."
@@ -401,8 +401,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   filterChip: {
-    backgroundColor: 'white',
-    borderRadius: 18,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.lg,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: 8,
     height: 36,
@@ -421,12 +421,12 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   filterChipText: {
-    fontSize: 13,
+    fontSize: theme.fontSize.xs,
     color: theme.colors.neutral[500],
     fontWeight: '500',
   },
   filterChipTextActive: {
-    color: '#FFFFFF',
+    color: theme.colors.white,
     fontWeight: '600',
   },
   deviceList: {
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     minHeight: 500, // Ensure minimum height to fill remaining space
   },
   deviceListContent: {
-    paddingBottom: 200, // Keep padding at bottom for FAB clearance
+    paddingBottom: theme.spacing['5xl'], // Keep padding at bottom for FAB clearance
     flexGrow: 1, // Allow content to grow and fill available space
     justifyContent: 'flex-start', // Align content to top
     alignItems: 'stretch', // Stretch items to full width
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing['2xl'],
   },
   loadingText: {
-    fontSize: theme.fontSize.base,
+    fontSize: theme.fontSize.sm,
     color: theme.colors.neutral[600],
   },
   emptyContainer: {
@@ -454,13 +454,13 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing['2xl'],
   },
   emptyText: {
-    fontSize: theme.fontSize.xl,
+    fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.label,
     marginBottom: theme.spacing.sm,
   },
   emptySubtext: {
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.fontSize.xs,
     color: theme.colors.neutral[600],
     textAlign: 'center',
   },
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: theme.colors.blackA50,
   },
   modalContent: {
     backgroundColor: theme.colors.systemBackground,
@@ -491,13 +491,13 @@ const styles = StyleSheet.create({
     ...theme.shadows.md,
   },
   modalTitle: {
-    fontSize: theme.fontSize.xl,
+    fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.bold,
     color: theme.colors.label,
     marginBottom: theme.spacing.md,
   },
   modalMessage: {
-    fontSize: theme.fontSize.base,
+    fontSize: theme.fontSize.sm,
     color: theme.colors.neutral[600],
     textAlign: 'center',
     marginBottom: theme.spacing.lg,
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalButtonText: {
-    fontSize: theme.fontSize.base,
+    fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.semibold,
     textAlign: 'center',
   },

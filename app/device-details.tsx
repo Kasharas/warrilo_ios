@@ -357,8 +357,8 @@ export default function DeviceDetailsScreen() {
           }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ 
-                color: '#dc2626', 
-                fontSize: 14,
+                color: theme.colors.error[600], 
+                fontSize: theme.fontSize.sm,
                 flex: 1
               }}>{error}</Text>
             </View>

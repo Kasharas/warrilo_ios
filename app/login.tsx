@@ -397,10 +397,10 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: theme.fontSize.sm,
-    color: '#007AFF',
+    color: theme.colors.systemBlue,
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.systemBlue,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.lg,
     alignItems: 'center',
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing['3xl'],
   },
   secondaryButton: {
-    borderColor: '#007AFF',
+    borderColor: theme.colors.systemBlue,
     borderWidth: 2,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.md,
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.semibold,
-    color: '#007AFF',
+    color: theme.colors.systemBlue,
   },
   signUpContainer: {
     flexDirection: 'row',
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   },
   signUpLink: {
     fontSize: theme.fontSize.base,
-    color: '#007AFF',
+    color: theme.colors.systemBlue,
     fontWeight: theme.fontWeight.medium,
   },
   secondaryButtonDisabled: {
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   errorText: {
-    color: '#FF3B30',
+    color: theme.colors.systemRed,
     fontSize: theme.fontSize.sm,
     textAlign: 'center',
     marginTop: theme.spacing.sm,

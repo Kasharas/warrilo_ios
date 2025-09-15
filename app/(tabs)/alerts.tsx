@@ -107,7 +107,7 @@ export default function AlertsScreen() {
       }}
     >
       <View style={[styles.notificationIcon, { backgroundColor: '#f59e0b' }]}>
-        <Text style={{ color: 'white', fontSize: 18 }}>!</Text>
+        <Text style={{ color: 'white', fontSize: theme.fontSize.lg }}>!</Text>
       </View>
       <View style={styles.notificationContent}>
         <Text style={styles.notificationTitle}>🚨 Warranty Alert</Text>
@@ -288,14 +288,14 @@ export default function AlertsScreen() {
           {/* Loading indicator for warranty alerts */}
           {loadingAlerts && (
             <View style={{
-              padding: 16,
+              padding: theme.spacing.base,
               alignItems: 'center',
               backgroundColor: '#f9fafb',
               borderRadius: 12,
               marginBottom: 12
             }}>
               <ActivityIndicator size="small" color="#2563eb" />
-              <Text style={{ marginTop: 8, color: '#6b7280', fontSize: 14 }}>
+              <Text style={{ marginTop: 8, color: theme.colors.neutral[500], fontSize: theme.fontSize.sm }}>
                 Loading warranty alerts...
               </Text>
             </View>
@@ -304,13 +304,13 @@ export default function AlertsScreen() {
           {/* Empty state for warranty alerts */}
           {!loadingAlerts && warrantyAlerts.length === 0 && !warrantyAlertsError && (
             <View style={{
-              padding: 16,
+              padding: theme.spacing.base,
               alignItems: 'center',
               backgroundColor: '#f0f9ff',
               borderRadius: 12,
               marginBottom: 12
             }}>
-              <Text style={{ color: '#0369a1', fontSize: 14, textAlign: 'center' }}>
+              <Text style={{ color: theme.colors.secondary[700], fontSize: theme.fontSize.sm, textAlign: 'center' }}>
                 No warranty alerts at this time
               </Text>
             </View>
@@ -319,12 +319,12 @@ export default function AlertsScreen() {
           {/* Error display for warranty alerts */}
           {warrantyAlertsError && (
             <View style={{
-              padding: 16,
+              padding: theme.spacing.base,
               backgroundColor: '#fef2f2',
               borderRadius: 12,
               marginBottom: 12
             }}>
-              <Text style={{ color: '#dc2626', fontSize: 14, textAlign: 'center' }}>
+              <Text style={{ color: theme.colors.error[600], fontSize: theme.fontSize.sm, textAlign: 'center' }}>
                 {warrantyAlertsError}
               </Text>
             </View>
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   filterChipText: {
-    fontSize: 13,
+    fontSize: theme.fontSize.xs,
     color: theme.colors.neutral[500],
     fontWeight: '500',
   },
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing['2xl'],
   },
   loadingText: {
-    fontSize: theme.fontSize.base,
+    fontSize: theme.fontSize.sm,
     color: theme.colors.neutral[600],
   },
   emptyContainer: {
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   emptyText: {
-    fontSize: theme.fontSize.lg,
+    fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.neutral[700],
     marginBottom: theme.spacing.sm,
@@ -501,13 +501,13 @@ const styles = StyleSheet.create({
     color: theme.colors.neutral[500],
   },
   alertTitle: {
-    fontSize: theme.fontSize.base,
+    fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.neutral[900],
     marginBottom: theme.spacing.sm,
   },
   alertMessage: {
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.fontSize.xs,
     color: theme.colors.neutral[700],
     marginBottom: theme.spacing.md,
     lineHeight: 20,
@@ -560,13 +560,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notificationTitle: {
-    fontSize: theme.fontSize.base,
+    fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.neutral[900],
     marginBottom: theme.spacing.xs,
   },
   notificationMessage: {
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.fontSize.xs,
     color: theme.colors.neutral[700],
     marginBottom: theme.spacing.xs,
     lineHeight: 20,

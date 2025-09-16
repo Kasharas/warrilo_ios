@@ -378,7 +378,7 @@ export default function AlertsScreen() {
           {/* Loading indicator for warranty alerts */}
           {loadingAlerts && (
             <View style={{
-              padding: theme.spacing.base,
+              padding: theme.spacing.md,
               alignItems: 'center',
               backgroundColor: '#f9fafb',
               borderRadius: 12,
@@ -394,7 +394,7 @@ export default function AlertsScreen() {
           {/* Empty state for warranty alerts */}
           {!loadingAlerts && warrantyAlerts.length === 0 && !warrantyAlertsError && (
             <View style={{
-              padding: theme.spacing.base,
+              padding: theme.spacing.md,
               alignItems: 'center',
               backgroundColor: '#f0f9ff',
               borderRadius: 12,
@@ -409,7 +409,7 @@ export default function AlertsScreen() {
           {/* Error display for warranty alerts */}
           {warrantyAlertsError && (
             <View style={{
-              padding: theme.spacing.base,
+              padding: theme.spacing.md,
               backgroundColor: '#fef2f2',
               borderRadius: 12,
               marginBottom: 12

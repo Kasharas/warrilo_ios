@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SUPABASE_CONFIG } from './config';
+import { getOAuthRedirectUrl } from './urlConfig';
 
 console.log('=== SUPABASE CLIENT INITIALIZATION ===');
 console.log('1. Supabase URL:', SUPABASE_CONFIG.url);
@@ -31,7 +32,7 @@ export const signInWithGoogle = async () => {
   try {
     if (Platform.OS === 'web') {
       // Web: Use Supabase's built-in OAuth flow
-      const redirectUrl = 'http://localhost:8081/auth-callback';
+      const redirectUrl = getOAuthRedirectUrl();
       console.log('Web OAuth: Using built-in flow with redirect:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -54,12 +55,28 @@ export const signInWithGoogle = async () => {
       console.log('Web OAuth initiated successfully');
       return { error: null };
     } else {
-      // Mobile: Use React Native Google Sign-In
-      console.log('Mobile: Using React Native Google Sign-In...');
+      // Mobile: Use OAuth with deep linking
+      console.log('Mobile: Using OAuth with deep linking...');
       
-      // Google Sign-In not available in development build
-      console.log('Google Sign-In requires native build - falling back to OAuth');
-      return { error: 'Google Sign-In requires native build. Please use OAuth flow for now.' };
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: getOAuthRedirectUrl(), // Deep link to your app
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          skipBrowserRedirect: false
+        }
+      });
+      
+      if (error) {
+        console.error('❌ Mobile OAuth error:', error);
+        return { error: error.message };
+      }
+      
+      console.log('✅ Mobile OAuth initiated');
+      return { data, error: null };
     }
   } catch (error) {
     console.error('Google Sign-In exception:', error);

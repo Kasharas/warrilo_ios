@@ -6,6 +6,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { theme } from '@/src/styles/theme';
 import { useStartupSync } from '@/src/hooks/useStartupSync';
 import { StatusBar } from 'expo-status-bar';
+import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { testSecureStorage } from '@/lib/secureStorage';
 import { validateAuthConfiguration } from '@/lib/config';
@@ -119,6 +120,7 @@ function AppContent() {
 }
 
 export default function RootLayout() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -129,6 +131,35 @@ export default function RootLayout() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Deep link handling
+  useEffect(() => {
+    const handleDeepLink = (url: string) => {
+      console.log('📱 Deep link received:', url);
+      
+      if (url.includes('auth-callback')) {
+        console.log('🔄 Routing to auth callback...');
+        // Use object form to avoid typed route mismatch in build-time types
+        router.push({ pathname: '/auth-callback' } as any);
+      }
+    };
+
+    // Handle deep links when app is already open
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    // Handle deep links when app is opened from closed state
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink(url);
+      }
+    });
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [router]);
 
   if (isLoading) {
     return (

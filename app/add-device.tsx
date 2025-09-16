@@ -662,8 +662,9 @@ export default function AddDeviceScreen() {
       setCompressionStatus('Storing device locally...');
       
       // Step 2: Store device locally with COMPRESSED images
+      const generatedLocalId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const localDeviceData = {
-        id: '', // Will be updated with Supabase ID after upload
+        id: generatedLocalId, // Start with local ID; will be updated with Supabase ID after upload
         user_id: user.id,
         name: deviceName.trim(),
         supplier: storeName.trim(),
@@ -679,7 +680,7 @@ export default function AddDeviceScreen() {
         identifiers: serialNumber.trim() || null,
         created_at: new Date().toISOString(),
         sync_status: 'pending' as const,
-        local_id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        local_id: generatedLocalId
       };
       
       console.log('Storing device locally with COMPRESSED images:', localDeviceData);
@@ -822,8 +823,8 @@ export default function AddDeviceScreen() {
 
   // Generate date options
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
   const days = Array.from({length: 31}, (_, i) => i + 1);
   const years = Array.from({length: 50}, (_, i) => new Date().getFullYear() - 25 + i);
@@ -884,7 +885,7 @@ export default function AddDeviceScreen() {
                        {deviceImage ? (
               <View style={styles.imagePreviewContainer}>
                 <View style={styles.imageWrapper}>
-                  {console.log('🖼️ Rendering device image with URI:', deviceImage)}
+                  {/* Logging moved out of JSX to avoid returning void as ReactNode */}
                   <Image source={{ uri: deviceImage }} style={styles.imagePreview} />
                   {deviceImageCompressing && (
                     <View style={styles.compressionOverlay}>
@@ -1059,7 +1060,7 @@ export default function AddDeviceScreen() {
                  !selectedDate && styles.datePlaceholder
                ]}>
                  {selectedDate ? selectedDate.toLocaleDateString('en-US', {
-                   month: 'long',
+                   month: 'short',
                    day: 'numeric', 
                    year: 'numeric'
                  }) : 'Purchase date'}
@@ -1176,20 +1177,7 @@ export default function AddDeviceScreen() {
              <View style={styles.pickerContainer}>
                {/* Header */}
                <View style={styles.pickerHeader}>
-                 <Pressable onPress={() => {
-                   setTempSelectedCategory(selectedCategory); // Reset to original selection
-                   setShowCategoryPicker(false);
-                 }}>
-                   <Text style={styles.cancelButton}>Cancel</Text>
-                 </Pressable>
                  <Text style={styles.pickerTitle}>Category</Text>
-                 <Pressable onPress={() => {
-                   setSelectedCategory(tempSelectedCategory); // Apply the temporary selection
-                   setCategory(tempSelectedCategory);
-                   setShowCategoryPicker(false);
-                 }}>
-                   <Text style={styles.doneButton}>Done</Text>
-                 </Pressable>
                </View>
                
                {/* Picker Wheel */}
@@ -1202,15 +1190,18 @@ export default function AddDeviceScreen() {
                        tempSelectedCategory === cat && styles.pickerOptionSelected
                      ]}
                      onPress={() => {
-                       setTempSelectedCategory(cat); // Only update temporary selection
+                       setTempSelectedCategory(cat);
+                       setSelectedCategory(cat);
+                       setCategory(cat);
+                       setShowCategoryPicker(false);
                      }}
                    >
-                                           <Text style={[
-                        styles.pickerOptionText,
-                        tempSelectedCategory === cat && styles.pickerOptionTextSelected
-                      ]}>
-                        {cat}
-                      </Text>
+                    <Text style={[
+                      styles.pickerOptionText,
+                      tempSelectedCategory === cat && styles.pickerOptionTextSelected
+                    ]}>
+                      {cat}
+                    </Text>
                    </Pressable>
                  ))}
                </View>
@@ -1856,16 +1847,21 @@ const styles = StyleSheet.create({
        cancelButton: {
       fontSize: theme.fontSize.body,
       color: theme.colors.systemBlue,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
     },
        pickerTitle: {
-      fontSize: theme.fontSize.body,
+      fontSize: theme.fontSize.title3,
       fontWeight: theme.fontWeight.semibold,
       color: theme.colors.label,
+      textAlign: 'center',
     },
        doneButton: {
       fontSize: theme.fontSize.body,
       color: theme.colors.systemBlue,
       fontWeight: theme.fontWeight.semibold,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
     },
                pickerWheel: {
        paddingVertical: theme.spacing.xl,
@@ -1887,13 +1883,13 @@ const styles = StyleSheet.create({
        marginVertical: theme.spacing.xs,
      },
        pickerOptionText: {
-      fontSize: theme.fontSize.title3,
+      fontSize: theme.fontSize.body,
       color: theme.colors.label,
-      fontWeight: theme.fontWeight.normal,
+      fontWeight: theme.fontWeight.semibold,
     },
        pickerOptionTextSelected: {
       color: theme.colors.systemBackground,
-      fontWeight: theme.fontWeight.semibold,
+      fontWeight: theme.fontWeight.bold,
     },
 
        // Date picker styles
@@ -1955,7 +1951,7 @@ const styles = StyleSheet.create({
       backgroundColor: theme.colors.systemBlue,
     },
        wheelOptionText: {
-      fontSize: theme.fontSize.title3,
+      fontSize: theme.fontSize.body,
       color: theme.colors.label,
       fontWeight: theme.fontWeight.normal,
     },

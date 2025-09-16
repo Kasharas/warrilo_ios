@@ -74,9 +74,9 @@ export const warrantyAlertService = {
         return isValid;
       });
       
-      // ✅ PREPARE DATA FOR SUPABASE (remove device_name as it's not in the schema)
+      // ✅ PREPARE DATA FOR SUPABASE (remove fields not in the schema)
       const supabaseAlerts = validAlerts.map(alert => {
-        const { device_name, ...supabaseAlert } = alert;
+        const { device_name, local_device_id, ...supabaseAlert } = alert as any;
         return supabaseAlert;
       });
       

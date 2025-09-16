@@ -49,7 +49,7 @@ export default function Index() {
     }}>
               <ActivityIndicator size="large" color={theme.colors.systemBlue} />
       <Text style={{ 
-        marginTop: theme.spacing.base, 
+        marginTop: theme.spacing.md, 
         color: theme.colors.neutral[600],
         fontSize: theme.fontSize.base
       }}>

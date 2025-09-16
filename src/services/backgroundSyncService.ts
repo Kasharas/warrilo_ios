@@ -16,6 +16,7 @@ export interface SyncResult {
   duration: number
   devicesProcessed?: number
   errors?: string[]
+  alertsProcessed?: number
 }
 
 class BackgroundSyncService {
@@ -383,7 +384,7 @@ class BackgroundSyncService {
         reminder_date: alert.reminder_date,
         warranty_expire_date: alert.warranty_expire_date,
         device_name: deviceMap[alert.device_id] || 'Unknown device',
-        created_at: alert.created_at || new Date().toISOString()
+        created_at: (alert as any).created_at || new Date().toISOString()
       }))
       
       // Update local storage with Supabase data (master priority)

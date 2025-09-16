@@ -1921,6 +1921,8 @@ const styles = StyleSheet.create({
        cancelButton: {
       fontSize: theme.fontSize.body,
       color: theme.colors.systemBlue,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
     },
        pickerTitle: {
       fontSize: theme.fontSize.body,
@@ -1931,6 +1933,8 @@ const styles = StyleSheet.create({
       fontSize: theme.fontSize.body,
       color: theme.colors.systemBlue,
       fontWeight: theme.fontWeight.semibold,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
     },
                pickerWheel: {
        paddingVertical: theme.spacing.xl,

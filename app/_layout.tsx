@@ -139,8 +139,18 @@ export default function RootLayout() {
       
       if (url.includes('auth-callback')) {
         console.log('🔄 Routing to auth callback...');
-        // Use object form to avoid typed route mismatch in build-time types
-        router.push({ pathname: '/auth-callback' } as any);
+        // Preserve query params (e.g., ?code=...) when navigating to the callback screen
+        const parsed = Linking.parse(url);
+        const queryParams: any = parsed?.queryParams || {};
+        const codeParam = typeof queryParams.code === 'string' ? queryParams.code : undefined;
+
+        if (codeParam) {
+          console.log('🔑 Found auth code, navigating with code:', codeParam);
+          router.push({ pathname: '/auth-callback', params: { code: codeParam } } as any);
+        } else {
+          console.warn('⚠️ No code found in deep link, passing full URL');
+          router.push({ pathname: '/auth-callback', params: { url: encodeURIComponent(url) } } as any);
+        }
       }
     };
 

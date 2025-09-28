@@ -4,6 +4,7 @@
     "slug": "warrilo-mobile",
     "version": "1.0.0",
     "newArchEnabled": true,
+    "scheme": "warrilo",
     "web": {
       "bundler": "metro",
       "output": "single",
@@ -17,6 +18,21 @@
       "eas": {
         "projectId": "fcdfa3c1-d304-45d5-a77f-feccb85ea850"
       }
+    },
+    "android": {
+      "package": "com.x699tomas.warrilomobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            { "scheme": "warrilo" }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     }
   }
 }

@@ -8,12 +8,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signInWithGoogle, signIn, resetPassword, resendVerification, loading: isLoading } = useAuth();
+  const { signInWithGoogle, signIn, resetPassword, resendVerification } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Form validation functions
   const isValidEmail = (email: string) => {
@@ -62,7 +63,7 @@ export default function LoginScreen() {
     
     try {
       console.log('5. Calling signIn function from AuthContext...');
-      const { error, needsVerification, needsGoogleAuth } = await signIn(email, password);
+      const { error, needsVerification } = await signIn(email, password);
       
       if (needsVerification) {
         console.log('6. Email needs verification - showing verification popup');
@@ -73,22 +74,6 @@ export default function LoginScreen() {
             {
               text: 'Resend Verification',
               onPress: () => handleResendVerification(email)
-            },
-            {
-              text: 'OK',
-              style: 'default'
-            }
-          ]
-        );
-      } else if (needsGoogleAuth) {
-        console.log('6. User exists but uses Google OAuth - showing Google auth popup');
-        Alert.alert(
-          'Account Created with Google',
-          'This account was created using Google Sign-In. Please use the "Sign in with Google" button instead.',
-          [
-            {
-              text: 'Use Google Sign-In',
-              onPress: () => handleGoogleLogin()
             },
             {
               text: 'OK',
@@ -188,13 +173,14 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = async () => {
-    if (isLoading) return; // Prevent multiple clicks
+    if (googleLoading) return; // Prevent multiple clicks for Google only
     
     console.log('=== GOOGLE LOGIN DEBUG START ===');
     console.log('1. Button clicked, using auth system...');
-    console.log('2. Current auth state:', { isLoading, error });
+    console.log('2. Current auth state:', { loading, error });
     
     try {
+      setGoogleLoading(true);
       console.log('3. Calling signInWithGoogle function...');
       const { error } = await signInWithGoogle();
       if (error) {
@@ -207,6 +193,8 @@ export default function LoginScreen() {
     } catch (error) {
       console.error('6. Unexpected error during Google sign-in:', error);
       setError('An unexpected error occurred during Google Sign-In');
+    } finally {
+      setGoogleLoading(false);
     }
     
     console.log('=== GOOGLE LOGIN DEBUG END ===');
@@ -282,12 +270,12 @@ export default function LoginScreen() {
           <Pressable 
             style={[
               styles.secondaryButton,
-              isLoading && styles.secondaryButtonDisabled
+              googleLoading && styles.secondaryButtonDisabled
             ]}
             onPress={handleGoogleLogin}
-            disabled={isLoading}
+            disabled={googleLoading}
           >
-            {isLoading ? (
+            {googleLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#007AFF" />
                 <Text style={[styles.secondaryButtonText, styles.loadingText]}>

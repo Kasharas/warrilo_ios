@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import { supabase, signInWithGoogle as supabaseSignInWithGoogle } from '../lib/supabaseClient';
 import { DeviceLocalStorage } from '../src/lib/localStorage';
 import { validateSupabaseSession } from '../src/lib/sessionValidator';
+import { syncResetService } from '../src/services/syncResetService';
 
 interface AuthContextType {
   user: User | null;
@@ -38,6 +39,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isInitialized = useRef(false);
 
   useEffect(() => {
+    // Check if AuthContext initialization state persists incorrectly
+    console.log('AUTH CONTEXT INIT:', {
+      isInitialized: isInitialized.current,
+      userExists: !!user,
+      sessionExists: !!session
+    });
+    
     // Prevent multiple initializations
     if (isInitialized.current) {
       console.log('=== AUTH CONTEXT: Already initialized, skipping ===');
@@ -47,10 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('=== AUTH CONTEXT useEffect TRIGGERED ===');
     console.log('0a. useEffect dependency array changed');
     
-    // Platform-specific URL logging
-    const isWeb = typeof window !== 'undefined';
-    console.log('0b. Current window.location.href:', isWeb ? window.location.href : 'N/A (mobile)');
-    console.log('0c. Current window.location.search:', isWeb ? window.location.search : 'N/A (mobile)');
+    // Platform-specific URL logging (guard window access on native)
+    const isWeb = Platform.OS === 'web';
+    const currentHref = isWeb ? (typeof window !== 'undefined' ? (window.location?.href ?? 'N/A') : 'N/A') : 'N/A (mobile)';
+    const currentSearch = isWeb ? (typeof window !== 'undefined' ? (window.location?.search ?? 'N/A') : 'N/A') : 'N/A (mobile)';
+    console.log('0b. Current window.location.href:', currentHref);
+    console.log('0c. Current window.location.search:', currentSearch);
     
     const getInitialSession = async () => {
       console.log('=== AUTH CONTEXT INITIALIZATION ===');
@@ -75,33 +85,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             platform: 'mobile'
           });
 
-          try {
-            const sessionValidation = await validateSupabaseSession();
-
-            if (sessionValidation.isValid) {
-              console.log('Mobile auth: Session validated successfully - enabling sync', {
-                userId: session.user.id,
-                syncReady: true,
-                platform: 'mobile'
-              });
-              setSyncReady(true);
-            } else {
-              console.error('Mobile auth: Session validation failed for regular session:', {
-                error: sessionValidation.error,
-                userId: session.user.id,
-                syncReady: false,
-                platform: 'mobile'
-              });
-              setSyncReady(false);
-            }
-          } catch (validationError) {
-            console.error('Mobile auth: Session validation exception for regular session:', {
-              error: validationError instanceof Error ? validationError.message : 'Unknown error',
-              userId: session.user.id,
-              platform: 'mobile'
-            });
-            setSyncReady(false);
-          }
+          // Enable sync immediately - session validation is causing hangs
+          console.log('Mobile auth: Enabling sync immediately after login', {
+            userId: session.user.id,
+            syncReady: true,
+            platform: 'mobile'
+          });
+          setSyncReady(true);
         }
 
         console.log('5. Initial session set, user:', session?.user?.id || 'No user');
@@ -144,34 +134,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             userId: session.user.id,
             platform: 'mobile'
           });
-          
-          try {
-            const sessionValidation = await validateSupabaseSession();
-            
-            if (sessionValidation.isValid) {
-              console.log('Mobile auth: Session validated successfully - enabling sync', {
-                userId: session.user.id,
-                syncReady: true,
-                platform: 'mobile'
-              });
-              setSyncReady(true);
-            } else {
-              console.error('Mobile auth: Session validation failed in auth state change:', {
-                error: sessionValidation.error,
-                userId: session.user.id,
-                syncReady: false,
-                platform: 'mobile'
-              });
-              setSyncReady(false);
-            }
-          } catch (validationError) {
-            console.error('Mobile auth: Session validation exception in auth state change:', {
-              error: validationError instanceof Error ? validationError.message : 'Unknown error',
-              userId: session.user.id,
-              platform: 'mobile'
-            });
-            setSyncReady(false);
-          }
+          // Enable sync immediately - session validation is causing hangs
+          console.log('Mobile auth: Enabling sync immediately after auth state change', {
+            userId: session.user.id,
+            syncReady: true,
+            platform: 'mobile'
+          });
+          setSyncReady(true);
         } else {
           setSyncReady(false);
           console.log('Mobile auth: Sync marked as not ready - no user session', {
@@ -181,8 +150,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Handle user preferences creation
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log('DEBUG: User signed in, creating preferences for:', session.user.id);
-          await createUserPreferencesIfNeeded(session.user.id);
+          console.log('DEBUG: User signed in, deferring preferences creation for:', session.user.id);
+          // Defer database call to avoid corrupting OAuth client state
+          setTimeout(async () => {
+            await createUserPreferencesIfNeeded(session.user.id);
+          }, 2000);
         }
         
         if (event === 'TOKEN_REFRESHED') {
@@ -227,7 +199,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     console.log('=== SUPABASE SIGNIN DEBUG START ===');
     console.log('1. Calling supabase.auth.signInWithPassword with email:', email);
-    console.log('1a. AUTH CONTEXT VERSION: Enhanced with detailed logging');
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -240,51 +211,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('4. SignIn failed with error:', error.message);
-        console.log('5. Error details:', {
-          message: error.message,
-          status: error.status,
-          statusText: (error as any).statusText || 'Unknown error'
-        });
         
-        // Check if the error is due to unconfirmed email or Google OAuth user
-        if (error.message === 'Invalid login credentials') {
-          console.log('6. Checking if user exists but has different auth method...');
-          try {
-            // First try password reset - if it works, user exists (could be Google OAuth or unconfirmed)
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: 'com.warrilo.mobile://reset-password',
-            });
-            
-            if (!resetError) {
-              console.log('7. User exists - checking if email is confirmed...');
-              
-              // Try to resend verification - if it fails, email is already confirmed (likely Google OAuth)
-              const { error: resendError } = await supabase.auth.resend({
-                type: 'signup',
-                email: email
-              });
-              
-              if (resendError) {
-                console.log('8. User exists but email is already confirmed - likely Google OAuth user');
-                return { error: null, needsGoogleAuth: true };
-              } else {
-                console.log('8. User exists but email is not confirmed - resend verification sent');
-                return { error: null, needsVerification: true };
-              }
-            } else {
-              console.log('7. User likely does not exist');
-            }
-          } catch (checkError) {
-            console.log('7. Could not check user status, treating as invalid credentials');
-          }
+        // Only check for actual email verification errors, not "Invalid login credentials"
+        if (error.message.includes('email not confirmed') || 
+            error.message.includes('not verified') ||
+            error.message.includes('confirm your email')) {
+          console.log('5. Email verification required');
+          return { error: null, needsVerification: true };
         }
         
+        // Return the actual error for all other cases (wrong password, etc.)
         return { error };
       } else {
         console.log('4. SignIn successful');
         console.log('5. User ID:', data.user?.id || 'No ID');
         console.log('6. User email confirmed:', data.user?.email_confirmed_at ? 'Yes' : 'No');
-        console.log('7. Session created:', data.session ? 'Yes' : 'No');
         return { error: null };
       }
     } catch (error) {
@@ -398,6 +339,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('⚠️ AuthContext: Local storage clear warning:', storageError);
         // Continue with sign out even if storage clear fails
       }
+      
+      // Reset all sync states (including hasInitialSyncedRef)
+      console.log('🔄 AuthContext: Resetting sync states...');
+      syncResetService.resetAllSyncStates();
       
       // Sign out from Supabase
       console.log('🔐 AuthContext: Signing out from Supabase...');

@@ -39,41 +39,18 @@ class BackgroundSyncService {
   public async performSync(userId: string, force: boolean = false): Promise<SyncResult> {
     const startTime = Date.now()
     
+    // Log the sync status service state before attempting sync
+    console.log('SYNC STATUS BEFORE:', syncStatusService.getStatus());
+    
     console.log('Mobile background sync: Starting sync operation...', {
       userId,
       timestamp: new Date().toISOString(),
       platform: 'mobile'
     });
 
-    // Validate session before any sync operations
-    console.log('Mobile background sync: Validating session...');
-    const sessionResult = await validateSupabaseSession();
-    
-    if (!sessionResult.isValid) {
-      console.error('Mobile background sync: Aborted - invalid session:', {
-        error: sessionResult.error,
-        userId,
-        platform: 'mobile',
-        syncAttempt: 'background'
-      });
-      
-      return {
-        success: false,
-        message: `Background sync failed: ${sessionResult.error}`,
-        devicesProcessed: 0,
-        errors: [`Session validation failed: ${sessionResult.error}`],
-        operationsCompleted: 0,
-        operationsFailed: 1,
-        duration: Date.now() - startTime
-      };
-    }
-    
-    console.log('Mobile background sync: Session validated successfully, proceeding with sync...', {
-      userId: sessionResult.session?.user.id,
-      sessionValid: true,
-      platform: 'mobile'
-    });
-    
+    // Skip explicit session validation here to avoid device hangs
+    console.log('Mobile background sync: Skipping internal session validation (AuthContext gates readiness)')
+
     console.log('=== BACKGROUND SYNC STARTED ===')
     console.log('User ID:', userId)
     console.log('Force sync:', force)
@@ -81,7 +58,7 @@ class BackgroundSyncService {
     
     // Check if sync is already running
     if (!syncStatusService.startSync()) {
-      console.log('Sync already in progress, skipping')
+      console.log('SYNC BLOCKED: Already in progress');
       return {
         success: false,
         error: 'Sync already in progress',
@@ -101,27 +78,7 @@ class BackgroundSyncService {
       // Clear pending sync since we're now online
       this.pendingSyncUserId = null
 
-      // Step 1: Always sync warranty alerts (Supabase has master priority)
-      const alertsResult = await this.syncWarrantyAlerts(userId)
-      
-      // Step 2: Check if device sync is needed (unless forced)
-      if (!force) {
-        const syncNeeded = await dataComparisonService.isSyncNeeded(userId)
-        if (!syncNeeded) {
-          console.log('No device sync needed - data is already in sync')
-          console.log(`Warranty alerts synced: ${alertsResult.alertsProcessed}`)
-          syncStatusService.completeSync(true)
-          return {
-            success: true,
-            operationsCompleted: 0,
-            operationsFailed: 0,
-            duration: Date.now() - startTime,
-            alertsProcessed: alertsResult.alertsProcessed
-          }
-        }
-      }
-
-      // Step 2: Create sync plan
+      // Step 1: Sync devices first (so alerts can map device names properly)
       console.log('Creating sync plan...')
       let syncPlan: SyncPlan
       
@@ -157,19 +114,35 @@ class BackgroundSyncService {
       }
 
       if (syncPlan.summary.totalOperations === 0) {
-        console.log('No operations needed - data is in sync')
+        console.log('No device operations needed - data is in sync')
+        // Still sync warranty alerts even if no device operations needed
+        console.log('🔄 Syncing warranty alerts from Supabase...')
+        const alertsResult = await this.syncWarrantyAlerts(userId)
+        
+        const duration = Date.now() - startTime
+        console.log(`=== BACKGROUND SYNC COMPLETED ===`)
+        console.log(`Duration: ${duration}ms`)
+        console.log(`Device operations completed: 0`)
+        console.log(`Device operations failed: 0`)
+        console.log(`Warranty alerts synced: ${alertsResult.alertsProcessed}`)
+        
         syncStatusService.completeSync(true)
         return {
           success: true,
           syncPlan,
           operationsCompleted: 0,
           operationsFailed: 0,
-          duration: Date.now() - startTime
+          duration,
+          alertsProcessed: alertsResult.alertsProcessed
         }
       }
 
-      // Step 3: Execute sync operations
+      // Step 2: Execute device sync operations
       const result = await this.executeSyncPlan(syncPlan)
+      
+      // Step 3: Sync warranty alerts after devices (so alerts can map device names properly)
+      console.log('🔄 Syncing warranty alerts from Supabase...')
+      const alertsResult = await this.syncWarrantyAlerts(userId)
       
       const duration = Date.now() - startTime
       console.log(`=== BACKGROUND SYNC COMPLETED ===`)

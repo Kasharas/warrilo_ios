@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { AppState, AppStateStatus } from 'react-native'
 import { backgroundSyncService } from '../services/backgroundSyncService'
 import { syncStatusService } from '../services/syncStatusService'
+import { syncResetService } from '../services/syncResetService'
 import { useAuth } from '../../contexts/AuthContext'
 
 interface UseStartupSyncOptions {
@@ -21,11 +22,20 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
     maxRetries = 3
   } = options
 
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, syncReady } = useAuth()
   
   const retryCountRef = useRef(0)
   const syncIntervalRef = useRef<number | null>(null)
   const hasInitialSyncedRef = useRef(false)
+
+  // Log React ref values that control sync behavior
+  console.log('STARTUP SYNC STATE:', {
+    hasInitialSynced: hasInitialSyncedRef.current,
+    userExists: !!user?.id,
+    userId: user?.id,
+    authLoading,
+    syncReady
+  });
 
   // Main sync function with retry logic
   const performSyncWithRetry = async (): Promise<void> => {
@@ -128,6 +138,17 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
       }
     }
   }, [user?.id, syncIntervalMinutes])
+
+  // Register with sync reset service
+  useEffect(() => {
+    const unregister = syncResetService.registerResetCallback(() => {
+      console.log('🔄 useStartupSync: Resetting sync state on logout')
+      hasInitialSyncedRef.current = false
+      retryCountRef.current = 0
+    })
+
+    return unregister
+  }, [])
 
   // Cleanup on unmount
   useEffect(() => {

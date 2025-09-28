@@ -1,0 +1,1200 @@
+09-22 22:23:47.946  5984  5984 I fwkit_sdk_fm: handle framework init for:com.huawei.hwid.container3
+09-22 22:23:47.947  5984  5984 I fwkit_sdk_fm: initFramework start
+09-22 22:23:47.947 15082 15144 I Finsky  : [2179] A library licensing entry already exists for com.blizzard.arc.
+09-22 22:23:47.948  5984  6087 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.commonkit_61500301
+09-22 22:23:47.948  5984  6087 I fwkit_utils_fiu: system json at /system/app/HMS/modules/kits_config.json,time:1533657660000
+09-22 22:23:47.948  5984  6086 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.runtimekit_61500301
+09-22 22:23:47.948  5984  6086 I fwkit_utils_fiu: system json at /system/app/HMS/modules/kits_config.json,time:1533657660000
+09-22 22:23:47.948  5984  6087 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.commonkit_60200304
+09-22 22:23:47.949  5984  6087 I fwkit_utils_fiu: isAssetJsonValid:true isSysAppJsonValid:true
+09-22 22:23:47.949  5984  6087 I fwkit_utils_fiu: fillKitInfo:com.huawei.hms.commonkit_61500301
+09-22 22:23:47.949  5984  6087 I fwkit_utils_fiu: commonkit in json,isSystemApp:false,Framework-common.apk_61500301
+09-22 22:23:47.949  5984  6086 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.runtimekit_60200304
+09-22 22:23:47.949  5984  6086 I fwkit_utils_fiu: isAssetJsonValid:true isSysAppJsonValid:true
+09-22 22:23:47.949  5984  6086 I fwkit_utils_fiu: fillKitInfo:com.huawei.hms.runtimekit_61500301
+09-22 22:23:47.949  5984  6086 I fwkit_utils_fiu: runtime in json,isSystemApp:false,Framework-runtime.apk_61500301
+09-22 22:23:47.950  5984  6087 I fwkit_utils_fiu: commonkit in json:61500301,installed:61500301,time:1757980914000,size:1198545B,use installed
+09-22 22:23:47.950  5984  5984 I fwkit_utils_fiu: com.huawei.hms.fwkit.apk is ok, size 779227B, consistent check :true, cost 3
+09-22 22:23:47.951  5984  6086 I fwkit_utils_fiu: runtime in json:61500301,installed:61500301,time:1757980914000,size:512022B,use installed
+09-22 22:23:47.961  1710  2539 I PackageManager: getInstalledPackages cost 14 ms, flags: 790528, userId: 0, callingUid: 10169, callingPid: 19424
+09-22 22:23:47.963  6089  6089 I dex2oat-util: /Dex2oatUtil.cpp:28: TID(6089) 	new_execve:/system/bin/dex2oat
+09-22 22:23:47.963  6089  6089 I dex2oat-util: /Dex2oatUtil.cpp:30: TID(6089) 	dex2oat disabled
+09-22 22:23:47.965  5984  6087 I fwkit_utils_fiu: com.huawei.hms.commonkit.apk is ok, size 1198545B, consistent check :true, cost 15
+09-22 22:23:47.966  5984  6086 I fwkit_utils_fiu: com.huawei.hms.runtimekit.apk is ok, size 512022B, consistent check :true, cost 14
+09-22 22:23:47.969 15082 15082 I NotificationManager: com.android.vending: cancel(-1050172287)
+09-22 22:23:47.969 15082 15082 I Finsky  : [1] AIM: AppInfoCacheUpdater -> invalidating apps: [com.blizzard.arc]
+09-22 22:23:47.969 15082 15082 I Finsky  : [1] AIM: AppInfoManager-Perf > getApps > called for 1 apps
+09-22 22:23:47.976 15082  5999 I Finsky  : [2584] SCH: Received scheduling request: Id: 12-1, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+09-22 22:23:47.979  2720  5163 I Finsky:background: [3033] IQ: Notifying installation update. [Package:com.authy.authy, isid:u0LKfJLQT0i1iyrW5nfDQA], status=DOWNLOADING, status_code=0, reason=auto_update, tsc=PT1H1M41.481S, attempt=0
+09-22 22:23:47.988 15082 15115 I Finsky  : [2161] RECEIVER_PACKAGE_MONITOR#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:47.993  2720  2720 I Finsky:background: [1] affh - Received: android.intent.action.PACKAGE_REMOVED, [ncLEZQTSFSUBMfhJKg1he3TpzwvGvwTJFupg5UiyAm8]
+09-22 22:23:47.995   679  1340 W /system/bin/netd: A binder object at 0x70cc88a6c0 is being transacted on, however, this object is in the same process as its proxy. Transacting with this binder is expensive compared to just calling the corresponding functionality in the same process.
+09-22 22:23:47.996   679  1340 I PreDnsController: CanPreDnsQuery,persist.sys.predns is false!
+09-22 22:23:47.998  2588  2588 D DEF_PackageChangedBroadcastReceiver: receive action:android.intent.action.PACKAGE_REPLACED
+09-22 22:23:47.998  2588  2588 D DEF_PackageChangedBroadcastReceiver: onReceive com.blizzard.arc android.intent.action.PACKAGE_REPLACED replacing: true
+09-22 22:23:47.998  2588  2864 I DEF_ProfileControl_Loader: handle Message: what: 3
+09-22 22:23:48.000  2588  2864 I ProfileBaseUtil: start to call hasConnected function, caller is com.huawei.systemserver
+09-22 22:23:48.000  2588  2864 I ProfileClient: profileService is null or not active, return false
+09-22 22:23:48.000  2588  2864 I ProfileBaseUtil: start to call connect function, caller is com.huawei.systemserver
+09-22 22:23:48.001  2588  2864 I ProfileClient: sdk version = null
+09-22 22:23:48.018  2965 23141 I A_DPMS_ObjectDevicePermissionManager: notifyPermissionChanged: operation start with uid: 10967
+09-22 22:23:48.019  2720  2797 I Finsky:background: [3001] DSC: remove(44576)
+09-22 22:23:48.021  2720  2720 I Finsky:background: [1] IQ: onPackageRemoved com.blizzard.arc, replacing=true, uninstallingFromPlay=false
+09-22 22:23:48.024  2720  2797 I Finsky:background: [3001] DS: remove(request_id=44576)
+09-22 22:23:48.028  2720  2797 I Finsky:background: [3001] RECEIVER_PACKAGE_MONITOR_BACKGROUND#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:48.029  1710  2777 W AwareLog: HwMtmBroadcastResourceManager: iaware_brjob not process: ResolveInfo{584fc28 com.android.vending/com.google.android.finsky.instantapps.appmanagement.InstantAppRemoveMonitor m=0x208000}, filter: null, count: null
+09-22 22:23:48.029  1710  2777 V ActivityManager: startProcess: name=com.android.vending:instant_app_installer app=null knownToBeDead=true thread=null pid=-1 preloadStatus=-1
+09-22 22:23:48.034  2588  2864 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.bindService:1777 android.content.ContextWrapper.bindService:705 com.huawei.profile.client.connect.RemoteServiceConnection.bindService:128 com.huawei.profile.client.connect.RemoteServiceConnection.open:99 com.huawei.profile.client.profile.ProfileClient.connect:265 
+09-22 22:23:48.034  2720  2782 I Finsky:background: [2988] DSC: remove(44577)
+09-22 22:23:48.036  2720  2782 I Finsky:background: [2988] DS: remove(request_id=44577)
+09-22 22:23:48.040   680   680 D Zygote  : Forked child process 6092
+09-22 22:23:48.041  1710  1920 I ActivityManager: Start proc 6092:com.android.vending:instant_app_installer/u0a116 for broadcast {com.android.vending/com.google.android.finsky.instantapps.appmanagement.InstantAppRemoveMonitor}
+09-22 22:23:48.047  6092  6092 E t_app_installe: LoadAppImageStartupCache enabled : 1
+09-22 22:23:48.048  6092  6092 I t_app_installe: Reinit property: dalvik.vm.checkjni= false
+09-22 22:23:48.048  6092  6092 I t_app_installe: ReInitProperties: persist.vm.debug.dumpapi= false
+09-22 22:23:48.049  6092  6092 E t_app_installe: Not starting debugger since process cannot load the jdwp agent.
+09-22 22:23:48.053 19523 19523 I HwProfileService: [main]:[2E1D9D483]ProfileService:ProfileService onCreate is invoked.
+09-22 22:23:48.054 19523 19523 I HwProfileService: [main]:[2E1D9D483]OnehopEngineManager:force register module:com.huawei.profile+-1000
+09-22 22:23:48.056  6092  6092 D ActivityThread: Attach thread to application
+09-22 22:23:48.056 19523 19523 I HwProfileService: [main]:[2E1D9D483]SoftBusAdapter:try to init adapter
+09-22 22:23:48.056 19523 19523 I HwProfileService: [main]:[2E1D9D483]SoftBusAdapter:adapter already initialed
+09-22 22:23:48.056 19523 19523 I HwProfileService: [main]:[2E1D9D483]HiComAdapter:Start to init HiCom adapter
+09-22 22:23:48.056  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188865
+09-22 22:23:48.056 19523 19523 I HwConnection: getInstance with moduleName
+09-22 22:23:48.056 19523 19523 I HwConnection: getInstance APP is:com.huawei.profile moduleName:com.huawei.profile+-1000
+09-22 22:23:48.057 19523 19523 I HwConnection: publishService
+09-22 22:23:48.057 19523 19523 I HwProfileService: [main]:[2E1D9D483]HiComAdapter:init manager publishService result is 0
+09-22 22:23:48.057 19523 19523 I HwProfileService: [main]:[2E1D9D483]OnehopEngineManager:start to add data processor
+09-22 22:23:48.057 19523 19523 I HwProfileService: [main]:[2E1D9D483]CommunicationDispatcher:start to setDataReceivedProcessor
+09-22 22:23:48.057 19523 19591 I HwConnection: rebindService
+09-22 22:23:48.057 19523 19523 I HwProfileService: [main]:[2E1D9D483]AuthorityManager:init method has been invoked
+09-22 22:23:48.057 19523 19523 I HwProfileService: [main]:[2E1D9D483]EventBus:no subscriber for object
+09-22 22:23:48.058 19523 19593 I HwProfileService: [reportData_2413]:[2E1D9D483]SafeRunnable:active count:1, queue size: 0
+09-22 22:23:48.058 19523 19593 I HwProfileService: [reportData_2413]:[2E1D9D483]ReportDataManager:enter reportToCloud.
+09-22 22:23:48.058 19523 19523 I HwProfileService: [main]:ProfileService:ProfileService onBind is invoked.
+09-22 22:23:48.058 19523 19593 I HwProfileService: [reportData_2413]:[2E1D9D483]ReportDataManager:report data has been reported today.
+09-22 22:23:48.058 19523 19591 I HwConnection: handleStartPublish
+09-22 22:23:48.060  2588  2588 I ProfileClient: Succeed to connect, invoke callback
+09-22 22:23:48.060  2588  2588 I DEF_ProfileControl_Loader: connect profile success.
+09-22 22:23:48.060  2588  2864 I DEF_ProfileControl_Loader: checkfun AgreedFlag:true
+09-22 22:23:48.061  2588  2864 I ProfileBaseUtil: start to call getServicesOfDevice with extra info function, caller is com.huawei.systemserver
+09-22 22:23:48.061  2588  2864 I ProfileClient: data source is 2
+09-22 22:23:48.070 19523  5931 I HwProfileService: [Binder:19523_8]:[2E1D9E484]ProfileServiceCore:start to call getServicesOfDeviceWithExtraInfo, isSync: false function, caller is com.huawei.systemserver
+09-22 22:23:48.070  2588 14160 I ConnService: publishService
+09-22 22:23:48.074  2588 14160 I ConnService: F_RESULT_CODE:23publishService(registerMode)
+09-22 22:23:48.074 19523 19591 I HwConnection: handleStartPublish moduleName: com.huawei.profile+-1000 resultCode: 0
+09-22 22:23:48.074  2588  4028 E ConnService: handleStartActiveAdv
+09-22 22:23:48.074 19523  5931 I HwProfileService: [Binder:19523_8]:[2E1D9E484]AuthorityUtils:getAuthorityIndex start
+09-22 22:23:48.076  2588  4028 D HicomNfManager: startAdvertising() called with: packageModuleName = com.huawei.profile+-1000
+09-22 22:23:48.077  2588  4028 I HicomNf_java_to_c: registerModule, moduleName: com.huawei.profile+-1000
+09-22 22:23:48.081  2588  4028 I HicomNfMainCtrlManager: Enter RegisterModule
+09-22 22:23:48.081  2588  4028 I HicomNfRegManager: RegisterModule OK, already registered com.huawei.profile+-1000
+09-22 22:23:48.081  2588  4028 D HicomNfDMsgServerManager: enter NotifyModuleRegistered
+09-22 22:23:48.081  2588  4028 E HicomNfManager: setServiceData, serviceData is null or empty
+09-22 22:23:48.081  2588  4028 I ConnService: F_RESULT_CODE:23reason: handleStartActiveAdv in coapresult:0
+09-22 22:23:48.088 19523  5931 I HwProfileService: [Binder:19523_8]:[2E1D9E484]BusinessUtils:device id type is 1
+09-22 22:23:48.097  6092  6092 D ApplicationLoaders: createClassLoader zip: /system/framework/org.apache.http.legacy.jar librarySearchPath: /data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/lib/arm64:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/base.apk!/lib/arm64-v8a:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.en.apk!/lib/arm64-v8a libraryPermittedPath: /data/user/0/com.android.vending parent: java.lang.BootClassLoader@a121f99 targetSdkVersion: 35 isBundled: false classLoaderName: null sharedLibraries: null
+09-22 22:23:48.101   679  1353 I netd    : trafficSwapActiveStatsMap() <16.80ms>
+09-22 22:23:48.103  2715  4874 I DownloadState: @@@@@@@@@@@@ uid :10116 download :true
+09-22 22:23:48.103  2715  4874 I PGServer: report state:5 event type:1 pid:0 uid:10116 pkg:null to pid: 1710
+09-22 22:23:48.112  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:48.113  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188866
+09-22 22:23:48.122  6092  6092 I t_app_installe: The ClassLoaderContext is a special shared library.
+09-22 22:23:48.127  6092  6092 D ApplicationLoaders: createClassLoader zip: /data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/base.apk:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.arm64_v8a.apk:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.en.apk librarySearchPath: /data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/lib/arm64:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/base.apk!/lib/arm64-v8a:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.en.apk!/lib/arm64-v8a libraryPermittedPath: /data/user/0/com.android.vending parent: java.lang.BootClassLoader@a121f99 targetSdkVersion: 35 isBundled: false classLoaderName: null sharedLibraries: [dalvik.system.PathClassLoader[DexPathList[[zip file "/system/framework/org.apache.http.legacy.jar"],nativeLibraryDirectories=[/data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/lib/arm64, /data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/base.apk!/lib/arm64-v8a, /data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.arm64_v8a.apk!/lib/arm64-v8a, /data/app/com.android.vending-5-dREcU2lrRy6TyzZ65jxg==/split_config.en.apk!/lib/arm64-v8a, /system/lib64, /hw_product/lib64, /system/product/lib64, /prets/lib64]]]]
+09-22 22:23:48.129  2460  2540 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1698 android.content.ContextWrapper.startService:669 e.d.D.B.c.a.doInBackground:27 java.lang.reflect.Method.invoke:-2 e.d.k.a.b.b.o.d:3 
+09-22 22:23:48.135  2720  5163 I Finsky:background: [3033] IQ: handled package removed
+09-22 22:23:48.135  2720  2720 I Finsky:background: [1] PIM: Ignore install package event for: com.authy.authy, isid: u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:48.136  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188867
+09-22 22:23:48.146 15082 15155 I Finsky  : [2182] AIM: Got app ownership map. App counts: 1. Unique apps: 1
+09-22 22:23:48.148  6092  6114 I ActivityThread: Init compatible state: false
+09-22 22:23:48.149  6092  6114 D HwFrameworkSecurityPartsFactory: HwFrameworkSecurityPartsFactory in.
+09-22 22:23:48.149  6092  6114 I HwFrameworkSecurityPartsFactory: add HwFrameworkSecurityPartsFactory to memory.
+09-22 22:23:48.162 19523  5931 I HwProfileService: [Binder:19523_8]:[2E1D9E484]ProfileServiceCore:getServicesOfDeviceWithExtraInfo result size is:0
+09-22 22:23:48.162  2588  2864 I ProfileClient: getServicesOfDevice result is 0
+09-22 22:23:48.162  2588  2864 D DEF_ProfileControl_Loader: onPackageRemoved get serviceOfDevice is empty.
+09-22 22:23:48.163  2588  2864 I DEF_ProfileControl_Loader: checkfun AgreedFlag:true
+09-22 22:23:48.164  2588  2864 I ProfileBaseUtil: start to call disconnect function, caller is com.huawei.systemserver
+09-22 22:23:48.164  2588  2864 I DEF_ProfileControl_Loader: connect profile onDisconnect.
+09-22 22:23:48.164  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188868
+09-22 22:23:48.165  2588  2864 I ProfileClient: close connection: true
+09-22 22:23:48.166  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:48.172 15082 15144 I Finsky  : [2179] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=1, cacheMissCount=0. Missed  in cache (limit 10) : []
+09-22 22:23:48.172 15082 15144 I Finsky  : [2179] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=0, cacheMissCount=1. Missed  in cache (limit 10) : [com.blizzard.arc]
+09-22 22:23:48.175 15082 15130 E Finsky  : [2173] [Counters] attempted to use a non-positive increment for: 4753
+09-22 22:23:48.182  1710 12680 I PackageManager: getInstalledPackages cost 5 ms, flags: 786432, userId: 0, callingUid: 10112, callingPid: 4546
+09-22 22:23:48.183  1710  6552 I UsageStatsService: User[0] Results: 255
+09-22 22:23:48.188 15082 15144 I Finsky  : [2179] AIM: Got app ownership map. App counts: . Unique apps: 0
+09-22 22:23:48.188 15082 15144 E Finsky  : [2179] [Counters] attempted to use a non-positive increment for: 4752
+09-22 22:23:48.189 15082 15144 I Finsky  : [2179] AIM: Got app ownership map. App counts: 1. Unique apps: 1
+09-22 22:23:48.190  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188869
+09-22 22:23:48.195  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:48.197  4546  4546 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+09-22 22:23:48.197  4546  4546 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+09-22 22:23:48.200 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=0, cacheMissCount=1, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : [com.blizzard.arc]
+09-22 22:23:48.210  1710  2777 I SecurityProfileUtils: Single watcher thread pool and queue is full.
+09-22 22:23:48.210  1710  2777 E SecurityProfileService: Missing state handler for NoScreenRecording
+09-22 22:23:48.210  1710  2777 E SecurityProfileService: Missing state handler for StopScreenRecording
+09-22 22:23:48.210  1710  2777 E SecurityProfileService: Missing state handler for NoScreenRecording
+09-22 22:23:48.212 15082 15130 I Finsky  : [2173] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=1, cacheMissCount=0. Missed  in cache (limit 10) : []
+09-22 22:23:48.213 15082 15130 E Finsky  : [2173] [Counters] attempted to use a non-positive increment for: 4753
+09-22 22:23:48.214 15082 15133 E Finsky  : [2175] [Counters] attempted to use a non-positive increment for: 4753
+09-22 22:23:48.216 15082 15133 I Finsky  : [2175] AIM: Got app ownership map. App counts: . Unique apps: 0
+09-22 22:23:48.216 15082 15133 E Finsky  : [2175] [Counters] attempted to use a non-positive increment for: 4752
+09-22 22:23:48.218 15082 15121 I Finsky  : [2165] WM::SCH: Logging work initialize for 12-1
+09-22 22:23:48.240  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188870
+09-22 22:23:48.240  2460  2668 E SQLiteDatabase: Error inserting UNIQUE constraint failed: unifiedpowerapps.pkg_name (Sqlite code 1555 SQLITE_CONSTRAINT_PRIMARYKEY), (OS error - 2:No such file or directory)
+09-22 22:23:48.242  2715  2993 I ApplistMgr: Standby database changed!
+09-22 22:23:48.242 15082 15144 I Finsky  : [2179] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=1, cacheMissCount=0, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : []
+09-22 22:23:48.243 15082 15144 E Finsky  : [2179] [Counters] attempted to use a non-positive increment for: 4753
+09-22 22:23:48.244  3249  3249 I PackageChangeReceiver: [HMSCore PackageChangeReceiver.java:34] oripackageName = package:com.blizzard.arc
+09-22 22:23:48.244  3249  3249 I PackageChangeReceiver: [HMSCore PackageChangeReceiver.java:62] packageName = com.blizzard.arc
+09-22 22:23:48.245  3249  6118 I ScopeUtil: [HMSCore ScopeUtil.java:11] hms is system app
+09-22 22:23:48.245  3249  6118 I ScopeUtil: [HMSCore ScopeUtil.java:34] load AppPermission for app packageName = com.blizzard.arc
+09-22 22:23:48.246  3249 23114 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:125] dispInBro:all kit,action:INNER_PACKAGE_CHANGED
+09-22 22:23:48.246  3249 23114 I fwkit_sec_breaker: [fwkit SecBreaker.java:24] Process is empty
+09-22 22:23:48.246  3249 23114 W fwkit_kit_breaker: [fwkit KitBreaker.java:89] infos invalid
+09-22 22:23:48.246  3249 23114 I FwKamsCompat: dispatchInnerBroadcast success
+09-22 22:23:48.285  3249  6119 I fwkit_kmds_preinstall: [fwkit AppInstallReceiver.java:46] Package:com.blizzard.arc added or updated
+09-22 22:23:48.285  3249  6119 I fwkit_kpms_parser: [fwkit KitSdkInfoParser.java:50] Parse kitSdkInfo size:0
+09-22 22:23:48.286  3249  6119 W fwkit_kpms_parser: [fwkit ApkParser.java:37] Parse kitSdkInfo failed, kitSdkInfoMap is null.
+09-22 22:23:48.286 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > ItemModel > ItemStore Called 1 apps cacheOptions = REFRESH_LOCAL_CACHE
+09-22 22:23:48.296 15082 15155 I Finsky  : [2182] AIM: ItemModel fetch - unauth(0), auth([VJz2DOuKMLnzCCtLbrrpRmpZrGXsL-9w_f00Bnd0CYc]->1)
+09-22 22:23:48.306  6092  6092 W t_app_installe: JIT profile information will not be recorded: profile file does not exits.
+09-22 22:23:48.306  6092  6092 W t_app_installe: JIT profile information will not be recorded: profile file does not exits.
+09-22 22:23:48.323  4154  4154 I HiAdKit.AppDownloadDelegate.main:  installReceiver.onReceive, action:android.intent.action.PACKAGE_ADDED, pkg: com.blizzard.arc
+09-22 22:23:48.342 15082 15155 I Finsky  : [2182] SCH: Scheduling phonesky job Id: 12-1, CT: 1758569027661, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+09-22 22:23:48.346  2836  3334 D DeviceMonitorPowerKit: run, sCountNum is 1
+09-22 22:23:48.346  2836  3334 D DeviceMonitorPowerKit: interval is 39983, ElapsedRealtime is 8296141, isNeedRepeat: false
+09-22 22:23:48.346  2836  3334 E DeviceMonitorPowerKit: not Satify ApplyResource
+09-22 22:23:48.351  6092  6114 I HwApiCacheMangerEx: apicache path=/storage/emulated/0 state=mounted key=com.android.vending#10116#256
+09-22 22:23:48.351  6092  6114 I HwApiCacheMangerEx: need clear apicache,because volumes changed,oldCnt=0 newCnt=1
+09-22 22:23:48.351  6092  6114 I HwApiCacheMangerEx: apicache path=/storage/emulated/0 state=mounted key=com.android.vending#10116#0
+09-22 22:23:48.351  6092  6114 I HwApiCacheMangerEx: need clear apicache,because volumes changed,oldCnt=1 newCnt=1
+09-22 22:23:48.352  6092  6092 I t_app_installe: QarthPatchMonintor::Run
+09-22 22:23:48.363  4154  4154 I HiAdKit.AppLocalDownloadDelegate.main:  itRe action: android.intent.action.PACKAGE_ADDED
+09-22 22:23:48.369  4154  6122 I HiAdKit.ApDnMgr.Cal:  getTask by pkgName
+09-22 22:23:48.371  4154  6122 I HiAdKit.HiAdTools.Cal:  Target provider service's package name is : com.huawei.hwid
+09-22 22:23:48.372  4154  6122 I HiAdKit.InnerApiProvider.Cal:  call api: getDownloadStatus
+09-22 22:23:48.395  6092  6092 I Finsky:instant_app_inst: [1] Process created at version: 48.0.19-29 [0] [PR] 807990555
+09-22 22:23:48.400  4154  6122 I HiAdKit.ApiCallManager.Cal:  call getDownloadStatus code: 200 msg: null
+09-22 22:23:48.401  4154  6122 I HiAdKit.HiAdTools.Cal:  Target provider service's package name is : com.huawei.hwid
+09-22 22:23:48.403  4154  6122 I HiAdKit.InnerApiProvider.Cal:  call api: getDownloadStatus
+09-22 22:23:48.404  3249  3249 I fwkit_sec_breaker: [fwkit SecBreaker.java:24] Process is empty
+09-22 22:23:48.404  3249  3249 W fwkit_kit_breaker: [fwkit KitBreaker.java:89] infos invalid
+09-22 22:23:48.408  5984  5984 W hwid.container: Failed execv(/system/bin/dex2oat --instruction-set=arm64 --instruction-set-features=runtime --runtime-arg -Xrelocate --boot-image=/system/framework/boot.art --runtime-arg -Xms64m --runtime-arg -Xmx512m -j4 --instruction-set-variant=generic --instruction-set-features=default --generate-mini-debug-info --generate-mini-debug-info --dex-file=/data/user_de/0/com.huawei.hwid/files/framework/earlyinstall/com.huawei.hms.fwkit/61500301/com.huawei.hms.fwkit.apk --output-vdex-fd=81 --oat-fd=82 --oat-location=/data/user_de/0/com.huawei.hwid/files/framework/earlyinstall/com.huawei.hms.fwkit/61500301/oat/arm64/com.huawei.hms.fwkit.odex --compiler-filter=verify --class-loader-context=& --compilation-reason=dynamic-load) because non-0 exit status
+09-22 22:23:48.425  4154  6122 I HiAdKit.ApiCallManager.Cal:  call getDownloadStatus code: 200 msg: null
+09-22 22:23:48.431  4546 32647 D SharedPreferencesImpl: Time required to fsync /data/user/0/com.google.android.gms/shared_prefs/proxy-apps-corpus.xml: [<1: 11, <2: 18, <4: 13, <8: 9, <16: 18, <32: 11, <64: 6, <128: 3, <256: 1, <512: 1, <1024: 0, <2048: 0, <4096: 0, <8192: 0, <16384: 0, >=16384: 0]
+09-22 22:23:48.433  6092  6114 I HwPartIawareFactory: add android.common.HwPartIawareFactoryImpl to memory.
+09-22 22:23:48.433  6092  6114 I AwareBitmapCacher: init processName:com.android.vending:instant_app_installer pid=6092 uid=10116
+09-22 22:23:48.444  3249  3249 I fwkit_sec_breaker: [fwkit SecBreaker.java:24] Process is empty
+09-22 22:23:48.445  3249  3249 W fwkit_kit_breaker: [fwkit KitBreaker.java:89] infos invalid
+09-22 22:23:48.446  2715  2993 I ApplistMgr: Standby protected apps: [com.android.mediacenter, com.huawei.hiviewtunnel, com.huawei.appmarket, com.huawei.android.hwouc, com.android.email, com.huawei.screenrecorder, com.huawei.KoBackup, com.huawei.health, com.huawei.pcassistant, com.azure.authenticator, com.huawei.hilink.framework]
+09-22 22:23:48.446  2715  2993 I ApplistMgr: Standby unprotected apps: [com.huawei.tips, com.huawei.android.remotecontroller, com.android.gallery3d, com.google.android.apps.docs, com.huawei.gameassistant, com.google.android.videos, com.amazon.appmanager, com.google.android.apps.maps, com.android.egg, com.android.chrome, com.huawei.hwusbearphoneupdate, com.android.storagemanager, com.huawei.android.totemweather, com.google.android.apps.photos, com.android.dreams.basic, com.android.simappdialog, com.android.calculator2, com.google.android.music, com.android.hwmirror, com.huawei.compass, com.ironsource.appcloud.oobe.huawei, com.android.soundrecorder, com.huawei.ar.measure, com.android.wallpaperbackup, com.google.android.youtube, com.google.android.gm, com.google.android.play.games, com.wolt.android, com.zhiliaoapp.musically, lt.sisp.itero.parking.client, com.huawei.contactscamcard, com.huawei.contacts.sync, com.huawei.numberidentity, com.android.localtransport, com.diginet.aruodas.lt, com.linkedin.android, com.sololearn, com.spotify.music, com.xiaomi.smarthome, com.liid.androidv2, com.microsoft.teams, com.microsoft.emmx, com.microsoft.office.powerpoint, com.microsoft.office.outlook, com.microsoft.skydrive, com.adobe.reader, com.microsoft.office.word, com.microsoft.mobile.polymer, com.microsoft.sharepoint, com.microsoft.office.excel, ak.alizandro.smartaudiobookplayer, com.squalio.peero, com.huawei.hwvoipservice, com.huawei.game.kitserver, com.huawei.mirror, com.huawei.hwdockbar, com.google.android.calculator, lt.itgirnos.uniparkparking.prod, com.xiaomi.router, com.microsoft.office.onenote, com.microsoft.crm.crmphone, com.ms.office365admin, org.dayup.stocks, com.huawei.waudio, no.mobitroll.kahoot.android, com.waze, com.finance.investing.mintos, com.viber.voip, com.huawei.featurelayer.sharedfeature.xrkit, com.google.android.apps.magazines, com.whatsapp, com.linkedin.android.salesnavigator, com.wizzair.WizzAirApp, se.seb.lithuania, com.kmshack.onewallet, com.ubercab, io.apphive.apps.renderer, com.wolffun.thetanarena, com.wahanda.marketplace, com.huawei.hms5gkit.agentservice, com.huawei.ohos.inputmethod, org.freevpn, com.slyfone.dev, com.microsoft.todos, com.microsoft.powerbim, com.microsoft.flow, com.microsoft.outlooklite, com.twitter.android, com.facebook.katana, ru.yandex.taxi, com.facebook.orca, com.google.android.apps.giant, com.authy.authy, com.pinterest, org.telegram.messenger, com.arpaplus.kontakt, com.facebook.adsmanager, lt.seesam.app, com.microsoft.office.officehubrow, com.medium.reader, com.google.android.apps.walletnfcrel, com.yahoo.mobile.client.android.finance, com.instagram.android, com.instagram.barcelona, com.kraken.invest.app, com.publishers, com.nytimes.android, com.avegagames.magic.craft.survival, com.shazam.android, fantasy.survival.game.rpg, lt.tele2.tsa, com.google.android.calendar, com.huawei.ucdlockscreen, com.blizzard.diablo.immortal, com.microsoft.xboxone.smartglass, com.lidl.eci.lidlplus, com.nirvanagames.nexuswar, com.tgelec.setracker, com.blizzard.arc, com.microsoft.windowsintune.companyportal, com.blizzard.wtcg.hearthstone, com.openmygame.games.android.jsurvive, com.sec.android.easyMover, com.google.android.safetycore, com.google.android.contactkeys, host.exp.exponent, com.x699tomas.warrilomobile]
+09-22 22:23:48.446  2715  2993 I ApplistMgr: Standby unshow apps: [com.huawei.parentcontrol, com.huawei.nearby, com.hicloud.android.clone, com.facebook.services, com.huawei.lbs, com.huawei.synergy, com.google.android.apps.tachyon, com.facebook.appmanager, com.huawei.android.pushagent, com.huawei.hidisk, com.huawei.camera, com.huawei.hwid, com.huawei.trustcircle, com.huawei.android.hwupgradeguide, com.huawei.localBackup, com.huawei.meetime]
+09-22 22:23:48.446  2715  3330 I AppFasManager: delay set fas when standby list changed , delay : 10000
+09-22 22:23:48.447 15082 15133 I Finsky  : [2175] SCH: Scheduling 1 system job(s)
+09-22 22:23:48.447  4546 26030 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=AppsCorpus serviceId=36
+09-22 22:23:48.447 15082 15133 I Finsky  : [2175] SCH: Scheduling system job Id: 9835, L: 14214, D: 52780091, C: false, I: false, N: 1
+09-22 22:23:48.211  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:48.447  1710  6552 I JobScheduler: CANCEL: eaf7d1a #u0a116/9835 com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain, reason:job rescheduled by app
+09-22 22:23:48.448 15082 15121 I Finsky  : [2165] WM::SCH: Logging work initialize for 12-1
+09-22 22:23:48.458  1710  6552 I JobScheduler.Time: Add job to TimeTracking: 82716ff #u0a116/9835 com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain, delayTime:8350440, deadlineTime:61116317
+09-22 22:23:48.461  6092  6092 I HwTypeface: updateFont: scale=0.95
+09-22 22:23:48.462  6092  6092 D SystemFonts: areFontsVariable: script=Latn
+09-22 22:23:48.462  6092  6092 I ActivityThread: finishPreloaded preloadStatus 0
+09-22 22:23:48.463  5984  5984 I fwkit_CLUtils: New dloader com.huawei.hms.fwkit.apk,cost:512
+09-22 22:23:48.469  5984  5984 W fwkit_coreapk_utils: [getCoreAppContext] failed. ReflectedException reflect_classtype:com.huawei.hms.app.CoreApplication
+09-22 22:23:48.469  5984  5984 I fwkit_coreapk_utils: packageName: com.huawei.hwid
+09-22 22:23:48.470  5984  5984 W fwkit_coreapk_utils: [getCoreAppContext] failed. ReflectedException reflect_classtype:com.huawei.hms.app.CoreApplication
+09-22 22:23:48.471  5984  5984 W fwkit_coreapk_utils: [getCoreAppContext] failed. ReflectedException reflect_classtype:com.huawei.hms.app.CoreApplication
+09-22 22:23:48.471  5984  5984 I fwkit_proc_utils: init over
+09-22 22:23:48.472  5984  5984 I fwkit_fwui_rpr: loadProperties finish, properties is {package_category=1, reclaim_threshold=50, enable_check_sign=true, package_type=1, need_check_statement_status=0} cost:0
+09-22 22:23:48.480  2720  5674 I Finsky:background: [3035] IV2: Finishing successful install for installId: 5822
+09-22 22:23:48.481 15082 15133 I Finsky  : [2175] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=1, cacheMissCount=0, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : []
+09-22 22:23:48.481 15082 15133 I Finsky  : [2175] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=0, cacheMissCount=1, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : [com.blizzard.arc]
+09-22 22:23:48.482 15082 15133 I Finsky  : [2175] AIM: AppInfoManager-Perf > ItemModel > ItemStore Called 1 apps cacheOptions = REFRESH_LOCAL_CACHE
+09-22 22:23:48.482 15082 15133 I Finsky  : [2175] AIM: ItemModel fetch - unauth(0), auth([VJz2DOuKMLnzCCtLbrrpRmpZrGXsL-9w_f00Bnd0CYc]->1)
+09-22 22:23:48.483  5984  5984 I fwkit_kams_process: kams_process start service
+09-22 22:23:48.485  3249  3249 I HiAdKit.DC.AppReceiver:  receive broadcast
+09-22 22:23:48.485  3249  5915 I HiAdKit.DC.AppReceiver:  call doOnReceive
+09-22 22:23:48.485  3249  5915 I HiAdKit.DC.SystemUtil:  isDeviceProvisioned: true
+09-22 22:23:48.485 15082 15130 V AudioManager: getMode...
+09-22 22:23:48.485 15082 15130 V AudioManager: getMode...
+09-22 22:23:48.486  3249  5915 I HiAdKit.DC.ACREntry:  oobe: false
+09-22 22:23:48.486  3249  5927 I HiAdKit.DC.AppDataCollectionProvider:  execute cmd: 3
+09-22 22:23:48.486  3249  5927 I HiAdKit.DC.AppDataCollectionManager:  report other
+09-22 22:23:48.487  4154  6129 I HiAdKit.PpsCoreService.Cmd:  isCmdAllowAccess rom: false permitRegion: 1
+09-22 22:23:48.487  5984  5984 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.runtimekit_61500301
+09-22 22:23:48.487  4154  6129 I HiAdKit.PpsCoreService.Cmd:  call method: reportConsent
+09-22 22:23:48.487  4154  6129 I HiAdKit.PpsCoreService.Cmd:  callerPkg: com.huawei.hwid
+09-22 22:23:48.489  5984  5984 I fwkit_utils: Get precast HMS path:/system/app/HMS,time:1533657660000
+09-22 22:23:48.490  5984  5984 I fwkit_utils_fiu: system json at /system/app/HMS/modules/kits_config.json,time:1533657660000
+09-22 22:23:48.490  5984  5984 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.runtimekit_60200304
+09-22 22:23:48.490  5984  5984 I fwkit_utils_fiu: isAssetJsonValid:true isSysAppJsonValid:true
+09-22 22:23:48.490  5984  5984 I fwkit_utils_fiu: fillKitInfo:com.huawei.hms.runtimekit_61500301
+09-22 22:23:48.490  5984  5984 I fwkit_utils_fiu: runtime in json,isSystemApp:false,Framework-runtime.apk_61500301
+09-22 22:23:48.491  5984  5984 I fwkit_utils_fiu: runtime in json:61500301,installed:61500301,time:1757980914000,size:512022B,use installed
+09-22 22:23:48.492  5984  5984 I fwkit_utils_fiu: com.huawei.hms.runtimekit.apk is ok, size 512022B, consistent check :true, cost 1
+09-22 22:23:48.497 15082 15123 I Finsky  : [2167] [ContentSync] finished, scheduled=true
+09-22 22:23:48.499 15082 15121 I Finsky  : [2165] WM::SCH: Logging work initialize for 12-1
+09-22 22:23:48.508  6131  6131 I dex2oat-util: /Dex2oatUtil.cpp:28: TID(6131) 	new_execve:/system/bin/dex2oat
+09-22 22:23:48.508  6131  6131 I dex2oat-util: /Dex2oatUtil.cpp:30: TID(6131) 	dex2oat disabled
+09-22 22:23:48.517 15082 15155 I Finsky  : [2182] SCH: Scheduling phonesky job Id: 12-1, CT: 1758569027932, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+09-22 22:23:48.527  2720  5674 I Finsky:background: [3035] SCU: Failed to abandon the session for com.blizzard.arc[iid:5822] [isid:zmd2YG7fSiCOV6mEDeX0EA] due to 5426, msg: Optional[No open Session with Context {name=com.blizzard.arc versionCode=118616} was found.]
+09-22 22:23:48.531 15082 15133 V AudioManager: getMode...
+09-22 22:23:48.531 15082 15133 V AudioManager: getMode...
+09-22 22:23:48.532 15082 15133 I Finsky  : [2175] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=0, cacheMissCount=1, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : [com.blizzard.arc]
+09-22 22:23:48.532 15082 15133 I Finsky  : [2175] AIM: AppInfoManager-Perf > ItemModel > ItemStore Called 1 apps cacheOptions = REFRESH_LOCAL_CACHE
+09-22 22:23:48.532 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=1, cacheMissCount=0, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : []
+09-22 22:23:48.532 15082 15133 I Finsky  : [2175] AIM: ItemModel fetch - unauth(0), auth([VJz2DOuKMLnzCCtLbrrpRmpZrGXsL-9w_f00Bnd0CYc]->1)
+09-22 22:23:48.535  2720  5674 I Finsky:background: [3035] IV2: stopping install timeout for 5822
+09-22 22:23:48.536  2720  5163 I Finsky:background: [3033] IQ: Notifying installation update. [Package:com.blizzard.arc, isid:zmd2YG7fSiCOV6mEDeX0EA], status=INSTALLED, status_code=0, reason=auto_update, tsc=PT1H1M42.361S, attempt=0
+09-22 22:23:48.549  2720  2785 I Finsky:background: [2990] RM::CM: Clearing artifacts for install of com.blizzard.arc
+09-22 22:23:48.549  2720  2720 I Finsky:background: [1] PIM: Ignore install package event for: com.blizzard.arc, isid: zmd2YG7fSiCOV6mEDeX0EA
+09-22 22:23:48.551  2720  2783 W Finsky:background: [2989] Failed to delete file: /data/user/0/com.android.vending/files/phonesky-resource-cache/com.blizzard.arc:118616
+09-22 22:23:48.551  2720  5737 I Finsky:background: [3058] DS: onRemove(request_id=44579, files_to_download=[config.arm64_v8a(size:27958784)], context[group_id=com.blizzard.arc:zmd2YG7fSiCOV6mEDeX0EA], display_data[invisible=true, title=Warcraft Rumble], network_restrictions=UNMETERED_ONLY status=succeeded, bytes_downloaded=27958784, total_bytes=27958784, retry[count=0, next_retry=n/a])
+09-22 22:23:48.552  2720  5737 I Finsky:background: [3058] DS: onRemove(request_id=44578, files_to_download=[com.blizzard.arc.dm(size:12520)], context[group_id=com.blizzard.arc:zmd2YG7fSiCOV6mEDeX0EA], display_data[invisible=true, title=Warcraft Rumble], network_restrictions=UNMETERED_ONLY status=succeeded, bytes_downloaded=12520, total_bytes=12520, retry[count=0, next_retry=n/a])
+09-22 22:23:48.553  2720  5737 I Finsky:background: [3058] DS: onRemove(request_id=44576, files_to_download=[com.blizzard.arc.apk(size:77217385)], context[group_id=com.blizzard.arc:zmd2YG7fSiCOV6mEDeX0EA], display_data[invisible=true, title=Warcraft Rumble], network_restrictions=UNMETERED_ONLY status=succeeded, bytes_downloaded=77217385, total_bytes=77217385, retry[count=0, next_retry=n/a])
+09-22 22:23:48.554 15082 15130 E Finsky  : [2173] [Counters] attempted to use a non-positive increment for: 4751
+09-22 22:23:48.555 15082 15130 V AudioManager: getMode...
+09-22 22:23:48.555 15082 15130 V AudioManager: getMode...
+09-22 22:23:48.556 15082 15144 E Finsky  : [2179] [Counters] attempted to use a non-positive increment for: 4751
+09-22 22:23:48.556 15082 15144 I Finsky  : [2179] AIM: AppInfoManager-Perf > getApps > data collection finished
+09-22 22:23:48.556 15082 15144 I Finsky  : [2179] AIM: AppInfoManager-Perf > maybeDestroyAppInfoManager is called. actives = 3
+09-22 22:23:48.558 15082 15144 I Finsky  : [2179] AIM: AppInfoManager-Perf > getApps > data collection finished
+09-22 22:23:48.558 15082 15144 I Finsky  : [2179] AIM: AppInfoManager-Perf > maybeDestroyAppInfoManager is called. actives = 2
+09-22 22:23:48.561 15082 15130 E Finsky  : [2173] [Counters] attempted to use a non-positive increment for: 4751
+09-22 22:23:48.561 15082 15130 I Finsky  : [2173] AIM: AppInfoManager-Perf > getApps > data collection finished
+09-22 22:23:48.562 15082 15130 I Finsky  : [2173] AIM: AppInfoManager-Perf > maybeDestroyAppInfoManager is called. actives = 1
+09-22 22:23:48.573  5984  5984 W hwid.container: Failed execv(/system/bin/dex2oat --instruction-set=arm64 --instruction-set-features=runtime --runtime-arg -Xrelocate --boot-image=/system/framework/boot.art --runtime-arg -Xms64m --runtime-arg -Xmx512m -j4 --instruction-set-variant=generic --instruction-set-features=default --generate-mini-debug-info --generate-mini-debug-info --dex-file=/data/user_de/0/com.huawei.hwid/files/framework/earlyinstall/com.huawei.hms.runtimekit/61500301/com.huawei.hms.runtimekit.apk --output-vdex-fd=81 --oat-fd=82 --oat-location=/data/user_de/0/com.huawei.hwid/files/framework/earlyinstall/com.huawei.hms.runtimekit/61500301/oat/arm64/com.huawei.hms.runtimekit.odex --compiler-filter=verify --class-loader-context=& --compilation-reason=dynamic-load) because non-0 exit status
+09-22 22:23:48.581  2720  2778 I Finsky:background: [2985] IQ: start evaluating install requests.
+09-22 22:23:48.582  2588  4146 I Booster_Qoe: AdaBoostPredict rlt,index:6,NisPsSlow:0,NProba:303,rsrp(rssi):-40,rsrq(noise):-82,rtt(chload):48,buffhigh(uldelay):0,buffcomm(rtt):0
+09-22 22:23:48.582  2588  4146 I Booster_Qoe: AdaBoostPredict rlt,index:2,NisPsSlow:0,NProba:303,rsrp(rssi):-40,rsrq(noise):-82,rtt(chload):48,buffhigh(uldelay):0,buffcomm(rtt):68
+09-22 22:23:48.582  2588  4146 I Collector: HandleRawWifiInfo: flag:0, netId:0!
+09-22 22:23:48.582  2588  2822 I NetworkQoeProxy: channelId:2 upRate:165, downRate499922
+09-22 22:23:48.582  2588  2822 D NpdcpAliveManager: ro.odm.npdcp_alive_cfg_enable is false
+09-22 22:23:48.583  2588  3857 I Hicom_Monitor: handleNetworkQoeReport. foregroundAppTcpRtt: 0, maxRatioChannelId: 2
+09-22 22:23:48.583  1710  2201 I WiFi_PRO_WifiProStateMachine: APP_SERVICE_QOE_NOTIFY Qoe info 10983,4,0,303,1,2,4,0,303,866700,650000,10,10,0,165,499922,0 CID 2 mMasterWifiRssi -30 mMasterCardAmbr 1048576 mSlaveCardAmbr 1048576
+09-22 22:23:48.583  1710  2201 I HwWifiProServiceProxy: ctrlHwWifiNetwork pkgName: WIFIPRO_SERVICE interfaceId: 9
+09-22 22:23:48.583  1710  2201 I WiFi_PRO_WifiProStateMachine: isWifi2WifiProcess = false, mIsNeedIgnoreQoeUpdate = false, mIsAppInBlacklist = false, mIsAppInBlacklistFullScreen = false, mIsWiFiNoInternet false, screen on = true, full screen = false, isLandscapeMode = false, mNotifyWifiLinkPoorReason = -1
+09-22 22:23:48.583  1710  2201 I WiFi_PRO_WifiProStateMachine: ignore app qoe info update, because current wifi link rate is good
+09-22 22:23:48.583  2588  3857 I Hicom_Monitor: handleNetworkQoeReport. qoeString: 10983,4,0,303,1,2,4,0,303,866700,650000,10,10,0,165,499922,0
+09-22 22:23:48.585  2720  5737 I Finsky:background: [3058] DS: onRemove(request_id=44577, files_to_download=[bundles(size:174143218)], context[group_id=com.blizzard.arc:zmd2YG7fSiCOV6mEDeX0EA], display_data[invisible=true, title=Warcraft Rumble], network_restrictions=UNMETERED_ONLY status=succeeded, bytes_downloaded=174143218, total_bytes=174143218, retry[count=0, next_retry=n/a])
+09-22 22:23:48.594 15082 15133 I Finsky  : [2175] SCH: Scheduling 0 system job(s)
+09-22 22:23:48.595 15082 15133 I Finsky  : [2175] [ContentSync] finished, scheduled=true
+09-22 22:23:48.595 15082 15133 I Finsky  : [2175] SCH: Scheduling phonesky job Id: 12-1, CT: 1758569027976, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+09-22 22:23:48.606  5984  5984 I fwkit_CLUtils: New dloader com.huawei.hms.runtimekit.apk,cost:112
+09-22 22:23:48.609 15082 15133 I Finsky  : [2175] SCH: Scheduling 0 system job(s)
+09-22 22:23:48.610 15082 15133 I Finsky  : [2175] [ContentSync] finished, scheduled=true
+09-22 22:23:48.610  5984  5984 I fwkit_fwui_rpr: loadProperties finish, properties is {package_category=1, reclaim_threshold=50, enable_check_sign=true, package_type=1, need_check_statement_status=0} cost:0
+09-22 22:23:48.613  5984  5984 I fwkit_DeviceInfo: Huawei Feature is found: com.huawei.software.features.handset
+09-22 22:23:48.614  5984  5984 I fwkit_DeviceInfo: 1. detectHuaweiFeature: 0
+09-22 22:23:48.614  5984  5984 I fwkit_DeviceInfo: 2. detectAndroidFeature: -1
+09-22 22:23:48.614  5984  5984 I fwkit_DeviceInfo: System property is found: default
+09-22 22:23:48.614  5984  5984 I fwkit_DeviceInfo: 3. detectSystemProperty: 0
+09-22 22:23:48.614  5984  5984 I fwkit_DeviceInfo: Final DeviceType: 0
+09-22 22:23:48.617  5984  5984 I fwkit_ShareLib: hmscore library: [commonKit_restclient]
+09-22 22:23:48.617  5984  5984 I fwkit_ShareLib: hmscore add library: commonKit_restclient
+09-22 22:23:48.618  5984  5984 I fwkit_ShareLib: manager library: [commonKit_restclient]
+09-22 22:23:48.618  5984  5984 I fwkit_ShareLib: manager add library: commonKit_restclient
+09-22 22:23:48.618  5984  5984 I fwkit_ShareLib: no Use Library: runtime
+09-22 22:23:48.619  5984  5984 I fwkit_kac_cl: update router config ams api level: 14
+09-22 22:23:48.622  2720  2778 I Finsky:background: [2985] IQ: There are 41 installs pending for job 20948: [ee.mtakso.client, lt.seesam.app, org.telegram.messenger, com.shazam.android, com.diginet.aruodas.lt, com.whatsapp, com.lidl.eci.lidlplus, com.microsoft.xboxone.smartglass, com.facebook.adsmanager, com.openmygame.games.android.jsurvive, com.instagram.android, com.waze, ru.yandex.taxi, fantasy.survival.game.rpg, org.dayup.stocks, com.instagram.barcelona, com.wahanda.marketplace, com.twitter.android, host.exp.exponent, com.google.android.calculator, com.wolt.android, com.google.android.apps.walletnfcrel, com.nytimes.android, lt.itgirnos.uniparkparking.prod, com.google.android.calendar, com.spotify.music, com.ubercab, com.kmshack.onewallet, com.facebook.katana, com.facebook.orca, com.microsoft.outlooklite, com.finance.investing.mintos, com.linkedin.android, se.seb.lithuania, com.google.android.apps.giant, com.microsoft.powerbim, com.azure.authenticator, com.avegagames.magic.craft.survival, com.google.android.play.games, com.google.android.apps.magazines, com.blizzard.wtcg.hearthstone]
+09-22 22:23:48.627  5984  5984 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.commonkit_61500301
+09-22 22:23:48.629  5984  5984 I fwkit_coreapk_utils: packageName: com.huawei.hwid
+09-22 22:23:48.631  5984  5984 I fwkit_utils: Get precast HMS path:/system/app/HMS,time:1533657660000
+09-22 22:23:48.631  5984  5984 I fwkit_utils_fiu: system json at /system/app/HMS/modules/kits_config.json,time:1533657660000
+09-22 22:23:48.632  5984  5984 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.commonkit_60200304
+09-22 22:23:48.632  5984  5984 I fwkit_utils_fiu: isAssetJsonValid:true isSysAppJsonValid:true
+09-22 22:23:48.632  5984  5984 I fwkit_utils_fiu: fillKitInfo:com.huawei.hms.commonkit_61500301
+09-22 22:23:48.632  5984  5984 I fwkit_utils_fiu: commonkit in json,isSystemApp:false,Framework-common.apk_61500301
+09-22 22:23:48.633  5984  5984 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.commonkit_61500301
+09-22 22:23:48.633  5984  5984 I fwkit_utils_fiu: system json at /system/app/HMS/modules/kits_config.json,time:1533657660000
+09-22 22:23:48.634  5984  5984 I fwkit_utils_fiu: parseApkInfo:com.huawei.hms.commonkit_60200304
+09-22 22:23:48.634  5984  5984 I fwkit_utils_fiu: isAssetJsonValid:true isSysAppJsonValid:true
+09-22 22:23:48.634  5984  5984 I fwkit_utils_fiu: fillKitInfo:com.huawei.hms.commonkit_61500301
+09-22 22:23:48.634  5984  5984 I fwkit_utils_fiu: commonkit in json,isSystemApp:false,Framework-common.apk_61500301
+09-22 22:23:48.634  5984  5984 I fwkit_utils_fiu: commonkit in json:61500301,installed:61500301,time:1757980914000,size:1198545B,use installed
+09-22 22:23:48.639  5984  5984 I fwkit_utils_fiu: com.huawei.hms.commonkit.apk is ok, size 1198545B, consistent check :true, cost 5
+09-22 22:23:48.641  5984  5984 W hwid.container: Unsupported class loader
+09-22 22:23:48.655  6138  6138 I dex2oat-util: /Dex2oatUtil.cpp:28: TID(6138) 	new_execve:/system/bin/dex2oat
+09-22 22:23:48.656  6138  6138 I dex2oat-util: /Dex2oatUtil.cpp:30: TID(6138) 	dex2oat disabled
+09-22 22:23:48.662  2720  2778 I Finsky:background: [2985] IQ: There are 7 installs pending for job 20953: [com.google.android.apps.messaging, com.google.android.apps.tachyon, com.google.android.apps.docs, com.google.android.apps.maps, com.google.android.ims, com.google.android.apps.photos, com.google.android.projection.gearhead]
+09-22 22:23:48.684  2720  2778 I Finsky:background: [2985] IQ: 48 scheduled install statuses found to proceed. 
+09-22 22:23:48.687 19234 19282 W HiApp.PM/DealTheTaskWhenInstalled: pool-7-thread-1{2482}  gtask is null, pkg: com.blizzard.arc
+09-22 22:23:48.719  5984  5984 W hwid.container: Failed execv(/system/bin/dex2oat --instruction-set=arm64 --instruction-set-features=runtime --runtime-arg -Xrelocate --boot-image=/system/framework/boot.art --runtime-arg -Xms64m --runtime-arg -Xmx512m -j4 --instruction-set-variant=generic --instruction-set-features=default --generate-mini-debug-info --generate-mini-debug-info --dex-file=/data/user_de/0/com.huawei.hwid/files/framework/earlyinstall/com.huawei.hms.commonkit/61500301/com.huawei.hms.commonkit.apk --output-vdex-fd=81 --oat-fd=82 --oat-location=/data/user_de/0/com.huawei.hwid/files/framework/earlyinstall/com.huawei.hms.commonkit/61500301/oat/arm64/com.huawei.hms.commonkit.odex --compiler-filter=verify --class-loader-context=& --compilation-reason=dynamic-load) because non-0 exit status
+09-22 22:23:48.726 19234 19234 I PackageReceiver: receive PackageReceiver
+09-22 22:23:48.726 19234 19234 I PackageReceiver: not daemon app or action is null : com.blizzard.arc, action : android.intent.action.PACKAGE_ADDED
+09-22 22:23:48.769  5984  5984 I fwkit_CLUtils: New dloader com.huawei.hms.commonkit.apk,cost:127
+09-22 22:23:48.772  5984  5984 I LogAdaptor: init: priority = 3, moduleName = fwkit
+09-22 22:23:48.772  5984  6078 I AppLogManager: already init
+09-22 22:23:48.773  5984  6078 I FeedbackNode: HMS log-dir is: /storage/emulated/0/Android/data/com.huawei.hwid/files/Log
+09-22 22:23:48.783  5984  5984 I LogAdaptor: init: priority = 3, moduleName = fwkit
+09-22 22:23:48.784  5984  6078 I AppLogManager: already init
+09-22 22:23:48.784  5984  6078 I FeedbackNode: HMS log-dir is: /storage/emulated/0/Android/data/com.huawei.hwid/files/Log
+09-22 22:23:48.791  5984  5984 I fwkit_sdk_fm: onAttachBaseContext end
+09-22 22:23:48.791  5984  5984 I fwkit_sdk_fm: FrameworkManager onAttachBaseContext cost:1007
+09-22 22:23:48.792  5984  5984 I CoreApplication: [HMSCore CoreApplication.java:112] Init KMS finish. --> attachBaseContext
+09-22 22:23:48.792  5984  5984 I CoreApplication: [HMSCore CoreApplication.java:237] Init CoreApplication finish. --> attachBaseContext cost:1029
+09-22 22:23:48.794  5984  6026 I HwPartIawareFactory: add android.common.HwPartIawareFactoryImpl to memory.
+09-22 22:23:48.794  5984  6026 I AwareBitmapCacher: init processName:com.huawei.hwid.container3 pid=5984 uid=10063
+09-22 22:23:48.798  5984  5984 I fwkit_proc_utils: [fwkit HmsProcUtils.java:438] init over
+09-22 22:23:48.804  1710  6552 I ActivityManager: App 10093/com.google.android.apps.maps targets O+, restricted
+09-22 22:23:48.804  1710  6552 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.google.android.apps.maps/com.google.android.libraries.social.peoplekit.thirdparty.viewcontrollers.ThirdPartyReceiver
+09-22 22:23:48.806  5984  6142 D SystemConfig: Removed unavailable feature android.hardware.sensor.barometer
+09-22 22:23:48.807  1710  6552 I ActivityManager: Killing 2249:com.huawei.deviceauth/u0a164 (adj 985): empty #33
+09-22 22:23:48.809  1710  2780 V ActivityManager: Successfully start provider ContentProviderRecord{ba1c4a1 u0 com.huawei.hwid/com.huawei.hms.runtimekit.kitcontainerservice.KitProcessAgent3Provider} launchingApp=ProcessRecord{38d9b25 5984:com.huawei.hwid.container3/u0a63} caller pid= 3249
+09-22 22:23:48.809  1710  1919 I ActivityManager: App 10099/com.google.android.apps.photos targets O+, restricted
+09-22 22:23:48.809  1710  1919 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.google.android.apps.photos/com.google.android.libraries.social.peoplekit.thirdparty.viewcontrollers.ThirdPartyReceiver
+09-22 22:23:48.809  5984  5984 I CoreApplication: [HMSCore CoreApplication.java:27] install provider cost:17
+09-22 22:23:48.810  5984  5984 I CoreApplication: [HMSCore CoreApplication.java:36] Start to init CoreApplication. --> onCreate
+09-22 22:23:48.810  5984  5984 W fwkit_HonorAgreementHelper: is statement Process, enable is false
+09-22 22:23:48.810  5984  5984 I CoreApplication: [isDex2oatProcess] cur proc name :com.huawei.hwid.container3
+09-22 22:23:48.810  5984  5984 I CoreApplication: [HMSCore CoreApplication.java:73] Start to init KMS. --> onCreate
+09-22 22:23:48.810  5984  6011 I fwkit_AbP: [fwkit AbsContentProvider.java:13] cp:com.huawei.hwid;query;content://com.huawei.hms.runtimekit.kitcontainerservice.KitProcessAgent3Provider
+09-22 22:23:48.810  5984  5984 I fwkit_sdk_fm: onCreate start
+09-22 22:23:48.810  5984  5984 I fwkit_sdk_fm: handle RuntimeActivityThread init for:com.huawei.hwid.container3
+09-22 22:23:48.813  5984  5984 I fwkit_sdk_fm: onCreate end
+09-22 22:23:48.813  5984  5984 I fwkit_sdk_fm: FrameworkManager onCreate cost:3
+09-22 22:23:48.813  5984  5984 I CoreApplication: [HMSCore CoreApplication.java:85] Init KMS finish. --> onCreate
+09-22 22:23:48.814  5984  6142 W SystemConfig: No directory /product_services/etc/sysconfig, skipping
+09-22 22:23:48.814  5984  6142 W SystemConfig: No directory /product_services/etc/permissions, skipping
+09-22 22:23:48.814  5984  6142 W SystemConfig: No directory /system/emui/base/sysconfig, skipping
+09-22 22:23:48.817  3249  4258 I fwkit_kams_RuntimeManager: [fwkit RuntimeManager.java:167] queryKCSBinder add kcs manager:com.huawei.hwid.container3
+09-22 22:23:48.817  2460  2540 E HSM_BG-11.1.1.361: SmartControlResidentService:handle message but no msg matched
+09-22 22:23:48.818  5984  6142 W SystemConfig: No directory /system/emui/oversea/sysconfig, skipping
+09-22 22:23:48.819   680   680 I Zygote  : Process 2249 exited due to signal 9 (Killed)
+09-22 22:23:48.819  5984  6142 W SystemConfig: No directory /vendor/etc/sysconfig, skipping
+09-22 22:23:48.821  5984  5984 I CoreApplication: [HMSCore CoreApplication.java:224] Init CoreApplication finish. --> onCreate cost:12
+09-22 22:23:48.821  5984  6142 D SystemConfig: Removed unavailable feature android.hardware.sensor.barometer
+09-22 22:23:48.822  5984  5984 I HwTypeface: updateFont: scale=0.95
+09-22 22:23:48.822  5984  5984 D SystemFonts: areFontsVariable: script=Latn
+09-22 22:23:48.823  5984  5984 I ActivityThread: finishPreloaded preloadStatus 0
+09-22 22:23:48.824  1710  2777 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.blizzard.arc flg=0x4000010 pkg=com.google.android.gms cmp=com.google.android.gms/does.not.exist (has extras) } U=0: not found
+09-22 22:23:48.825  5984  6142 W SystemConfig: No directory /odm/etc/sysconfig, skipping
+09-22 22:23:48.828  5984  6142 W SystemConfig: No directory /odm/etc/carrier/24603/sysconfig, skipping
+09-22 22:23:48.828  5984  6142 W SystemConfig: No directory /odm/etc/carrier/24603/permissions, skipping
+09-22 22:23:48.828  5984  6142 W SystemConfig: No directory /odm/hw_odm/VOG-L29/sysconfig, skipping
+09-22 22:23:48.828  5984  6142 W SystemConfig: No directory /odm/hw_odm/VOG-L29/permissions, skipping
+09-22 22:23:48.828  5984  6142 W SystemConfig: No directory /hw_product/etc/sysconfig, skipping
+09-22 22:23:48.832  5984  6142 W SystemConfig: No directory /hw_product/etc/carrier/24603/sysconfig, skipping
+09-22 22:23:48.832  5984  6142 W SystemConfig: No directory /hw_product/etc/carrier/24603/permissions, skipping
+09-22 22:23:48.832  5984  6149 I StubController: system app validUid:10063, isFriend:true
+09-22 22:23:48.833  1710  6552 V ActivityManager: Successfully start provider ContentProviderRecord{23401d7 u0 com.google.android.gsf/.gservices.GservicesProvider} launchingApp=ProcessRecord{f0bbd56 6621:com.google.process.gservices/u0a112} caller pid= 6092
+09-22 22:23:48.833  2434  5992 I Fitness : (REDACTED) FitCleanupIntentOperation received Intent %s
+09-22 22:23:48.833  1710  9104 D ActivityManager: cleanUpApplicationRecord app: 2249:com.huawei.deviceauth/u0a164, bad: false, restarting: false, allowRestart: true
+09-22 22:23:48.833  1710  1912 I HwPowerManagerService: appdie release wakelock, pid = 2249, uid = 10164
+09-22 22:23:48.833  1710  2134 W HwAudioServiceEx: SoundEffectState bundle get reserved is invalid
+09-22 22:23:48.833  1710  2134 I HwAudioServiceEx: sendAppKilledIntentForKit, isKitPackageOnPause = false, isKitPackageKill = false, isKitPackageOnResume = false
+09-22 22:23:48.833  3249  4258 I fwkit_kams_stubmanager: [fwkit StubManagerService.java:35] getSPNByComponent:com.huawei.hms.nearby, com.huawei.hms.nearby, true
+09-22 22:23:48.833  3249  4258 I fwkit_kams_scheduler: [fwkit ProcessScheduler.java:105] ProPre:com.huawei.hwid.container3
+09-22 22:23:48.834  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:88] action:android.intent.action.PACKAGE_REMOVED,receiver:com.huawei.hms.nearby.common.monitor.ContainerBroadcastReceiver|com.huawei.hwid.container3
+09-22 22:23:48.834  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:95] proc not run
+09-22 22:23:48.834  1710  2053 W AwareLog: SchedLevelBoost: onProcessDied config not set!
+09-22 22:23:48.834  2588  6012 E HsmCoreServiceImpl: onTransact in code is: 102
+09-22 22:23:48.834  2588  6012 I MediaProcessHandler: processOp opType: 1, uid: 10164, pid: 2249
+09-22 22:23:48.834  2588  6012 W MediaProcessHandler: only the process it self can do this operation: 10164, 1000, 2249, 2460
+09-22 22:23:48.835  2588  6012 I MediaProcessHandler: executedCallBack opType: 1 mMediaStatusObservers.size=0
+09-22 22:23:48.835  3249  4258 I fwkit_kams_stubmanager: [fwkit StubManagerService.java:35] getSPNByComponent:com.huawei.hms.analytics, com.huawei.hms.analytics, true
+09-22 22:23:48.835  3249  4258 I fwkit_kams_scheduler: [fwkit ProcessScheduler.java:105] ProPre:com.huawei.hwid.container3
+09-22 22:23:48.835  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:88] action:android.intent.action.PACKAGE_REMOVED,receiver:com.huawei.hms.analytics.receiver.HiAnalyticsSysEvtReceiver|com.huawei.hwid.container3
+09-22 22:23:48.835  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:95] proc not run
+09-22 22:23:48.835  5984  6142 W SystemConfig: No directory /hw_product/region_comm/oversea/sysconfig, skipping
+09-22 22:23:48.836  1710  2539 V ActivityManager: Successfully start provider ContentProviderRecord{cf82629 u0 com.huawei.hwid/com.huawei.hms.fwkit.provider.HMSFrameworkProvider} launchingApp=ProcessRecord{874b212 3249:com.huawei.hwid.core/u0a63} caller pid= 5984
+09-22 22:23:48.837   766  6517 D AudioPolicyService: getUidState(10164) !cacheIter->second.first, return PROCESS_STATE_UNKNOWN
+09-22 22:23:48.839  3249  4258 I fwkit_kams_stubmanager: [fwkit StubManagerService.java:35] getSPNByComponent:com.huawei.hms.kitstore, com.huawei.hms.kitstore, true
+09-22 22:23:48.839  3249  4258 I fwkit_kams_scheduler: [fwkit ProcessScheduler.java:32] RC:com.huawei.hwid.container3
+09-22 22:23:48.839  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:88] action:com.huawei.hms.action.INNER_PACKAGE_CHANGED,receiver:com.huawei.hms.kitstore.broadcast.PackageChangedInnerReceiver|com.huawei.hwid.container3
+09-22 22:23:48.839  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:95] proc not run
+09-22 22:23:48.840  3249  4258 I fwkit_kams_stubmanager: [fwkit StubManagerService.java:35] getSPNByComponent:com.huawei.hms.agclink, com.huawei.hms.agclink, true
+09-22 22:23:48.840  3249  4258 I fwkit_kams_scheduler: [fwkit ProcessScheduler.java:105] ProPre:com.huawei.hwid.container2
+09-22 22:23:48.840  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:88] action:android.intent.action.PACKAGE_ADDED,receiver:com.huawei.hms.agclink.PackageManagerReceiver|com.huawei.hwid.container2
+09-22 22:23:48.840  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:95] proc not run
+09-22 22:23:48.841  3249  4258 I fwkit_kams_stubmanager: [fwkit StubManagerService.java:35] getSPNByComponent:com.huawei.hms.mlkit.service, com.huawei.hms.mlkit.service, true
+09-22 22:23:48.841  3249  4258 I fwkit_kams_scheduler: [fwkit ProcessScheduler.java:105] ProPre:com.huawei.hwid.container3
+09-22 22:23:48.841  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:88] action:android.intent.action.PACKAGE_ADDED,receiver:com.huawei.hms.mlkit.service.receiver.MLKitBroadcastReceiver|com.huawei.hwid.container3
+09-22 22:23:48.841  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:95] proc not run
+09-22 22:23:48.842  5984  6149 I fwkit_sm: [fwkit ServiceManager.java:68] register [com.huawei.hwid.container3] DeathRecipient to core process
+09-22 22:23:48.842 29916 30448 I fwkit_kac_kitloader: [fwkit KitLoaderManager.java:133] kit loaded AGCLink_40004303 already exits, cost :0 ms
+09-22 22:23:48.842  5984  6142 W SystemConfig: No directory /preas/oversea/sysconfig, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /hw_product/hw_oem/VOG-L29/sysconfig, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /hw_product/hw_oem/VOG-L29/permissions, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /preload/VOG-L29/hw/eea/sysconfig, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/global/sysconfig, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/global/permissions, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/global/carrier/24603/sysconfig, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/global/carrier/24603/permissions, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/hw/eu/permissions, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/hw/eu/carrier/24603/sysconfig, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/hw/eu/carrier/24603/permissions, skipping
+09-22 22:23:48.845  5984  6142 W SystemConfig: No directory /cust/hw/eea/sysconfig, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /cust/hw/eea/permissions, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /hw_product/special_cust/VOG-L29/hw/eu/sysconfig, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /hw_product/special_cust/VOG-L29/hw/eu/permissions, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /version/special_cust/VOG-L29/hw/eea/sysconfig, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /version/special_cust/VOG-L29/hw/eea/permissions, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /cust/cotalite/sysconfig, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /cust/cotalite/permissions, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /cust/ecota/sysconfig, skipping
+09-22 22:23:48.846  5984  6142 W SystemConfig: No directory /cust/ecota/permissions, skipping
+09-22 22:23:48.846  5984  6142 I HwCustSystemConfigImpl: start read overlay feature.
+09-22 22:23:48.847  5984  6149 I fwkit_HmsProfiler: [fwkit HmsProfiler.java:5] hms profiler init enter
+09-22 22:23:48.850  5984  6142 I HwCustSystemConfigImpl: overlay feature take effect.
+09-22 22:23:48.853  1710  1921 I libprocessgroup: Successfully killed process cgroup uid 10164 pid 2249 in 45ms
+09-22 22:23:48.856  5984  6149 I fwkit_fwui_rpr: loadProperties finish, properties is {package_category=1, reclaim_threshold=50, enable_check_sign=true, package_type=1, need_check_statement_status=0} cost:0
+09-22 22:23:48.860  5984  6142 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:56] getSplitPath application.packageName = com.huawei.hms.commonkit
+09-22 22:23:48.860  5984  6142 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:76] getSplitPath dirs == null || dirs.length == 0
+09-22 22:23:48.860  5984  6142 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:77] dynamicInstall no splitPaths
+09-22 22:23:48.861 15082 15082 I NotificationManager: com.android.vending: cancel(-1050172287)
+09-22 22:23:48.861  5984  6149 I fwkit_coreapk_utils: packageName: com.huawei.hwid
+09-22 22:23:48.862  5984  6149 I fwkit_proc_utils: init over
+09-22 22:23:48.862  5984  6142 I fwkit_CommonInitUtil: framework network start init.
+09-22 22:23:48.863  1710  3714 V ActivityManager: Successfully start provider ContentProviderRecord{2141efe u0 com.huawei.hwid/com.huawei.hms.commonkit.config.CommonKitProvider} launchingApp=null caller pid= 5984
+09-22 22:23:48.865  5984  6149 I fwkit_HmsProfiler: [fwkit HmsProfiler.java:51] hms profiler init start
+09-22 22:23:48.866  5984  6149 I fwkit_HmsProfiler: [fwkit HmsProfiler.java:71] hms profiler init end
+09-22 22:23:48.867  5984  6142 I NK_NetworkKit: kac_cl_commonkit-thread-1|NetworkKit|2|init  Version:8.0.1.305  BuildTime:2024-12-02 cp:com.huawei.hms.commonkit
+09-22 22:23:48.869  5984  6153 W fwkit_CrashHandler: [fwkit CrashHandler.java:71] processName is: com.huawei.hwid.container3
+09-22 22:23:48.869  5984  6142 W NK_ActivityUtil: kac_cl_commonkit-thread-1|common.ActivityUtil|21|context is not application, register background fail
+09-22 22:23:48.869  5984  6142 I fwkit_NetInitThread: framework network init finished.
+09-22 22:23:48.870  5984  6153 I fwkit_UnExpHandler: [fwkit UncaughtExceptionHandler.java:5] init
+09-22 22:23:48.871  5984  6153 W fwkit_CrashHandler: [fwkit CrashHandler.java:107] is: com.huawei.hwid.container3
+09-22 22:23:48.873  5984  6155 I fwkit_CountryCodeBean: [fwkit CountryCodeBean.java:40] countryCode by ro.hw.country is: eea
+09-22 22:23:48.875  5984  6155 I fwkit_CountryCodeBean: [fwkit CountryCodeBean.java:46] countryCode by SimCountryIso is: lt
+09-22 22:23:48.875  5984  6155 I fwkit_CountryCodeBean: [fwkit CountryCodeBean.java:31] get issue_country code from SIM_COUNTRY
+09-22 22:23:48.876  3249  4357 I fwkit_db_SettingsManager: [fwkit SettingsManager.java:51] The value get from cache.Key is hw_app_analytics_state, value is 0
+09-22 22:23:48.876  5984  6153 W fwkit_HmsProfiler: [fwkit HmsProfiler.java:27] deny upload, user not allowed to upload.
+09-22 22:23:48.876  5984  6154 I fwkit_Mixed_PM: [fwkit MixedPackageManager.java:17] handler create success
+09-22 22:23:48.876  5984  6154 I fwkit_Mixed_PM: [fwkit MixedPackageManager.java:5] register registerKitCacheClearReceiver
+09-22 22:23:48.876 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.calendar, isEntryInstallationFree:false
+09-22 22:23:48.876 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry_phone
+09-22 22:23:48.876 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.contacts, isEntryInstallationFree:false
+09-22 22:23:48.876 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.deskclock, isEntryInstallationFree:false
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry_phone
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.mediacenter, isEntryInstallationFree:false
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.example.android.notepad, isEntryInstallationFree:false
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.huawei.android.thememanager, isEntryInstallationFree:false
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.huawei.android.totemweather, isEntryInstallationFree:false
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry_phone
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:com.huawei.audioaccessorymanager, isEntryInstallationFree:false
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames bundleName:ohos.global.systemres, isEntryInstallationFree:false
+09-22 22:23:48.877 19234 19307 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.884  1710  3714 I ActivityManager: App 10100/com.google.android.videos targets O+, restricted
+09-22 22:23:48.885  1710  3714 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.google.android.videos/com.google.android.libraries.social.peoplekit.thirdparty.viewcontrollers.ThirdPartyReceiver
+09-22 22:23:48.886  5984  6150 E fwkit_RC_Parser: [fwkit RemoteConfigParser.java:16] parseListFromConfig is blank
+09-22 22:23:48.886  5984  6150 I fwkit_ShareLibManager: [fwkit ClassLoaderManager.java:45] sSharedLibRemoteConfig: []
+09-22 22:23:48.886  5984  6150 I fwkit_ShareLibManager: [fwkit ClassLoaderManager.java:109] kitUid: keyring_60900323, mClassLoaderPath:/system/framework/org.apache.http.legacy.jar:/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.keyring/60900323/com.huawei.hms.keyring.apk, sharePath: []
+09-22 22:23:48.887  5984  6150 I fwkit_ShareLib: [fwkit ProxyClassLoader.java:87] keyring_60900323 add library: commonKit_restclient
+09-22 22:23:48.887  5984  6154 I NK_DynamicLoadPermit: kac_cl_commonkit-thread-1 ->NK_NK_0|api.a|20|is dynamic load: false, advance: true
+09-22 22:23:48.887  5984  6154 I NK_NetworkKit: kac_cl_commonkit-thread-1 ->NK_NK_0|NetworkKit|25|not dynamic load
+09-22 22:23:48.889  5984  6150 W hwid.container: Unsupported class loader
+09-22 22:23:48.889  5984  6154 I NK_NetworkKitProvider: kac_cl_commonkit-thread-1 ->NK_NK_0|NetworkKitProvider|37|load local result is: true
+09-22 22:23:48.890  5984  6153 I fwkit_MemoryMonitor: [fwkit MemoryMonitor.java:78] processRamEvent stage: mem_t1 pkgName: none version:none
+09-22 22:23:48.890  5984  6153 I fwkit_MemoryMonitor: [fwkit MemoryMonitor.java:84] do something
+09-22 22:23:48.890  5984  6150 W hwid.container: Skipping duplicate class check due to unsupported classloader
+09-22 22:23:48.891  5984  6150 W hwid.container: Unsupported class loader
+09-22 22:23:48.891  5984  6154 I NK_NetworkKitProvider: kac_cl_commonkit-thread-1 ->NK_NK_0|NetworkKitProvider|79|provider client version code: 8.0.1.305, api level: 13
+09-22 22:23:48.891  5984  6154 I NK_NetworkKitProvider: kac_cl_commonkit-thread-1 ->NK_NK_0|NetworkKitProvider|111|NetworkKitProvider is dynamic provider result : false
+09-22 22:23:48.891  5984  5984 I fwkit_KitDAReporter: [fwkit KitDailyActivateReporter.java:90] sim state changed, state = 5, simCountry = lt
+09-22 22:23:48.894  3249  3249 I fwkit_PackageRemovedReceiver: receive app touch removed receiver
+09-22 22:23:48.897  5984  6154 I NK_PackageUtils: kac_cl_commonkit-thread-1 ->NK_NK_0|common.PackageManagerCompat|59|kitContext: com.huawei.hms.commonkit
+09-22 22:23:48.897  3249  3249 I fwkit_AbP: [fwkit AbsContentProvider.java:6] cp:com.huawei.hwid;call;content://com.huawei.hms.contentprovider/com.huawei.hms.commonkit/touch
+09-22 22:23:48.898  3249  3249 I fwkit_ATContentProvider[6.4.0.313]: call method is getAppInfoByPackage , arg is com.blizzard.arc
+09-22 22:23:48.898  3249  3249 I fwkit_ATContentProvider[6.4.0.313]: getAppInfoFromDatabase start, arg = com.blizzard.arc
+09-22 22:23:48.902  3249  3249 I fwkit_ATContentProvider[6.4.0.313]: getAppInfoFromDatabase end
+09-22 22:23:48.902  3249  3249 I fwkit_AppTouchApi: [fwkit null:67] first install time not change
+09-22 22:23:48.902  3249  3249 I PackageChangeReceiver: [HMSCore PackageChangeReceiver.java:34] oripackageName = package:com.blizzard.arc
+09-22 22:23:48.903  3249  3249 I PackageChangeReceiver: [HMSCore PackageChangeReceiver.java:62] packageName = com.blizzard.arc
+09-22 22:23:48.903  5984  6154 I NK_ConfigManager: kac_cl_commonkit-thread-1 ->NK_NK_0|embedded.j|8|init :com.huawei.hms.commonkit
+09-22 22:23:48.903  3249  6160 I ScopeUtil: [HMSCore ScopeUtil.java:11] hms is system app
+09-22 22:23:48.903  3249  6160 I ScopeUtil: [HMSCore ScopeUtil.java:34] load AppPermission for app packageName = com.blizzard.arc
+09-22 22:23:48.904  3249 23114 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:125] dispInBro:all kit,action:INNER_PACKAGE_CHANGED
+09-22 22:23:48.904  3249 23114 I fwkit_sec_breaker: [fwkit SecBreaker.java:24] Process is empty
+09-22 22:23:48.904  3249 23114 W fwkit_kit_breaker: [fwkit KitBreaker.java:89] infos invalid
+09-22 22:23:48.904  3249 23114 I FwKamsCompat: dispatchInnerBroadcast success
+09-22 22:23:48.905  3249  4258 I fwkit_kams_stubmanager: [fwkit StubManagerService.java:35] getSPNByComponent:com.huawei.hms.kitstore, com.huawei.hms.kitstore, true
+09-22 22:23:48.905  3249  4258 I fwkit_kams_scheduler: [fwkit ProcessScheduler.java:32] RC:com.huawei.hwid.container3
+09-22 22:23:48.905  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:88] action:com.huawei.hms.action.INNER_PACKAGE_CHANGED,receiver:com.huawei.hms.kitstore.broadcast.PackageChangedInnerReceiver|com.huawei.hwid.container3
+09-22 22:23:48.905  3249  4258 I fwkit_kbct_dsp: [fwkit KitBroadcastDispatcher.java:95] proc not run
+09-22 22:23:48.906  2916  2916 I HwNaturalBase: [main]: AppDataClearBroadcastReceiver: Package Name not exist.
+09-22 22:23:48.906  1710  3714 D HwConnectivityServiceEx: set 10063 wlan0 value false
+09-22 22:23:48.918  1710  6552 V ActivityManager: Successfully start provider ContentProviderRecord{144638 u0 com.huawei.systemmanager/.netassistant.db.traffic.TrafficDBProvider} launchingApp=null caller pid= 2504
+09-22 22:23:48.921  5984  6150 W hwid.container: Skipping duplicate class check due to unsupported classloader
+09-22 22:23:48.923  5984  6150 I fwkit_CLUtils: [fwkit ClsLoaderUtils.java:119] New dloader com.huawei.hms.keyring.apk,cost:33
+09-22 22:23:48.923  5984  6150 I fwkit_ShareLib: [fwkit ClassLoaderManager.java:295] classLoader: dalvik.system.DexClassLoader[DexPathList[[zip file "/system/framework/org.apache.http.legacy.jar", zip file "/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.keyring/60900323/com.huawei.hms.keyring.apk"],nativeLibraryDirectories=[/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.keyring/60900323/lib, /system/lib64, /hw_product/lib64, /system/product/lib64, /prets/lib64]]]
+09-22 22:23:48.924  5984  6154 I NK_PLSharedPreferences: kac_cl_commonkit-thread-1 ->NK_NK_0|common.PLSharedPreferences|38|sp size 0
+09-22 22:23:48.924  5984  6154 I NK_ConfigManager: kac_cl_commonkit-thread-1 ->NK_NK_0|embedded.j|8|remote config has been disabled
+09-22 22:23:48.925  5984  6154 I NK_PackageUtils: kac_cl_commonkit-thread-1 ->NK_NK_0|common.PackageManagerCompat|59|kitContext: com.huawei.hms.commonkit
+09-22 22:23:48.926  2504  2504 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1698 android.content.ContextWrapper.startService:669 android.content.ContextWrapper.startService:669 com.huawei.antivirus.utils.AntiVirusTools.deleteVirusApk:928 com.huawei.antivirus.AntiVirusReceiver.onReceive:36 
+09-22 22:23:48.929  1710  6552 I ActivityManager: App 10075/com.facebook.katana targets O+, restricted
+09-22 22:23:48.929  1710  6552 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.facebook.katana/com.facebook.feed.platformads.AppInstallReceiver
+09-22 22:23:48.930  1710  1919 V BroadcastQueue: Finished with ordered broadcast BroadcastRecord{b156b6d u0 android.intent.action.PACKAGE_REMOVED}
+09-22 22:23:48.932 15082 15082 I Finsky  : [1] affs - Received: android.intent.action.PACKAGE_REMOVED, [ncLEZQTSFSUBMfhJKg1he3TpzwvGvwTJFupg5UiyAm8]
+09-22 22:23:48.934  1710  2539 V ActivityManager: Successfully start provider ContentProviderRecord{9d9ab7e u0 com.huawei.systemmanager/com.huawei.securitycenter.antivirus.db.keyvalue.KeyValueDatabaseProvider} launchingApp=ProcessRecord{1d2f939 2618:com.huawei.systemmanager:security_scan/1000} caller pid= 2460
+09-22 22:23:48.935 15082 15082 I Finsky  : [1] affs - Deduping intent android.intent.action.PACKAGE_REMOVED
+09-22 22:23:48.935 15082 15112 I Finsky  : [2158] RECEIVER_PACKAGE_MONITOR#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:48.935   766  6517 D AudioPolicyService: getUidState(10225) !cacheIter->second.first, return PROCESS_STATE_UNKNOWN
+09-22 22:23:48.935   766  6517 D AudioPolicyService: getUidState(10225) cacheIter->second.first, return cacheIter->second.second(-1)
+09-22 22:23:48.935   766  6517 D AudioPolicyService: getUidState(10029) !cacheIter->second.first, return PROCESS_STATE_UNKNOWN
+09-22 22:23:48.935   766  6517 D AudioPolicyService: getUidState(10029) cacheIter->second.first, return cacheIter->second.second(-1)
+09-22 22:23:48.936   679  1353 I netd    : firewallSetUidRule(2, 10225, 1) <0.02ms>
+09-22 22:23:48.936  1710  2102 I NetworkPolicy: upPwResUL:10225,idle:1,resPw:0,dIdle:0,fg=1,white=0,old=64,new=32,newUid=32,oldUid=64,resBg=0
+09-22 22:23:48.937  2720  2720 I Finsky:background: [1] affh - Received: android.intent.action.PACKAGE_REMOVED, [ncLEZQTSFSUBMfhJKg1he3TpzwvGvwTJFupg5UiyAm8]
+09-22 22:23:48.937  4154  4154 I HiAdKit.AppDownloadDelegate.main:  installReceiver.onReceive, action:android.intent.action.PACKAGE_REPLACED, pkg: com.blizzard.arc
+09-22 22:23:48.944  2720  2720 I Finsky:background: [1] affh - Deduping intent android.intent.action.PACKAGE_REMOVED
+09-22 22:23:48.944  2720  2790 I Finsky:background: [2995] RECEIVER_PACKAGE_MONITOR_BACKGROUND#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:48.945  5984  6154 I NK_NetworkKit: kac_cl_commonkit-thread-1 ->NK_NK_0|NetworkKit|2|init  Version:8.0.1.305  BuildTime:2024-12-02 cp:com.huawei.hms.commonkit
+09-22 22:23:48.945  5984  6154 W NK_ActivityUtil: kac_cl_commonkit-thread-1 ->NK_NK_0|common.ActivityUtil|21|context is not application, register background fail
+09-22 22:23:48.946  5984  6154 I NK_NetSerManager: kac_cl_commonkit-thread-1 ->NK_NK_0|embedded.m4|4|networkServices map is: {netdiag=com.huawei.hms.network.netdiag.NetDiagnosisService@ddf6dd1, dns=com.huawei.hms.network.dns.DNSService@c3da036, config=com.huawei.hms.network.conf.api.ConfigService@cd1db37}
+09-22 22:23:48.947  1710  2539 V BroadcastQueue: Finished with ordered broadcast BroadcastRecord{dd95a6 u0 android.intent.action.PACKAGE_REMOVED}
+09-22 22:23:48.947  5984  6154 I NK_NetSerManager: kac_cl_commonkit-thread-1 ->NK_NK_0|embedded.m4|5|dnsService,setOptions:
+09-22 22:23:48.947  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188871
+09-22 22:23:48.948  5984  6154 I NK_NetSerManager: kac_cl_commonkit-thread-1 ->NK_NK_0|embedded.m4|5|netdiagService,setOptions:
+09-22 22:23:48.949 19234 19234 I HslPackageManager: Get Hsl Package Manager.
+09-22 22:23:48.949 19234 19234 I HslPackageManager: is Support Hsl false
+09-22 22:23:48.951  1710  6552 I ActivityManager: App 10127/com.google.android.packageinstaller targets O+, restricted
+09-22 22:23:48.951  1710  6552 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+09-22 22:23:48.953  1710  6552 V ActivityManager: Successfully start provider ContentProviderRecord{e5c7e7b u0 com.android.providers.settings/.hwext.HwSettingsProvider} launchingApp=null caller pid= 5984
+09-22 22:23:48.954  5984  6154 I NK_NetworkKit: kac_cl_commonkit-thread-1 ->NK_NK_0|NetworkKit|2|init success
+09-22 22:23:48.954  5984  6154 I fwkit_CommonInitUtil: NetworkKit init result:true, app context: com.huawei.hms.commonkit
+09-22 22:23:48.954  2383  2383 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1698 android.content.ContextWrapper.startService:669 android.content.ContextWrapper.startService:669 com.android.settings.applications.BlackListReceiver.onReceive:48 android.app.ActivityThread.handleReceiver:4637 
+09-22 22:23:48.955  5984  6154 I NK_AdvanceNetworkKitProvider: kac_cl_commonkit-thread-1 ->NK_NK_0|AdvanceNetworkKitProvider|52|AdvanceNetworkKitProvider is dynamic provider result : false
+09-22 22:23:48.955  5984  6154 I NetworkSdk_NK_Logger: [HMSCore NetworkLog.java:1] kac_cl_commonkit-thread-1 ->NK_NK_0|common.Logger|27|logger = com.huawei.hms.network.embedded.h1$k@15ef3d3false
+09-22 22:23:48.955  5984  6154 I fwkit_CommonInitUtil: enable HA Listen. 
+09-22 22:23:48.955  5984  6154 I fwkit_CommonInitUtil: enable ipv6 preferred.
+09-22 22:23:48.956  5984  6154 I NetworkSdk_PolicyService: [HMSCore NetworkLog.java:1] kac_cl_commonkit-thread-1 ->NK_NK_0|httpclient.excutor.ProcessPolicyNetworkService|20|options = {"enable_ipv6_preferred":true}
+09-22 22:23:48.956  5984  6154 I NetworkSdk_NetSerManager: [HMSCore NetworkLog.java:1] kac_cl_commonkit-thread-1 ->NK_NK_0|embedded.m4|5|dnsService,setOptions:
+09-22 22:23:48.956  5984  6154 I NetworkSdk_NetSerManager: [HMSCore NetworkLog.java:1] kac_cl_commonkit-thread-1 ->NK_NK_0|embedded.m4|5|netdiagService,setOptions:
+09-22 22:23:48.957 19234 19282 W HiApp.PCS/AuthorityUtils: main{1} not find Permission provider.
+09-22 22:23:48.957  1710  3714 D HwConnectivityServiceEx: set 10029 wlan0 value false
+09-22 22:23:48.958  1710  6552 V ActivityManager: Successfully start provider ContentProviderRecord{71781c4 u0 com.huawei.systemmanager/com.huawei.securitycenter.antivirus.db.AntiVirusDBProvider} launchingApp=null caller pid= 2460
+09-22 22:23:48.960  2383  2383 W BlockListService: settings app is pulled up, onCreate is called
+09-22 22:23:48.962 19234 19884 I HslPackageManager: Get Hsl Package Manager.
+09-22 22:23:48.962 19234 19884 I HslPackageManager: is Support Hsl false
+09-22 22:23:48.963 15082 15082 I Finsky  : [1] affs - Received: android.intent.action.PACKAGE_ADDED, [ncLEZQTSFSUBMfhJKg1he3TpzwvGvwTJFupg5UiyAm8]
+09-22 22:23:48.964  5984  6167 I SecurityComp10300300: SX509TM: loadBksCA
+09-22 22:23:48.964  5984  6154 I NetworkSdk_NetworkKit: [HMSCore NetworkLog.java:1] NK_NK_0 ->NK_NK_0|NetworkKit|2|init success
+09-22 22:23:48.964  2383  2383 W BlockListService: settings app is pulled up, onDestroy is called
+09-22 22:23:48.964 19234 19282 W HiApp.Personal/RedDotManagerImpl: main{1} , get redDotEnhances fail:no DetailResponse
+09-22 22:23:48.965  2460  2668 W HSC_BG_AddViewInterceptionListManager: onVirusPackageChange: abroad version, ignore
+09-22 22:23:48.966 19234 19884 I NK_RealHttpClient: CORE_THREAD_POOL-0|embedded.a1|23|request: ConnectTimeout:, ConcurrentConnectDelay:´+îrequest firstIpv6ClientConcurrentConnectDelay´+Ühttpclient: ConnectTimeout:10000, ConcurrentConnectDelay:500´+îhttpclient firstIpv6ClientConcurrentConnectDelay´+Ü250
+09-22 22:23:48.968 19234 19884 I NK_CountryCodeBean: CORE_THREAD_POOL-0|network.grs.local.model.CountryCodeBean|32|get issue_country code from SIM_COUNTRY
+09-22 22:23:48.968  5984  6168 I NetworkSdk_TaskManager: [HMSCore NetworkLog.java:1] NK_NK_0 ->NK_DnsManager_0|embedded.r0|29|DNS ThreadPool init!
+09-22 22:23:48.968 15082 15133 I Finsky  : [2175] A library licensing entry already exists for com.blizzard.arc.
+09-22 22:23:48.969 19234 19884 I NK_OkReqTsk: CORE_THREAD_POOL-0|embedded.j3|285|the request has used the okhttp! 
+09-22 22:23:48.969  5984  6168 I NetworkSdk_KPMS_Util_Emui: [HMSCore NetworkLog.java:1] NK_NK_0 ->NK_DnsManager_0|common.EmuiUtil|53|Get Manufacturer: HUAWEI, isHuaweiDevice : true
+09-22 22:23:48.969  5984  6167 I SecurityComp10300300: BksUtil: getFilesBksIS 
+09-22 22:23:48.970  5984  6150 I fwkit_kac_kitloader: [fwkit KitLoaderManager.java:355] kit loaded:keyring_60900323, cost :135 ms
+09-22 22:23:48.970  5984  6167 I SecurityComp10300300: SX509TM: get bks not from assets
+09-22 22:23:48.971  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:56] getSplitPath application.packageName = com.huawei.hms.keyring
+09-22 22:23:48.971  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:76] getSplitPath dirs == null || dirs.length == 0
+09-22 22:23:48.971  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:77] dynamicInstall no splitPaths
+09-22 22:23:48.973 15082 15082 I NotificationManager: com.android.vending: cancel(294276639)
+09-22 22:23:48.974  5984  6168 I NetworkSdk_CountryCodeBean: [HMSCore NetworkLog.java:1] NK_NK_0 ->NK_DnsManager_0|network.grs.local.model.CountryCodeBean|33|get issue_country code from SIM_COUNTRY
+09-22 22:23:48.975 15082 15082 I NotificationManager: com.android.vending: cancel(350450212)
+09-22 22:23:48.975  5984  6168 I NetworkSdk_CountryCodeBean: [HMSCore NetworkLog.java:1] NK_NK_0 ->NK_DnsManager_0|network.grs.local.model.CountryCodeBean|33|get issue_country code from SIM_COUNTRY
+09-22 22:23:48.975 15082 15082 I Finsky  : [1] AIM: AppInfoCacheUpdater -> invalidating apps: [com.blizzard.arc]
+09-22 22:23:48.975 15082 15082 I Finsky  : [1] AIM: AppInfoManager-Perf > getApps > called for 1 apps
+09-22 22:23:48.976 15082 15130 I Finsky  : [2173] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=0, cacheMissCount=1. Missed  in cache (limit 10) : [com.blizzard.arc]
+09-22 22:23:48.976 15082 15082 I Finsky  : [1] DTU: Received onPackageAdded, replacing: true
+09-22 22:23:48.977  1710  3437 I UsageStatsService: User[0] Results: 255
+09-22 22:23:48.977 15082 15113 I Finsky  : [2159] RECEIVER_PACKAGE_MONITOR#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.calendar, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry_phone
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.contacts, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.deskclock, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry_phone
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.android.mediacenter, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.example.android.notepad, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.huawei.android.thememanager, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.huawei.android.totemweather, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry_phone
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:com.huawei.audioaccessorymanager, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames bundleName:ohos.global.systemres, isEntryInstallationFree:false
+09-22 22:23:48.978 19234  5129 D BundleMgrProxy: getServiceBundleNames entryModuleName:entry
+09-22 22:23:48.978  5984  5984 I keyringKit-KeyringApplication: has created.
+09-22 22:23:48.979  4154  4154 I HiAdKit.AppLocalDownloadDelegate.main:  itRe action: android.intent.action.PACKAGE_REPLACED
+09-22 22:23:48.980 19234  5129 E BundleMgrProxy: getAssociatedBundleInfos failed, size is invalid
+09-22 22:23:48.981  2720  2720 I Finsky:background: [1] affh - Received: android.intent.action.PACKAGE_ADDED, [ncLEZQTSFSUBMfhJKg1he3TpzwvGvwTJFupg5UiyAm8]
+09-22 22:23:48.981 19234 19282 W HiApp.SIDS/SystemInstalledCacheInfo: main{1}  installedApp is null.
+09-22 22:23:48.982  5984  6167 E SecurityComp10300300: EncryptUtil: exception : Failed resolution of: Lorg/bouncycastle/crypto/engines/AESEngine; , you should implementation bcprov-jdk15on library
+09-22 22:23:48.983  1710  2780 V ActivityManager: Successfully start provider ContentProviderRecord{91b8ae u0 com.huawei.android.launcher/.LauncherProvider} launchingApp=null caller pid= 19234
+09-22 22:23:48.984 31633  4156 I HwLauncher: LauncherProvider launcher call - method:checkcancallbadge arg: extras:[package=com.huawei.appmarket] uid =10029 pid =19234
+09-22 22:23:48.984 31633  4156 E HwLauncher: SuggestionCallMethodManager  current device not support ability form.
+09-22 22:23:48.984 31633  4156 I HwLauncher: LauncherProvider launcher call - method:change_badge arg:null extras:[package=com.huawei.appmarket][badgenumber=4][class=com.huawei.appmarket.MainActivity] uid =10029 pid =19234
+09-22 22:23:48.984 31633  4156 E HwLauncher: SuggestionCallMethodManager  current device not support ability form.
+09-22 22:23:48.984 15082 15130 I Finsky  : [2173] AIM: Got app ownership map. App counts: 1. Unique apps: 1
+09-22 22:23:48.986 15082 15130 I Finsky  : [2173] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=1, cacheMissCount=0. Missed  in cache (limit 10) : []
+09-22 22:23:48.986 15082 15133 E Finsky  : [2175] [Counters] attempted to use a non-positive increment for: 4753
+09-22 22:23:48.986 15082 15130 I Finsky  : [2173] AIM: Got app ownership map. App counts: . Unique apps: 0
+09-22 22:23:48.986 15082 15130 E Finsky  : [2173] [Counters] attempted to use a non-positive increment for: 4752
+09-22 22:23:48.987  5984  6167 I SecurityComp10300300: BksUtil: getFilesBksIS 
+09-22 22:23:48.987 19234 19234 I FormalHASDK: HAImpl==> onEvent. tag:_default_config_tag, type:1, eventId:907112061
+09-22 22:23:48.988 15082 15133 E Finsky  : [2175] [Counters] attempted to use a non-positive increment for: 4753
+09-22 22:23:48.989 19234 19282 E HiApp.InstalledAppDataMgr: main{1} the installed app list is not initial yet. it's useless to update!
+09-22 22:23:48.989  5984  6167 I SecurityComp10300300: SecureX509SingleInstance: get files bks
+09-22 22:23:48.991  2720  2790 I Finsky:background: [2995] RECEIVER_PACKAGE_MONITOR_BACKGROUND#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:48.998  5984  5984 I keyringKit-UninstallAppReceiver: onReceiveMsg
+09-22 22:23:49.008  5984  6150 I fwkit_ShareLibManager: [fwkit ClassLoaderManager.java:109] kitUid: nearby_61201300, mClassLoaderPath:/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.nearby/61201300/com.huawei.hms.nearby.apk, sharePath: []
+09-22 22:23:49.009  5984  6150 I fwkit_ShareLib: [fwkit ProxyClassLoader.java:87] nearby_61201300 add library: commonKit_restclient
+09-22 22:23:49.009  5984  6150 W hwid.container: Unsupported class loader
+09-22 22:23:49.010  1710  3437 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.blizzard.arc flg=0x4000010 pkg=com.google.android.gms cmp=com.google.android.gms/does.not.exist (has extras) } U=0: not found
+09-22 22:23:49.011  4546  6043 I Auth    : (REDACTED) [SupervisedAccountIntentOperationV2] onHandleIntent: %s
+09-22 22:23:49.014  4546  6068 I NearbyDiscovery: (REDACTED) processGrantSlicePermission: %s
+09-22 22:23:49.017  1710  2539 I PackageManager: getInstalledPackages cost 0 ms, flags: 786432, userId: 0, callingUid: 10112, callingPid: 4546
+09-22 22:23:49.020  5984  6167 D NetworkSecurityConfig: Using Network Security Config from resource network_security_config debugBuild: false
+09-22 22:23:49.020  3249  3249 I HiAdKit.DC.AppReceiver:  receive broadcast
+09-22 22:23:49.021  3249  5915 I HiAdKit.DC.AppReceiver:  call doOnReceive
+09-22 22:23:49.021  3249  5915 I HiAdKit.DC.SystemUtil:  isDeviceProvisioned: true
+09-22 22:23:49.024  3249  5915 I HiAdKit.DC.ACREntry:  oobe: false
+09-22 22:23:49.024  3249  5928 I HiAdKit.DC.AppDataCollectionProvider:  execute cmd: 3
+09-22 22:23:49.024  3249  5928 I HiAdKit.DC.AppDataCollectionManager:  report other
+09-22 22:23:49.024  5984  6150 W hwid.container: Skipping duplicate class check due to unsupported classloader
+09-22 22:23:49.025  3249  5928 W fwkit_kims: [fwkit KIMSServiceController.java:61] Can't find the specific package.
+09-22 22:23:49.025  4154  6178 I HiAdKit.PpsCoreService.Cmd:  isCmdAllowAccess rom: false permitRegion: 1
+09-22 22:23:49.025  4154  6178 I HiAdKit.PpsCoreService.Cmd:  call method: reportConsent
+09-22 22:23:49.025  4154  6178 I HiAdKit.PpsCoreService.Cmd:  callerPkg: com.huawei.hwid
+09-22 22:23:49.025  5984  6150 I fwkit_CLUtils: [fwkit ClsLoaderUtils.java:119] New dloader com.huawei.hms.nearby.apk,cost:16
+09-22 22:23:49.026  5984  6150 I fwkit_ShareLib: [fwkit ClassLoaderManager.java:295] classLoader: dalvik.system.DexClassLoader[DexPathList[[zip file "/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.nearby/61201300/com.huawei.hms.nearby.apk"],nativeLibraryDirectories=[/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.nearby/61201300/lib/arm64, /system/lib64, /hw_product/lib64, /system/product/lib64, /prets/lib64]]]
+09-22 22:23:49.028  3249  5928 I NetworkSdk_CountryCodeBean: [HMSCore NetworkLog.java:1] PPS-DC-Cal-pool-thread-54|network.grs.local.model.CountryCodeBean|33|get issue_country code from SIM_COUNTRY
+09-22 22:23:49.028  3249  5928 I HiAdKit.DC.AIDCP:  clctWifi is off
+09-22 22:23:49.028  3249  5928 I HiAdKit.DC.AIDCP:  clctDyncData is off
+09-22 22:23:49.028  3249  5928 I HiAdKit.DC.AIDCP:  clctStatData is off
+09-22 22:23:49.030  3249  5927 W fwkit_kims: [fwkit KIMSServiceController.java:61] Can't find the specific package.
+09-22 22:23:49.032  3249  5928 I HiAdKit.DC.NetworkUtil:  multicard device
+09-22 22:23:49.032  3249  5927 W fwkit_kims: [fwkit KIMSServiceController.java:61] Can't find the specific package.
+09-22 22:23:49.037  3249  5928 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.038  3249  5928 I HiAdKit.DC.SystemUtil:  hasPermissions true
+09-22 22:23:49.039  3249  5928 I HiAdKit.DC.SystemUtil:  hasPermissions true
+09-22 22:23:49.041  3249  6183 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.044  3249  5811 I HiAdKit.DC.AIDCP:  addAppDataCollectionToCache - cache valide time: 7200 expireTime: 1758137029043
+09-22 22:23:49.044  3249  6183 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.055 15082  5999 I Finsky  : [2584] [ContentSync] finished, scheduled=false
+09-22 22:23:49.056  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188872
+09-22 22:23:49.059  1025  6185 D keymaster_worker: Keystore begin
+09-22 22:23:49.059  1025  6185 D keymaster_worker: Keystore begin hidl
+09-22 22:23:49.059   586   586 I HisiKeyMaster: HisiKmBegin start
+09-22 22:23:49.059   586   586 I HisiKeyMaster: Disable the enhanced crypto!
+09-22 22:23:49.060  5984  6150 I fwkit_kac_kitloader: [fwkit KitLoaderManager.java:355] kit loaded:nearby_61201300, cost :64 ms
+09-22 22:23:49.060  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:56] getSplitPath application.packageName = com.huawei.hms.nearby
+09-22 22:23:49.060  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:76] getSplitPath dirs == null || dirs.length == 0
+09-22 22:23:49.060  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:77] dynamicInstall no splitPaths
+09-22 22:23:49.065   586   586 I HisiKeyMaster: out_params_buffer_len = 32
+09-22 22:23:49.065   586   586 I HisiKeyMaster: HisiKmBegin success
+09-22 22:23:49.065  1025  6185 D keymaster_worker: Keystore begin hidl end
+09-22 22:23:49.065  1025  6185 D keymaster_worker: Keystore begin end
+09-22 22:23:49.066  1025  6188 D keymaster_worker: Keystore update
+09-22 22:23:49.066  1025  6188 D keymaster_worker: Keystore update hidl
+09-22 22:23:49.066   586   586 I HisiKeyMaster: HisiKmUpdate start
+09-22 22:23:49.066   586   586 I HisiKeyMaster: Disable the enhanced crypto!
+09-22 22:23:49.069   586   586 I HisiKeyMaster: HisiKmUpdate success
+09-22 22:23:49.069  1025  6188 D keymaster_worker: Keystore update hidl end
+09-22 22:23:49.069  1025  6188 D keymaster_worker: Keystore update end
+09-22 22:23:49.070  1025  6190 D keymaster_worker: Keystore finish
+09-22 22:23:49.070  1025  6190 D keymaster_worker: Keystore finish hidl
+09-22 22:23:49.070   586   586 I HisiKeyMaster: HisiKmFinish start
+09-22 22:23:49.070   586   586 I HisiKeyMaster: Disable the enhanced crypto!
+09-22 22:23:49.071 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=1, cacheMissCount=0, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : []
+09-22 22:23:49.071 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > ItemModel > CacheSize=86, cacheHitCount=0, cacheMissCount=1, total appsWithNoServerDataCount=2. Missed  in cache (limit 10) : [com.blizzard.arc]
+09-22 22:23:49.072 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > ItemModel > ItemStore Called 1 apps cacheOptions = REFRESH_LOCAL_CACHE
+09-22 22:23:49.072 15082 15155 I Finsky  : [2182] AIM: ItemModel fetch - unauth(0), auth([VJz2DOuKMLnzCCtLbrrpRmpZrGXsL-9w_f00Bnd0CYc]->1)
+09-22 22:23:49.073   586   586 I HisiKeyMaster: output data size=16
+09-22 22:23:49.073  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188873
+09-22 22:23:49.073   586   586 I HisiKeyMaster: HisiKmFinish success
+09-22 22:23:49.073  1025  6190 D keymaster_worker: Keystore finish hidl end
+09-22 22:23:49.073  1025  6190 D keymaster_worker: Keystore finish end
+09-22 22:23:49.076  3249  6191 I HiAdKit.DC.AIDCP:  query cache app data collection size:1
+09-22 22:23:49.076  3249  6191 I HiAdKit.DC.AIDCP:  query cache app data count before report:1
+09-22 22:23:49.077  5984  5984 I LogAdaptor: init: priority = 4, moduleName = NearbyService
+09-22 22:23:49.077  5984  5984 I HmsNearbyKit_apk_61201300_NearbyApplication: [NearbyService null:4] onCreate begin
+09-22 22:23:49.077  5984  5984 I HmsNearbyKit_apk_61201300_NearbyApplication: [NearbyService null:11] set kit context success.
+09-22 22:23:49.078  5984  6078 I AppLogManager: already init
+09-22 22:23:49.078  5984  6078 I FeedbackNode: HMS log-dir is: /storage/emulated/0/Android/data/com.huawei.hwid/files/Log
+09-22 22:23:49.080  3249  6191 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.080  3249  6191 I HiAdKit.DC.SystemUtil:  hasPermissions true
+09-22 22:23:49.081  3249  6183 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.081  3249  6191 I HiAdKit.DC.SystemUtil:  hasPermissions true
+09-22 22:23:49.082  3249  6183 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.082  5984  5984 I HmsNearbyKit_apk_61201300_NearbyApplication: [NearbyService null:14] Nearby Service init, version=6.12.1.300
+09-22 22:23:49.083  4154  5930 I HiAdKit.PpsCoreService.Net:  isCmdAllowAccess rom: false permitRegion: 1
+09-22 22:23:49.083  4154  5930 I HiAdKit.PpsCoreService.Net:  call method: netRequest
+09-22 22:23:49.083  4154  5930 I HiAdKit.PpsCoreService.Net:  callerPkg: com.huawei.hwid
+09-22 22:23:49.083  5984  5984 I LogAdaptor: init: priority = 4, moduleName = NearbyService
+09-22 22:23:49.083  5984  5984 I HmsNearbyKit_apk_61201300_NearbyApplication: [NearbyService null:35] onCreate end
+09-22 22:23:49.083  5984  6078 I AppLogManager: already init
+09-22 22:23:49.083  4154  5930 I HiAdKit.SystemUtil.Net:  isDeviceProvisioned: true
+09-22 22:23:49.083  5984  6078 I FeedbackNode: HMS log-dir is: /storage/emulated/0/Android/data/com.huawei.hwid/files/Log
+09-22 22:23:49.084  1710  3437 D HwConnectivityServiceEx: set 10116 wlan0 value false
+09-22 22:23:49.084  4154  5930 I HiAdKit.HttpCall.Net:  oobe: false
+09-22 22:23:49.085 15082 15155 E Finsky  : [2182] [Counters] attempted to use a non-positive increment for: 4751
+09-22 22:23:49.087  4154  5930 I NetworkSdk_CountryCodeBean: [HMSCore NetworkLog.java:1] PPS-Net-pool-thread-67|network.grs.local.model.CountryCodeBean|33|get issue_country code from SIM_COUNTRY
+09-22 22:23:49.087  4154  5930 I HiAdKit.AccessMethod.Builder.Net:  countryCode:LT
+09-22 22:23:49.089  4154  5998 W HiAdKit.bx.Cal:  Root obj class (class java.lang.String) is invalid in conversion
+09-22 22:23:49.089  4154  5998 W HiAdKit.bx.Cal:  toAnonymousJson JSONException
+09-22 22:23:49.089  4154  5998 I HiAdKit.HiAdRequestDataLogger.Cal:  upper thread name: PPS-Net-pool-thread-67 request data:  
+09-22 22:23:49.089  4154  6193 I NetworkSdk_e: [HMSCore NetworkLog.java:1] PPS-Cal-pool-thread-89|network.grs.h.e|1|isSpExpire false.
+09-22 22:23:49.089  4154  6193 I NetworkSdk_a: [HMSCore NetworkLog.java:1] PPS-Cal-pool-thread-89|network.grs.a|7|GrsClientManager.getUrlsLocal: Get URL from GRS Server Cache
+09-22 22:23:49.090  4154  6193 I NetworkSdk_a: [HMSCore NetworkLog.java:1] PPS-Cal-pool-thread-89|network.grs.a|6|Return [com.huawei.cloud.pps.kit] Urls: {*t*s*v*4*3*:*h*t*s*\*\*c*n*u*e*.*u*w*i*c*m*/*i*i*i*e*/*l*u*s*r*i*e*/*d*\*a*v*r*i*e*e*t*i*f*r*a*i*n*h*m*"*"*p*D*t*S*r*e*"*"*t*p*:*/*/*v*n*s*d*e*o*.*b*n*c*o*d*c*m*/*o*t*e*v*r*/*e*o*t*p*D*t*"*"*t*t*s*i*s*v*4*3*:*h*t*s*\*\*c*n*u*e*.*u*w*i*c*m*/*i*i*i*e*/*l*u*s*r*i*e*/*d*\*o*i*-*r*v*c*-*t*t*m*n*.*t*?*,*a*a*y*i*s*e*v*r*:*h*t*s*\*\*e*e*t*-*r*.*p*d*a*k*l*u*.*o*\*c*n*s*r*e*\*r*p*r*E*c*p*i*n*/*c*i*n*,*c*p*a*e*r*"*"*t*p*:*/*/*m*.*b*n*c*n*c*m*,*a*s*e*v*r*:*h*t*s*\*\*l*g*l*c*o*d*h*a*e*.*o*"*"*m*S*r*e*"*"*t*p*:*/*/*o*s*m*r*h*a*e*.*o*\*m*n*s*t*\*c*o*d*e*v*c*\*a*i*f*\*t*r*s*h*m*"*"*r*v*c*S*r*e*G*o*a*"*"*t*p*:*/*/*o*s*m*r*h*a*e*.*o*\*m*n*s*t*\*c*o*d*e*v*c*\*a*\*p*i*a*y*s*a*e*e*t*h*m*c*u*t*y*E*"*"*a*d*v*4*3*:*h*t*s*\*\*c*n*u*e*.*u*w*i*c*m*/*i*i*i*e*/*l*u*s*r*i*e*/*d*\*o*i*-*e*c*i*t*o*.*t*?*,*e*S*l*s*C*n*i*"*"*t*p*:*/*/*d*s*r*e*-*r*.*p*d*a*k*l*u*.*o*\*s*k*e*v*r*/*x*p*a*h*o*f*g*,*c*n*e*t*o*f*g*e*v*r*:*h*t*s*\*\*s*k*e*v*r*d*e*o*.*b*n*c*o*d*c*m*/*d*s*r*e*\*c*n*e*t*o*k*p*,*e*B*s*U*l*:*h*t*s*\*\*e*e*t*-*r*.*p*d*a*k*l*u*.*o*"*"*5*e*v*r*v*:*h*t*s*\*\*h*h*s*i*g*d*e*d*a*k*d*.*o*"*"*d*S*r*e*B*s*U*l*:*h*t*s*\*\*s*k*e*v*r*d*e*o*.*b*n*c*o*d*c*m*,*i*s*a*l*u*h*e*v*r*:*h*t*s*\*\*a*x*d*e*o*.*b*n*c*o*d*c*m*/*n*t*l*A*t*"*"*a*d*e*v*r*:*h*t*s*\*\*c*n*u*e*.*u*w*i*c*m*/*i*i*i*e*/*l*u*s*r*i*e*/*d*a*d*/*e*m*.*t*?*,*p*i*a*y*l*b*l*0*"*"*t*p*:*/*/*o*s*m*r*h*a*e*.*o*\*m*n*s*t*\*c*o*d*e*v*c*\*a*s*/*r*v*c*-*t*t*m*n*.*t*?*o*n*r*=*U*,*a*x*a*e*r*"*"*t*p*:*/*/*d*-*r*.*p*d*a*k*l*u*.*o*"*"*s*a*e*r*T*"*"*t*p*:*/*/*v*n*s*d*e*o*.*b*n*c*o*d*c*m*,*s*k*e*v*r*a*e*r*T*"*"*t*p*:*/*/*d*s*r*e*-*r*.*p*d*a*k*l*u*.*o*"*"*d*S*r*e*"*"*t*p*:*/*/*d*-*r*.*p*d*a*k*l*u*.*o*\*r*s*l*.*d*,*k*t*o*f*g*e*v*r*:*h*t*s*\*\*s*k*e*v*r*d*e*o*.*b*n*c*o*d*c*m*/*d*s*r*e*\*p*s*i*C*n*i*"*"*v*n*S*r*e*"*"*t*p*:*/*/*v*n*s*d*e*o*.*b*n*c*o*d*c*m*/*o*t*e*v*r*/*e*c*n*e*t*/*c*i*n*,*s*a*i*t*c*S*r*e*"*"*t*p*:*/*/*o*s*m*r*h*a*e*.*o*\*m*n*s*t*\*c*o*d*e*v*c*\*a*s*a*s*/*r*v*c*-*t*t*m*n*.*t*?*,*a*s*e*v*r*v*:*h*t*s*\*\*l*g*l*c*o*d*h*a*e*.*o*"*"*o*f*g*e*v*r*:*h*t*s*\*\*s*k*e*v*r*d*e*o*.*b*n*c*o*d*c*m*/*d*s*r*e*\*q*e*y*,*a*x*a*e*r*T*"*"*t*p*:*/*/*d*-*r*.*p*d*a*k*l*u*.*o*"*"*r*v*c*S*r*e*"*"*t*p*:*/*/*o*s*m*r*h*a*e*.*o*\*m*n*s*t*\*c*o*d*e*v*c*\*a*\*p*i*a*y*s*a*e*e*t*h*m*"*"*5*e*v*r*:*h*t*s*\*\*h*h*s*i*g*d*e*d*a*k*d*.*o*"*
+09-22 22:23:49.091   679  1340 W /system/bin/netd: A binder object at 0x70cc88a6c0 is being transacted on, however, this object is in the same process as its proxy. Transacting with this binder is expensive compared to just calling the corresponding functionality in the same process.
+09-22 22:23:49.091   679  1340 I PreDnsController: CanPreDnsQuery,persist.sys.predns is false!
+09-22 22:23:49.094  5984  6150 I fwkit_ShareLibManager: [fwkit ClassLoaderManager.java:109] kitUid: hianalytics_61001309, mClassLoaderPath:/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.analytics/61001309/com.huawei.hms.analytics.apk, sharePath: []
+09-22 22:23:49.094  5984  6150 W hwid.container: Unsupported class loader
+09-22 22:23:49.094  6092  6176 I NotificationManager: com.android.vending: cancel(10436)
+09-22 22:23:49.095 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > getApps > data collection finished
+09-22 22:23:49.095 15082 15155 I Finsky  : [2182] AIM: AppInfoManager-Perf > maybeDestroyAppInfoManager is called. actives = 1
+09-22 22:23:49.095  2720  5674 I Finsky:background: [3035] IV2: installer unavailable to accept lt.seesam.app. Current active installs : 
+09-22 22:23:49.095  2720  5674 I Finsky:background: com.authy.authy: installId: 5823 isid: u0LKfJLQT0i1iyrW5nfDQA requested 0 min ago
+09-22 22:23:49.095  2720  5674 W Finsky:background: [3035] IV2: cannot process install request now for [Package:lt.seesam.app, isid:k4xibCSiTHOSv1himPLPkA] with status code 1136
+09-22 22:23:49.103  6196  6196 I dex2oat-util: /Dex2oatUtil.cpp:28: TID(6196) 	new_execve:/system/bin/dex2oat
+09-22 22:23:49.103  6196  6196 I dex2oat-util: /Dex2oatUtil.cpp:30: TID(6196) 	dex2oat disabled
+09-22 22:23:49.107  6092  6092 I Isotope : UID: [10116]  PID: [6092] PlogsChecker : sWAAdl not set, disallowing personal logging
+09-22 22:23:49.113  2715  2993 I AppManager: dependence has been existed:6092 -> 2434
+09-22 22:23:49.125  5984  6150 W hwid.container: Failed execv(/system/bin/dex2oat --instruction-set=arm64 --instruction-set-features=runtime --runtime-arg -Xrelocate --boot-image=/system/framework/boot.art --runtime-arg -Xms64m --runtime-arg -Xmx512m -j4 --instruction-set-variant=generic --instruction-set-features=default --generate-mini-debug-info --generate-mini-debug-info --dex-file=/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.analytics/61001309/com.huawei.hms.analytics.apk --output-vdex-fd=94 --oat-fd=95 --oat-location=/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.analytics/61001309/oat/arm64/com.huawei.hms.analytics.odex --compiler-filter=verify --class-loader-context=& --compilation-reason=dynamic-load) because non-0 exit status
+09-22 22:23:49.138 15082 15130 V AudioManager: getMode...
+09-22 22:23:49.138 15082 15130 V AudioManager: getMode...
+09-22 22:23:49.141 15082 15133 V AudioManager: getMode...
+09-22 22:23:49.142 15082 15133 V AudioManager: getMode...
+09-22 22:23:49.143 15082 15130 V AudioManager: getMode...
+09-22 22:23:49.144 15082 15130 V AudioManager: getMode...
+09-22 22:23:49.144 19234 19927 I HslPackageManager: Get Hsl Package Manager.
+09-22 22:23:49.144 19234 19927 I HslPackageManager: is Support Hsl false
+09-22 22:23:49.145   679  1353 I netd    : trafficSwapActiveStatsMap() <27.63ms>
+09-22 22:23:49.146  5984  6150 I fwkit_CLUtils: [fwkit ClsLoaderUtils.java:119] New dloader com.huawei.hms.analytics.apk,cost:51
+09-22 22:23:49.146  5984  6150 I fwkit_ShareLib: [fwkit ClassLoaderManager.java:295] classLoader: dalvik.system.DexClassLoader[DexPathList[[zip file "/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.analytics/61001309/com.huawei.hms.analytics.apk"],nativeLibraryDirectories=[/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.analytics/61001309/lib, /system/lib64, /hw_product/lib64, /system/product/lib64, /prets/lib64]]]
+09-22 22:23:49.146  1710  2805 V ActivityManager: Successfully start provider ContentProviderRecord{e5c7e7b u0 com.android.providers.settings/.hwext.HwSettingsProvider} launchingApp=null caller pid= 6092
+09-22 22:23:49.146 19234 19927 I HMSSDK_HMSPackageManager: Enter getHMSPackageName
+09-22 22:23:49.148  5984  6150 I fwkit_kac_kitloader: [fwkit KitLoaderManager.java:355] kit loaded:hianalytics_61001309, cost :64 ms
+09-22 22:23:49.149  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:56] getSplitPath application.packageName = com.huawei.hms.analytics
+09-22 22:23:49.149  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:76] getSplitPath dirs == null || dirs.length == 0
+09-22 22:23:49.149  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:77] dynamicInstall no splitPaths
+09-22 22:23:49.151  5984  5984 I AGConnectProvider: AGConnectInitializeProvider#onCreate
+09-22 22:23:49.152  5984  5984 I AGConnectInstance: AGConnectInstance#initialize
+09-22 22:23:49.154  5984  5984 W AGC_Instance: agc sdk initialize
+09-22 22:23:49.156 19234 19927 I NK_RealHttpClient: CORE_THREAD_POOL-1|embedded.a1|23|request: ConnectTimeout:, ConcurrentConnectDelay:´+îrequest firstIpv6ClientConcurrentConnectDelay´+Ühttpclient: ConnectTimeout:10000, ConcurrentConnectDelay:500´+îhttpclient firstIpv6ClientConcurrentConnectDelay´+Ü250
+09-22 22:23:49.158 19234 19927 I NK_CountryCodeBean: CORE_THREAD_POOL-1|network.grs.local.model.CountryCodeBean|32|get issue_country code from SIM_COUNTRY
+09-22 22:23:49.159 19234 19927 I NK_OkReqTsk: CORE_THREAD_POOL-1|embedded.j3|285|the request has used the okhttp! 
+09-22 22:23:49.160  5984  5984 I AGC_Registrar: getServices
+09-22 22:23:49.166  1710  3437 I JobScheduler.Time: Add job to TimeTracking: 676d189 #u0a116/165064389 com.android.vending/com.google.android.finsky.instantapps.metrics.LogFlushJob, delayTime:9536944, deadlineTime:9566944
+09-22 22:23:49.174  5984  5984 I AGC_Registrar: services:2
+09-22 22:23:49.174  5984  5984 D AGC_Instance: AGConnectInstanceImpl init
+09-22 22:23:49.174  5984  5984 D AGC_ServiceRepository: addService start
+09-22 22:23:49.174  5984  5984 D AGC_ServiceRepository: addService end
+09-22 22:23:49.174  5984  5984 D AGC_ServiceRepository: addService start
+09-22 22:23:49.174  5984  5984 D AGC_Instance: AGConnectInstanceImpl init end
+09-22 22:23:49.174  5984  5984 I AGC_Instance: initFinish callback start
+09-22 22:23:49.178  5984  5984 I AGC_Instance: AGC SDK initialize end
+09-22 22:23:49.179  5984  5984 D AGC_ConfigImpl: initConfigReader
+09-22 22:23:49.180  5984  5984 W ResourcesUtils: resId == 0
+09-22 22:23:49.181  5984  5984 D AGC_FixedDecrypt: init
+09-22 22:23:49.181 19234 19234 I PackageReceiver: receive PackageReceiver
+09-22 22:23:49.181 19234 19234 I PackageReceiver: not daemon app or action is null : com.blizzard.arc, action : android.intent.action.PACKAGE_REPLACED
+09-22 22:23:49.182  5984  5984 D AGC_Keys: build aes key, iterationCount:5000
+09-22 22:23:49.185  5984  6150 I fwkit_ShareLibManager: [fwkit ClassLoaderManager.java:109] kitUid: kitstore_61500301, mClassLoaderPath:/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.kitstore/61500301/com.huawei.hms.kitstore.apk, sharePath: []
+09-22 22:23:49.185  5984  6150 I fwkit_ShareLib: [fwkit ProxyClassLoader.java:87] kitstore_61500301 add library: commonKit_restclient
+09-22 22:23:49.186  5984  6150 W hwid.container: Unsupported class loader
+09-22 22:23:49.196 29916 29916 D AGCLinkKit: [AGCLinkKit KitReceiverUtils.java:15] ACTION_PACKAGE_ADDED :com.blizzard.arc
+09-22 22:23:49.196  6201  6201 I dex2oat-util: /Dex2oatUtil.cpp:28: TID(6201) 	new_execve:/system/bin/dex2oat
+09-22 22:23:49.196  6201  6201 I dex2oat-util: /Dex2oatUtil.cpp:30: TID(6201) 	dex2oat disabled
+09-22 22:23:49.196 29916 29916 D AGCLinkKit: [AGCLinkKit null:54] get arrive link:com.blizzard.arc
+09-22 22:23:49.200 19234  6203 I NK_Netdiag: CORE_THREAD_POOL-0 ->NK_netdiag_13|netdiag.tools.NetDetectAndPolicy|1|the time count will reset!
+09-22 22:23:49.201  1710  2805 V ActivityManager: Successfully start provider ContentProviderRecord{3dd7de3 u0 com.huawei.hwid/com.huawei.hms.fwkit.kams.provideragent.StubContentProvider} launchingApp=ProcessRecord{874b212 3249:com.huawei.hwid.core/u0a63} caller pid= 1710
+09-22 22:23:49.202  2715  1857 I KStateManager: send binder call message, called pid:3249, calling pid:[1710]
+09-22 22:23:49.203 19234 19884 I NK_InterceptorExecutor: CORE_THREAD_POOL-0|embedded.p2|409|response code:200
+09-22 22:23:49.208  3249  4434 W fwkit_kit_breaker: [fwkit KitBreaker.java:89] infos invalid
+09-22 22:23:49.209  3249  4434 I fwkit_kams_stubmanager: [fwkit StubManagerService.java:35] getSPNByComponent:com.huawei.hms.agclink, com.huawei.hms.agclink, true
+09-22 22:23:49.209  3249  4434 I fwkit_kams_scheduler: [fwkit ProcessScheduler.java:105] ProPre:com.huawei.hwid.container2
+09-22 22:23:49.209  3249  4434 I fwkit_kitProviderDispatcher: [fwkit KitProviderDispatcher.java:163] package Name : com.huawei.hms.agclink; get provider processName :com.huawei.hwid.container2
+09-22 22:23:49.209  3249  4434 I fwkit_kitProviderDispatcher: [fwkit KitProviderDispatcher.java:173] providerUriMap add
+09-22 22:23:49.210  1710  2805 V ActivityManager: Successfully start provider ContentProviderRecord{d2c3e70 u0 com.huawei.hwid/com.huawei.hms.runtimekit.kitcontainerservice.KitProcessAgent2Provider} launchingApp=ProcessRecord{b2d18b3 29916:com.huawei.hwid.container2/u0a63} caller pid= 1710
+09-22 22:23:49.211 29916 29916 I fwkit_AbP: [fwkit AbsContentProvider.java:13] cp:null;getType;content://com.huawei.hms.runtimekit.kitcontainerservice.KitProcessAgent2Provider/com.huawei.hms.agclink.CacheContentProvider/NotArrived-com.blizzard.arc
+09-22 22:23:49.211  2715  1857 I KStateManager: send binder call message, called pid:29916, calling pid:[1710]
+09-22 22:23:49.218  5984  5984 D AGC_Keys: build aes key end
+09-22 22:23:49.225  2720  5737 I Finsky:background: [3058] DSC::L: Update all listeners for download <44580:RUNNING:100%[100%]> in group com.authy.authy:u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:49.225  5984  5984 D AGC_ConfigImpl: getRoutePolicy
+09-22 22:23:49.225  2720  5737 I Finsky:background: [3058] DSC::L: Updating listener svy@bbf94db for download <44580:RUNNING:100%[100%]>
+09-22 22:23:49.225  2720  5737 I Finsky:background: [3058] DSC::L: Updating listener DownloadServiceManagerListener::riv@8f569ea for download <44580:RUNNING:100%[100%]>
+09-22 22:23:49.225  2720  5737 I Finsky:background: [3058] DSC::L: Updating listener DownloadServiceManagerListener::ajig@841528d for download <44580:RUNNING:100%[100%]>
+09-22 22:23:49.225  2720  5737 I Finsky:background: [3058] DS: Received onProgress request_id=44580
+09-22 22:23:49.225  2720  5737 I Finsky:background: [3058] RM: receive resource status onProgress download_request_id=44580, group_id=com.authy.authy.apk reason: auto_update isid: u0LKfJLQT0i1iyrW5nfDQA, status_code=RESOURCE_STATUS_IN_PROGRESS, legacy_status_code=192, size: 12069505/12069505
+09-22 22:23:49.225  2720  5737 I Finsky:background: [3058] DS::IDC: updateWith: <44580:RUNNING:100%[100%]>
+09-22 22:23:49.229  5984  6150 W hwid.container: Failed execv(/system/bin/dex2oat --instruction-set=arm64 --instruction-set-features=runtime --runtime-arg -Xrelocate --boot-image=/system/framework/boot.art --runtime-arg -Xms64m --runtime-arg -Xmx512m -j4 --instruction-set-variant=generic --instruction-set-features=default --generate-mini-debug-info --generate-mini-debug-info --dex-file=/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.kitstore/61500301/com.huawei.hms.kitstore.apk --output-vdex-fd=95 --oat-fd=96 --oat-location=/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.kitstore/61500301/oat/arm64/com.huawei.hms.kitstore.odex --compiler-filter=verify --class-loader-context=& --compilation-reason=dynamic-load) because non-0 exit status
+09-22 22:23:49.229  2720  2782 I Finsky:background: [2988] DSC: getDownload(44580)
+09-22 22:23:49.230  2720  2782 I Finsky:background: [2988] DS: getDownload(request_id=44580)
+09-22 22:23:49.230  2720  5737 I Finsky:background: [3058] DS: onGetDownload(request_id=44580, files_to_download=[com.authy.authy.apk(size:12069505)], context[group_id=com.authy.authy:u0LKfJLQT0i1iyrW5nfDQA], display_data[invisible=true, title=Twilio Authy Authenticator], network_restrictions=UNMETERED_ONLY status=running, bytes_downloaded=12069505, total_bytes=12069505, retry[count=0, next_retry=n/a])
+09-22 22:23:49.231  1710  2780 E WifiPermissionsUtil: getUidPermission is DENIED and permissionType android.permission.ACCESS_FINE_LOCATIONuid 10029
+09-22 22:23:49.231  1710  2780 E WifiService: enforceCanAccessScanResults: hiding ssid and bssidUID 10029 has no location permission
+09-22 22:23:49.231  2720  2720 I Finsky:background: [1] RF: onProgress request_id=44580 isid=u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:49.231  2720  2720 I Finsky:background: [1] RF: resourceStatus for request_id=44580 group=com.authy.authy artifact=com.authy.authy.apk collectedBytes= 12069505 / 12069505
+09-22 22:23:49.232  2720  2720 I Finsky:background: [1] RF: Group=com.authy.authy totalBytesDownloaded= 12106598 / 12106598 for 2 artifacts
+09-22 22:23:49.232  2720  2720 I Finsky:background: [1] RF: Preventing total bytes update to listeners
+09-22 22:23:49.232  1710  2805 V ActivityManager: Successfully start provider ContentProviderRecord{35e4869 u0 com.google.android.gms/.auth.account.be.legacy.AccountContentProvider} launchingApp=ProcessRecord{ea29fd4 2434:com.google.android.gms.persistent/u0a112} caller pid= 32414
+09-22 22:23:49.233  5984  5984 E BridgeInstance: createInstance error
+09-22 22:23:49.233  5984  5984 I [AGC_LOG]HaConnector: init HiAnalyticsBridge SDK end.
+09-22 22:23:49.234  5984  5984 I HiAnalyticsKit: HiAnalyticsSysEvtReceiver=> onReceive is running..
+09-22 22:23:49.236 19234 19884 I FormalHASDK: HAImpl==> onEvent. tag:_default_config_tag, type:1, eventId:907112013
+09-22 22:23:49.237 19234 19921 I FormalHASDK: HAImpl==> onEvent. tag:_default_config_tag, type:0, eventId:2030300101
+09-22 22:23:49.238 19234 19282 E HiApp.PCS/PolicyItemUtils: PermissionConfigInfoManager-0{2487} get app permission is error, because appPermissionControls is empty
+09-22 22:23:49.243  2504  2569 E HSM_UI-11.1.1.361: SecurityBroadcastReceiver:SecurityBroadcastReceiver the rainbow is not enabled!
+09-22 22:23:49.244 19234 19282 W HiApp.PCS/ShareControlManager: PermissionConfigInfoManager-0{2487} illegal brand to HwResolver.
+09-22 22:23:49.244 19234 19282 W HiApp.PCS/ShareControlManager: PermissionConfigInfoManager-0{2487} Not support to Synchronize data.
+09-22 22:23:49.249  2504  2504 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1698 android.content.ContextWrapper.startService:669 android.content.ContextWrapper.startService:669 com.huawei.antivirus.utils.AntiVirusTools.checkVirusForNewInstalledApk:905 com.huawei.antivirus.AntiVirusReceiver.onReceive:33 
+09-22 22:23:49.251  5984  6150 I fwkit_CLUtils: [fwkit ClsLoaderUtils.java:119] New dloader com.huawei.hms.kitstore.apk,cost:64
+09-22 22:23:49.251  5984  6150 I fwkit_ShareLib: [fwkit ClassLoaderManager.java:295] classLoader: dalvik.system.DexClassLoader[DexPathList[[zip file "/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.kitstore/61500301/com.huawei.hms.kitstore.apk"],nativeLibraryDirectories=[/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.kitstore/61500301/lib/arm64, /system/lib64, /hw_product/lib64, /system/product/lib64, /prets/lib64]]]
+09-22 22:23:49.251  2460  2460 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1698 android.content.ContextWrapper.startService:669 com.huawei.antivirus.AntiVirusService.handleInstalledApkCheck:236 com.huawei.antivirus.AntiVirusService.onStartCommand:172 android.app.ActivityThread.handleServiceArgs:4951 
+09-22 22:23:49.257  5984  6150 I fwkit_kac_kitloader: [fwkit KitLoaderManager.java:355] kit loaded:kitstore_61500301, cost :75 ms
+09-22 22:23:49.257  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:56] getSplitPath application.packageName = com.huawei.hms.kitstore
+09-22 22:23:49.257  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:76] getSplitPath dirs == null || dirs.length == 0
+09-22 22:23:49.257  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:77] dynamicInstall no splitPaths
+09-22 22:23:49.260  1710  2780 I ActivityManager: App 10075/com.facebook.katana targets O+, restricted
+09-22 22:23:49.260  1710  2780 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.facebook.katana/com.facebook.feed.platformads.AppInstallReceiver
+09-22 22:23:49.262  1710  1919 V BroadcastQueue: Finished with ordered broadcast BroadcastRecord{6557be7 u0 android.intent.action.PACKAGE_ADDED}
+09-22 22:23:49.264 15082 15082 I Finsky  : [1] affs - Received: android.intent.action.PACKAGE_ADDED, [ncLEZQTSFSUBMfhJKg1he3TpzwvGvwTJFupg5UiyAm8]
+09-22 22:23:49.264 19234 19252 I uawei.appmarke: Background concurrent copying GC freed 60881(2992KB) AllocSpace objects, 6(456KB) LOS objects, 49% free, 6818KB/13MB, paused 64us total 116.538ms
+09-22 22:23:49.265  2720  5737 I Finsky:background: [3058] DS: Decremented runningDownloadsCount to: 0
+09-22 22:23:49.265  2720  5737 I Finsky:background: [3058] DS: Current runningDownloadsCount: 0, maxSimultaneousDownloads: 4
+09-22 22:23:49.266 19234 19254 W System  : A resource failed to call close. 
+09-22 22:23:49.266  6735  6205 I CAWARENESS_ServiceMonitor: memory(kB) static totalPss=13425, dalvikPss=1877, nativePss=2189
+09-22 22:23:49.267  5984  5984 I fwkit_kitstore_application: KitStoreApplication onCreate start
+09-22 22:23:49.267 15082 15082 I Finsky  : [1] affs - Deduping intent android.intent.action.PACKAGE_ADDED
+09-22 22:23:49.267 15082 15113 I Finsky  : [2159] RECEIVER_PACKAGE_MONITOR#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:49.269  5984  5984 I fwkit_HmsProfiler: hms profiler init enter
+09-22 22:23:49.271  2720  2720 I Finsky:background: [1] affh - Received: android.intent.action.PACKAGE_ADDED, [ncLEZQTSFSUBMfhJKg1he3TpzwvGvwTJFupg5UiyAm8]
+09-22 22:23:49.271  5984  5984 I fwkit_HmsProfiler: hms profiler init start
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] DSC::L: Update all listeners for download <44580:SUCCEEDED> in group com.authy.authy:u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] DSC::L: Updating listener svy@bbf94db for download <44580:SUCCEEDED>
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] DSC::L: Updating listener DownloadServiceManagerListener::riv@8f569ea for download <44580:SUCCEEDED>
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] DSC::L: Updating listener DownloadServiceManagerListener::ajig@841528d for download <44580:SUCCEEDED>
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] RM: receive resource status onSuccess com.authy.authy.apk reason: auto_update isid: u0LKfJLQT0i1iyrW5nfDQA, 3, 200, size: 12069505/12069505
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] DS::IDC: updateWith: <44580:SUCCEEDED>
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] DS::IDC: All invisible downloads are finished.
+09-22 22:23:49.272  2720  5737 I Finsky:background: [3058] DS::ISM: Stopping invisible download job
+09-22 22:23:49.273  5984  5984 I fwkit_HmsProfiler: hms profiler init end
+09-22 22:23:49.274  2720  2794 I Finsky:background: [2998] DSC: getDownload(44580)
+09-22 22:23:49.274  2720  2782 I Finsky:background: [2988] DS: getDownload(request_id=44580)
+09-22 22:23:49.278  5984  5984 I fwkit_kitstore_application: start kit feature service
+09-22 22:23:49.279  5984  6210 W fwkit_CrashHandler: processName is: com.huawei.hwid.container3
+09-22 22:23:49.281  2618  2675 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.bindService:1777 com.huawei.securitycenter.antivirus.agguard.AgGuardCloudProcess.bindAgService:449 com.huawei.securitycenter.antivirus.agguard.AgGuardCloudProcess.<init>:91 com.huawei.antivirus.features.AntivirusScanHelper.getScanResult:105 com.huawei.antivirus.features.AntivirusScanHelper.scanInstalledPackageUsingAllEngine:99 
+09-22 22:23:49.281  5984  5984 I fwkit_kitstore_feature: kit feature service start...
+09-22 22:23:49.281  5984  5984 I fwkit_kitstore_application: register network change receiver
+09-22 22:23:49.282  2720  5867 I Finsky:background: [3075] SCH: Canceling job 40-9998
+09-22 22:23:49.282  2720  5867 I Finsky:background: [3075] WM::SCH: Logging work end for 40-9998
+09-22 22:23:49.283   679  1340 W /system/bin/netd: A binder object at 0x70cc88a6c0 is being transacted on, however, this object is in the same process as its proxy. Transacting with this binder is expensive compared to just calling the corresponding functionality in the same process.
+09-22 22:23:49.283   679  1340 I PreDnsController: CanPreDnsQuery,persist.sys.predns is false!
+09-22 22:23:49.284  2720  2783 I Finsky:background: [2989] SCH: no pending jobs to schedule.
+09-22 22:23:49.284  2720  5737 I Finsky:background: [3058] DS: onGetDownload(request_id=44580, files_to_download=[com.authy.authy.apk(size:12069505)], context[group_id=com.authy.authy:u0LKfJLQT0i1iyrW5nfDQA], display_data[invisible=true, title=Twilio Authy Authenticator], network_restrictions=UNMETERED_ONLY status=succeeded, bytes_downloaded=12069505, total_bytes=12069505, retry[count=0, next_retry=n/a])
+09-22 22:23:49.285  2715  2993 I AppManager: dependence has been existed:2618 -> 19234
+09-22 22:23:49.286  2720  2720 I Finsky:background: [1] affh - Deduping intent android.intent.action.PACKAGE_ADDED
+09-22 22:23:49.287  2720  2797 I Finsky:background: [3001] RECEIVER_PACKAGE_MONITOR_BACKGROUND#logWorkEndAndFinishGoAsync: SUCCESS
+09-22 22:23:49.287  1710  2539 V BroadcastQueue: Finished with ordered broadcast BroadcastRecord{20e738f u0 android.intent.action.PACKAGE_ADDED}
+09-22 22:23:49.287  5984  5984 I fwkit_KitDAReporter: sim state changed, state = 5, simCountry = lt
+09-22 22:23:49.287  2720  2720 I Finsky:background: [1] Job 40-9998 is canceled while running
+09-22 22:23:49.288  5984  6212 I fwkit_kitstore_PackageAdde: Package:com.blizzard.arc added or updated
+09-22 22:23:49.288  5984  6212 I fwkit_kpms_apppkg: [fwkit KitPackageManagerImpl.java:5]  queryDependAndCheckUpgradeByKit
+09-22 22:23:49.289  2720  2720 I Finsky:background: [1] SCH: jobStopped: 40-9998. TimeElapsed: 5391ms. EventType: 2544
+09-22 22:23:49.289  2720  2720 I Finsky:background: [1] WM::SCH: Logging work stop for 40-9998
+09-22 22:23:49.289  2720  2720 I Finsky:background: [1] DS::IDC: has 0 invisibleDownloads
+09-22 22:23:49.289  2720  2720 I Finsky:background: [1] DS::IRJ: onStopJob: false, stopReason: 3
+09-22 22:23:49.289  3249  4376 W fwkit_kpms_parser: [fwkit ApkParser.java:24] Parse callerPkg dependency failed, dependencies is null.
+09-22 22:23:49.289  2720  5941 I Finsky:background: [3089] Wrote row to frosting DB: 188874
+09-22 22:23:49.289  2720  2720 I Finsky:background: [1] RF: onResourceSuccess request_id=44580 isid=u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:49.289  2720  2720 I Finsky:background: [1] RF: resourceStatus for request_id=44580 group=com.authy.authy artifact=com.authy.authy.apk collectedBytes= 12069505 / 12069505
+09-22 22:23:49.289  2720  2720 I Finsky:background: [1] RF: Group=com.authy.authy totalBytesDownloaded= 12106598 / 12106598 for 2 artifacts
+09-22 22:23:49.290  2720  2720 I Finsky:background: [1] bytesCompleted/bytesTotal/ratio = 12106598 / 12106598 / 1.000000
+09-22 22:23:49.290  2720  2720 I Finsky:background: [1] RF: onSuccess request_id=44580 isid=u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:49.290  2720  2720 I Finsky:background: [1] RF: resourceStatus for request_id=44580 group=com.authy.authy artifact=com.authy.authy.apk collectedBytes= 12069505 / 12069505
+09-22 22:23:49.290  2720  2720 I Finsky:background: [1] RF: Group=com.authy.authy totalBytesDownloaded= 12106598 / 12106598 for 2 artifacts
+09-22 22:23:49.290  2383  2383 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1698 android.content.ContextWrapper.startService:669 android.content.ContextWrapper.startService:669 com.android.settings.applications.BlackListReceiver.onReceive:48 android.app.ActivityThread.handleReceiver:4637 
+09-22 22:23:49.291  5984  6150 I fwkit_ShareLibManager: [fwkit ClassLoaderManager.java:109] kitUid: mlkit_30700301, mClassLoaderPath:/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.mlkit.service/30700301/com.huawei.hms.mlkit.service.apk, sharePath: []
+09-22 22:23:49.291  5984  6150 W hwid.container: Unsupported class loader
+09-22 22:23:49.294  2720  2781 I Finsky:background: [2987] RF: starting postprocessing for com.authy.authy.apk
+09-22 22:23:49.294  2720  2781 I Finsky:background: [2987] RF::PP-Patch: starting to apply patch for com.authy.authy[iid:5823] [isid:u0LKfJLQT0i1iyrW5nfDQA] [tid: 1000006046].
+09-22 22:23:49.294  2720  2781 I Finsky:background: [2987] IV2::PP: Get source file from installed app for com.authy.authy.apk
+09-22 22:23:49.295  2383  2383 W BlockListService: settings app is pulled up, onCreate is called
+09-22 22:23:49.295  1710  3714 E PackageInstallerSession_JNI: TurboZone nativeGetTzFreeBlocks fail
+09-22 22:23:49.295  3249  4376 W fwkit_kpms_depChecker: [fwkit DependencySearcher.java:16] search dependency kitList is empty.
+09-22 22:23:49.295  1710  3714 D TurboZone: TurboZone: freeBlocksBytes 0 freeBlocks 0 apklengthBytes 64875884
+09-22 22:23:49.295  1710  3714 E TurboZone: TurboZone: No enough space when move apk! 
+09-22 22:23:49.295  3249  4376 I fwkit_kpms_depChecker: [fwkit DependencyChecker.java:99] Missing dependent pkg is []
+09-22 22:23:49.295  3249  4376 I fwkit_kpms_depChecker: [fwkit DependencyChecker.java:119] Collect dependent pkg is []
+09-22 22:23:49.295  3249  4376 I fwkit_kmds_sc: [fwkit KMDSServiceController.java:189] getDependencyByKit,,depMap:{}
+09-22 22:23:49.295  3249  4376 E fwkit_kmds_sc: [fwkit KMDSServiceController.java:16] convertMapToList pkgsMap error.
+09-22 22:23:49.296  5984  6212 E fwkit_kitstore_PackageAdde: queryDependAndCheckUpgradeByApk is null or empty
+09-22 22:23:49.297  1710  3714 I PackageManager: getInstalledApplications cost 1 ms, flags: 8192, userId: 0, callingUid: 1000, callingPid: 1710
+09-22 22:23:49.297  1710  1919 I ActivityManager: App 10099/com.google.android.apps.photos targets O+, restricted
+09-22 22:23:49.297  1710  1919 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.google.android.apps.photos/.account.full.FetchAccountPropertiesAppUpgradeBroadcastReceiver
+09-22 22:23:49.297  1710  1919 I ActivityManager: App 10099/com.google.android.apps.photos targets O+, restricted
+09-22 22:23:49.297  1710  1919 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.google.android.apps.photos/.account.full.SyncAccountsForLoginBroadcastReceiver
+09-22 22:23:49.298  1710  1919 I ActivityManager: App 10099/com.google.android.apps.photos targets O+, restricted
+09-22 22:23:49.298  1710  1919 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.blizzard.arc flg=0x4000010 (has extras) } to com.google.android.apps.photos/.notificationchannels.AppUpdateBroadcastReceiver
+09-22 22:23:49.300  5984  6150 W hwid.container: Skipping duplicate class check due to unsupported classloader
+09-22 22:23:49.302  5984  6150 I fwkit_CLUtils: [fwkit ClsLoaderUtils.java:119] New dloader com.huawei.hms.mlkit.service.apk,cost:11
+09-22 22:23:49.302  5984  6150 I fwkit_ShareLib: [fwkit ClassLoaderManager.java:295] classLoader: dalvik.system.DexClassLoader[DexPathList[[zip file "/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.mlkit.service/30700301/com.huawei.hms.mlkit.service.apk"],nativeLibraryDirectories=[/data/user_de/0/com.huawei.hwid/files/kits/com.huawei.hms.mlkit.service/30700301/lib, /system/lib64, /hw_product/lib64, /system/product/lib64, /prets/lib64]]]
+09-22 22:23:49.303  2383  2383 W BlockListService: settings app is pulled up, onDestroy is called
+09-22 22:23:49.304  5984  6150 I fwkit_kac_kitloader: [fwkit KitLoaderManager.java:355] kit loaded:mlkit_30700301, cost :19 ms
+09-22 22:23:49.305  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:56] getSplitPath application.packageName = com.huawei.hms.mlkit.service
+09-22 22:23:49.305  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:76] getSplitPath dirs == null || dirs.length == 0
+09-22 22:23:49.305  5984  5984 I fwkit_kac_dynamic_loader: [fwkit SplitCompat.java:77] dynamicInstall no splitPaths
+09-22 22:23:49.309  2720  2781 I Finsky:background: [2987] SCH: no pending jobs to schedule.
+09-22 22:23:49.311  5984  6150 I fwkit_kac_kitloader: [fwkit KitLoaderManager.java:133] kit loaded kitstore_61500301 already exits, cost :0 ms
+09-22 22:23:49.312  3249  4376 W fwkit_kims: [fwkit KIMSServiceController.java:61] Can't find the specific package.
+09-22 22:23:49.312  3249  4376 W fwkit_kims: [fwkit KIMSServiceController.java:62] getApplicationInfo: com.blizzard.arc null.
+09-22 22:23:49.313  3249  4887 W fwkit_kims: [fwkit KIMSServiceController.java:71] no KitInfoEntity by package name: com.blizzard.arc
+09-22 22:23:49.313  2720  5907 I Finsky:background: [3088] SCH: job service finished with id 10189.
+09-22 22:23:49.313  3249  4887 E fwkit_kpmsCoreBinder: [fwkit KPmsCoreBinder.java:22] getInstalledPlugin kitInfo is invalid
+09-22 22:23:49.315  1710  3437 I PackageManager: getInstalledPackages cost 2 ms, flags: 786432, userId: 0, callingUid: 10112, callingPid: 4546
+09-22 22:23:49.316  5984  5984 I MLKitBroadcastReceiver: packageName = com.blizzard.arc, dependency = 
+09-22 22:23:49.317  5984  6212 I fwkit_kitstore_PackageAdde: Package:com.blizzard.arc added or updated
+09-22 22:23:49.317  5984  6212 I fwkit_kpms_apppkg: [fwkit KitPackageManagerImpl.java:5]  queryDependAndCheckUpgradeByKit
+09-22 22:23:49.320  3249  4376 W fwkit_kpms_parser: [fwkit ApkParser.java:24] Parse callerPkg dependency failed, dependencies is null.
+09-22 22:23:49.321  2720  5674 I Finsky:background: [3035] IV2: onTaskProgress com.authy.authy[iid:5823] [isid:u0LKfJLQT0i1iyrW5nfDQA] status:RESOURCE_FETCH_PROGRESS, size: 12106598/12106598
+09-22 22:23:49.321  2720  2783 I Finsky:background: [2989] SCH: no pending jobs to schedule.
+09-22 22:23:49.322  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:49.326 19234 19927 I NK_InterceptorExecutor: CORE_THREAD_POOL-1|embedded.p2|409|response code:200
+09-22 22:23:49.326 19234  6203 I NK_Netdiag: CORE_THREAD_POOL-1 ->NK_netdiag_13|netdiag.tools.NetDetectAndPolicy|1|the time count will reset!
+09-22 22:23:49.331  1710  6552 I JobScheduler: APP response end time, Completed JobStatus{6ed89d3 #u0a116/10189 com.android.vending/com.google.android.finsky.scheduler.process.backgroundimpl.PhoneskyJobServiceBackground u=0 s=10116 TIME=none:-1m33s958ms READY}, reschedule=false
+09-22 22:23:49.333  2720  5907 I Finsky:background: [3088] SCH: job service finished with id 10188.
+09-22 22:23:49.333  1710  2539 W ProcBatteryStats: timer is not running , not stop, name: , uid: 10116, tag: *job*/com.android.vending/com.google.android.finsky.scheduler.process.backgroundimpl.PhoneskyJobServiceBackground
+09-22 22:23:49.333   739   739 I AudioModuleManager: [AudioModuleGetParameters:71]: list size: 12
+09-22 22:23:49.334   739   739 I audio_hw_usbaudio_hw: [get_typec_parameters:587]: check show hires (false)
+09-22 22:23:49.334  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:49.335  1710  2539 I JobScheduler: APP response end time, Completed JobStatus{9831137 #u0a116/10188 com.android.vending/com.google.android.finsky.scheduler.process.backgroundimpl.PhoneskyJobServiceBackground u=0 s=10116 TIME=none:+23h58m25s697ms NET READY}, reschedule=false
+09-22 22:23:49.335  1710  2134 I HwAudioServiceEx: HwAudioHandlerEx receive unknown msg
+09-22 22:23:49.337  2720  5163 I Finsky:background: [3033] IQ: Notifying installation update. [Package:com.authy.authy, isid:u0LKfJLQT0i1iyrW5nfDQA], status=DOWNLOADING, status_code=0, reason=auto_update, tsc=PT1H1M42.839S, attempt=0
+09-22 22:23:49.343  1710  2780 V BroadcastQueue: Finished with ordered broadcast BroadcastRecord{c5c9602 u0 android.intent.action.PACKAGE_REPLACED}
+09-22 22:23:49.345  1710  9104 E WifiPermissionsUtil: getUidPermission is DENIED and permissionType android.permission.ACCESS_FINE_LOCATIONuid 10029
+09-22 22:23:49.345  1710  9104 E WifiService: enforceCanAccessScanResults: hiding ssid and bssidUID 10029 has no location permission
+09-22 22:23:49.349  2720  5868 I Finsky:background: [3076] DU: Stored data usage stats for package com.authy.authy; completed bytes: 12069505.
+09-22 22:23:49.350  2720  5674 I Finsky:background: [3035] IV2: onTaskProgress com.authy.authy[iid:5823] [isid:u0LKfJLQT0i1iyrW5nfDQA] status:RESOURCE_FETCH_PROGRESS, size: 12106598/12106598
+09-22 22:23:49.350 19234 19927 I FormalHASDK: HAImpl==> onEvent. tag:_default_config_tag, type:1, eventId:907112013
+09-22 22:23:49.352 19234 19282 W HiApp.ChnM/ReferrerImpl: main{1} saveAttribution: attribution and adsAttribution is empty. or packageName is empty.
+09-22 22:23:49.354  3249  4376 W fwkit_kpms_depChecker: [fwkit DependencySearcher.java:16] search dependency kitList is empty.
+09-22 22:23:49.354  3249  4376 I fwkit_kpms_depChecker: [fwkit DependencyChecker.java:99] Missing dependent pkg is []
+09-22 22:23:49.354  3249  4376 I fwkit_kpms_depChecker: [fwkit DependencyChecker.java:119] Collect dependent pkg is []
+09-22 22:23:49.354  3249  4376 I fwkit_kmds_sc: [fwkit KMDSServiceController.java:189] getDependencyByKit,,depMap:{}
+09-22 22:23:49.354  3249  4376 E fwkit_kmds_sc: [fwkit KMDSServiceController.java:16] convertMapToList pkgsMap error.
+09-22 22:23:49.355  5984  6212 E fwkit_kitstore_PackageAdde: queryDependAndCheckUpgradeByApk is null or empty
+09-22 22:23:49.356  2720  2720 I Finsky:background: [1] PIM: Ignore install package event for: com.authy.authy, isid: u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:49.357  2720  5163 I Finsky:background: [3033] IQ: Notifying installation update. [Package:com.authy.authy, isid:u0LKfJLQT0i1iyrW5nfDQA], status=DOWNLOADING, status_code=0, reason=auto_update, tsc=PT1H1M42.859S, attempt=0
+09-22 22:23:49.358  4546 26033 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=null serviceId=30
+09-22 22:23:49.365  1710  1828 I UsageStatsService: User[0] Results: 24
+09-22 22:23:49.370  2720  2720 I Finsky:background: [1] PIM: Ignore install package event for: com.authy.authy, isid: u0LKfJLQT0i1iyrW5nfDQA
+09-22 22:23:49.381  4546  5691 I Icing   : Usage reports ok 3, Failed Usage reports 0, indexed 0, rejected 0
+09-22 22:23:49.398  4546  5691 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0
+09-22 22:23:49.409  1710  2104 I WificondControl: Noise: -84, Snr: 39, Chload: 19, rssi: -29, txBitrate: 866, rxBitrate: 585, frequency: 5220, UlDelay: -1, currentTxBytes: 20853141, currentTxPackets: 109838, currentTxFailed: 0, currentRxBytes: -1283690609, currentRxPackets: 235697
+09-22 22:23:49.410  1710  2104 V HwWifiServiceFactory: get AllImpl object = com.android.server.wifi.HwWifiServiceFactoryImpl@b9b5ede
+09-22 22:23:49.418  4546  5691 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+09-22 22:23:49.429  2460  2540 W HSM_BG-11.1.1.361: NormalTrafficAnalysis:Alert byte is 0, so return
+09-22 22:23:49.431  4546  5691 I Icing   : Indexing done com.google.android.gms-apps
+09-22 22:23:49.431  4546  5691 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+09-22 22:23:49.432  4546  5691 I Icing   : Indexing done com.google.android.gms-apps
+09-22 22:23:49.434  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:49.449  4546  5691 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+09-22 22:23:49.452  4546  5691 I Icing   : Indexing done com.google.android.gms-apps
+09-22 22:23:49.448  1710  1933 I chatty  : uid=1000(system) PowerManagerSer identical 3 lines
+09-22 22:23:49.453  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:49.473  1710  1710 W Looper  : Slow dispatch took 1915ms main h=android.app.ActivityThread$H c=android.app.-$$Lambda$LoadedApk$ReceiverDispatcher$Args$_BumDX2UKsnxLVrE6UJsJZkotuA@8ddd42d m=0
+09-22 22:23:49.474  1710  1710 D HwConnectivityManagerImpl: getNetworkPolicyFlag flagStr null
+09-22 22:23:49.474  1710  1710 W Looper  : Slow delivery took 1916ms main h=android.app.ActivityThread$H c=android.app.-$$Lambda$LoadedApk$ReceiverDispatcher$Args$_BumDX2UKsnxLVrE6UJsJZkotuA@4e73d62 m=0
+09-22 22:23:49.474  1710  1710 I chatty  : uid=1000 system_server identical 1 line
+09-22 22:23:49.474  1710  1710 D HwConnectivityManagerImpl: getNetworkPolicyFlag flagStr null
+09-22 22:23:49.475  1710  1710 D HwBastetService: BroadcastReceiver android.intent.action.PACKAGE_ADDED
+09-22 22:23:49.475  1008  1035 I bastetd : [IBastetService ] onTransact# BnBastetService::onTransact, code=29, flags=17
+09-22 22:23:49.475  1710  5933 I SecurityProfileUtils: Single watcher thread pool and queue is full.
+09-22 22:23:49.476  1710  5933 W SecurityProfileService: Policy not found: getPolicy err for SignatureInvalidException
+09-22 22:23:49.476  1710  5933 I SecurityProfileUtils: Single watcher thread pool and queue is full.
+09-22 22:23:49.476  1710  5933 E SecurityProfileService: Missing state handler for NoScreenRecording
+09-22 22:23:49.476  1710  5933 E SecurityProfileService: Missing state handler for StopScreenRecording
+09-22 22:23:49.476  1710  5933 E SecurityProfileService: Missing state handler for NoScreenRecording
+09-22 22:23:49.597  2588  4146 I Booster_Qoe: AdaBoostPredict rlt,index:6,NisPsSlow:0,NProba:285,rsrp(rssi):-40,rsrq(noise):-84,rtt(chload):19,buffhigh(uldelay):0,buffcomm(rtt):0
+09-22 22:23:49.598  2588  4146 I Booster_Qoe: AdaBoostPredict rlt,index:2,NisPsSlow:0,NProba:285,rsrp(rssi):-40,rsrq(noise):-84,rtt(chload):19,buffhigh(uldelay):0,buffcomm(rtt):76
+09-22 22:23:49.598  2588  2822 I NetworkQoeProxy: channelId:2 upRate:124, downRate319258
+09-22 22:23:49.598  2588  4146 I Collector: HandleRawWifiInfo: flag:0, netId:0!
+09-22 22:23:49.598  2588  2822 D NpdcpAliveManager: ro.odm.npdcp_alive_cfg_enable is false
+09-22 22:23:49.599  2588  3857 I Hicom_Monitor: handleNetworkQoeReport. foregroundAppTcpRtt: 0, maxRatioChannelId: 2
+09-22 22:23:49.599  2588  3857 I Hicom_Monitor: handleNetworkQoeReport. qoeString: 10983,4,0,285,1,2,4,0,285,866700,585000,10,10,0,124,319258,0
+09-22 22:23:49.599  1710  2201 I WiFi_PRO_WifiProStateMachine: APP_SERVICE_QOE_NOTIFY Qoe info 10983,4,0,285,1,2,4,0,285,866700,585000,10,10,0,124,319258,0 CID 2 mMasterWifiRssi -29 mMasterCardAmbr 1048576 mSlaveCardAmbr 1048576
+09-22 22:23:49.599  1710  2201 I HwWifiProServiceProxy: ctrlHwWifiNetwork pkgName: WIFIPRO_SERVICE interfaceId: 9
+09-22 22:23:49.599  1710  2201 I WiFi_PRO_WifiProStateMachine: isWifi2WifiProcess = false, mIsNeedIgnoreQoeUpdate = false, mIsAppInBlacklist = false, mIsAppInBlacklistFullScreen = false, mIsWiFiNoInternet false, screen on = true, full screen = false, isLandscapeMode = false, mNotifyWifiLinkPoorReason = -1
+09-22 22:23:49.599  1710  2201 I WiFi_PRO_WifiProStateMachine: ignore app qoe info update, because current wifi link rate is good
+09-22 22:23:49.626  4154  5930 I HiAdKit.Response.Net:  setNetDuration1 537
+09-22 22:23:49.627  4154  5930 I HiAdKit.Response.Net:  setNetDuration2 538
+09-22 22:23:49.627  4154  5930 I HiAdKit.Response.Net:  setDataConverterCost 0
+09-22 22:23:49.627  4154  5998 W HiAdKit.bx.Cal:  Root obj class (class java.lang.String) is invalid in conversion
+09-22 22:23:49.627  4154  5998 W HiAdKit.bx.Cal:  toAnonymousJson JSONException
+09-22 22:23:49.627  4154  5998 I HiAdKit.HiAdResponseDataLogger.Cal:  upper thread name: PPS-Net-pool-thread-67 response data:  
+09-22 22:23:49.629  4154  5930 I HiAdKit.OkHttpCaller.Net:  end request
+09-22 22:23:49.629  4154  5930 I HiAdKit.HttpCall.Net:  response http code: 200
+09-22 22:23:49.633  3249  6191 I HiAdKit.DC.AIDCP:  query cache app data count after report:0
+09-22 22:23:49.637  3249  5809 I HiAdKit.DC.AnalysisReport:  createAnalysisInfo enable: true
+09-22 22:23:49.639  3249  5809 I HiAdKit.DC.NetworkUtil:  multicard device
+09-22 22:23:49.643  3249  5809 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.643  3249  5809 I HiAdKit.DC.SystemUtil:  hasPermissions true
+09-22 22:23:49.643  3249  6183 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.643  3249  5809 I HiAdKit.DC.SystemUtil:  hasPermissions true
+09-22 22:23:49.644  3249  6183 I HiAdKit.DC.PpsOpenDevicePreference:  getOaidMode: 0
+09-22 22:23:49.644  3249  5809 I HiAdKit.DC.EventProcessor:  create event, type is : exception AnalysisInfo{analysisType='173', adType=-1}
+09-22 22:23:49.644  3249  5809 I HiAdKit.DC.AnalysisEventReporter:  addEventToCache, event:exception showId:null reqId:null, contentId:null
+09-22 22:23:49.645  3249  5811 E fwkit_kims: [fwkit KIMSServiceController.java:49] No match IFE for:com.google.android.gms.ads.identifier.service.START
+09-22 22:23:49.645  3249  5811 I fwkit_kac_context: [fwkit KitContext.java:51] Can not find match intent, may be not a kit component.
+09-22 22:23:49.687  1710  1710 W Looper  : Slow dispatch took 212ms main h=android.app.ActivityThread$H c=android.app.-$$Lambda$LoadedApk$ReceiverDispatcher$Args$_BumDX2UKsnxLVrE6UJsJZkotuA@6b466c3 m=0
+09-22 22:23:49.688  1040  1100 D AwareLog: iawared: WorkingsetProcessCommand subCmd = 355, userId=10967, pid=0, com.blizzard.arc
+09-22 22:23:49.688  1040  1100 D AwareLog: iawared: WorkingsetSendClearMsg com.blizzard.arc
+09-22 22:23:49.688  1040  1120 E AwareLog: iawared: WorkingsetPathCheckInternal Failed to lstat(/data/system/iaware/workingset/com.blizzard.arc/): 2
+09-22 22:23:49.688  1040  1120 E AwareLog: iawared: WorkingsetPathCheck Failed to delete directory(/data/system/iaware/workingset/com.blizzard.arc/): 2
+09-22 22:23:49.691  1710  1710 I PackageManager: getInstalledPackages cost 4 ms, flags: 135004160, userId: 0, callingUid: 1000, callingPid: 1710
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: e1f8248 #u0a129/-148 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: e1f8248 #u0a129/-148 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: c791af5 #u0a129/-446 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: c791af5 #u0a129/-446 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 98faacf #u0a129/-350 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 7b6b3ad #u0a129/-462 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 68d7171 #u0a129/-128 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 68d7171 #u0a129/-128 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 59f97d7 #u0a129/-480 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 59f97d7 #u0a129/-480 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 50b302c #u0a129/-484 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 50b302c #u0a129/-484 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 4c986fb #u0a129/-202 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 4c986fb #u0a129/-202 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 42024c7 #u0a129/-406 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 42024c7 #u0a129/-406 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 4154d32 #u0a129/-358 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 4154d32 #u0a129/-358 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 350fc5c #u0a129/-352 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 350fc5c #u0a129/-352 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 29d3d30 #u0a129/-256 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 29d3d30 #u0a129/-256 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 21af03a #u0a129/-324 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 18624eb #u0a129/-486 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.703  1710  1710 I JobScheduler: isComponentUsable: 18624eb #u0a129/-486 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.704  1710  1710 I JobScheduler: isComponentUsable: 12feb56 #u0a129/-370 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.704  1710  1710 I JobScheduler: isComponentUsable: 12feb56 #u0a129/-370 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.704  1710  1710 I JobScheduler: isComponentUsable: 2e7439 #u0a129/-362 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.704  1710  1710 I JobScheduler: Ready to Be Executed: 94bbc9f #u0a116/10171 com.android.vending/com.google.android.finsky.scheduler.process.backgroundimpl.PhoneskyJobServiceBackground pending=false active=true
+09-22 22:23:49.704  1710  1710 I JobScheduler: isComponentUsable: 5f47bf2 #1001/10 com.huawei.hwvoipservice/.statistical.EventHandler$UploadStaticsJob component not present
+09-22 22:23:49.706  1710  5933 D SecurityProfile_Permission: Abroad area do not show policy.
+09-22 22:23:49.704  1710  1710 I JobScheduler: isComponentUsable: 5f47bf2 #1001/10 com.huawei.hwvoipservice/.statistical.EventHandler$UploadStaticsJob component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: e1f8248 #u0a129/-148 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: e1f8248 #u0a129/-148 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: c791af5 #u0a129/-446 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: c791af5 #u0a129/-446 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 98faacf #u0a129/-350 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 7b6b3ad #u0a129/-462 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 68d7171 #u0a129/-128 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 68d7171 #u0a129/-128 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 59f97d7 #u0a129/-480 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 59f97d7 #u0a129/-480 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 50b302c #u0a129/-484 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 50b302c #u0a129/-484 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 4c986fb #u0a129/-202 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 4c986fb #u0a129/-202 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 42024c7 #u0a129/-406 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 42024c7 #u0a129/-406 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 4154d32 #u0a129/-358 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.710  1710  1710 I JobScheduler: isComponentUsable: 4154d32 #u0a129/-358 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 350fc5c #u0a129/-352 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 350fc5c #u0a129/-352 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 29d3d30 #u0a129/-256 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 29d3d30 #u0a129/-256 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 21af03a #u0a129/-324 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 18624eb #u0a129/-486 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 18624eb #u0a129/-486 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 12feb56 #u0a129/-370 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 12feb56 #u0a129/-370 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: isComponentUsable: 2e7439 #u0a129/-362 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.711  1710  1710 I JobScheduler: Ready to Be Executed: 94bbc9f #u0a116/10171 com.android.vending/com.google.android.finsky.scheduler.process.backgroundimpl.PhoneskyJobServiceBackground pending=false active=true
+09-22 22:23:49.712  1710  1710 I JobScheduler: isComponentUsable: 5f47bf2 #1001/10 com.huawei.hwvoipservice/.statistical.EventHandler$UploadStaticsJob component not present
+09-22 22:23:49.712  1710  1710 I JobScheduler: isComponentUsable: 5f47bf2 #1001/10 com.huawei.hwvoipservice/.statistical.EventHandler$UploadStaticsJob component not present
+09-22 22:23:49.713  1710  1710 I JobScheduler: isComponentUsable: e1f8248 #u0a129/-148 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.713  1710  1710 I JobScheduler: isComponentUsable: e1f8248 #u0a129/-148 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.713  1710  1710 I JobScheduler: isComponentUsable: c791af5 #u0a129/-446 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.713  1710  1710 I JobScheduler: isComponentUsable: c791af5 #u0a129/-446 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.713  1710  1710 I JobScheduler: isComponentUsable: 98faacf #u0a129/-350 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.713  1710  1710 I JobScheduler: isComponentUsable: 7b6b3ad #u0a129/-462 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 68d7171 #u0a129/-128 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 68d7171 #u0a129/-128 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 59f97d7 #u0a129/-480 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 59f97d7 #u0a129/-480 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 50b302c #u0a129/-484 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 50b302c #u0a129/-484 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 4c986fb #u0a129/-202 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 4c986fb #u0a129/-202 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 42024c7 #u0a129/-406 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 42024c7 #u0a129/-406 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 4154d32 #u0a129/-358 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 4154d32 #u0a129/-358 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 350fc5c #u0a129/-352 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 350fc5c #u0a129/-352 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 29d3d30 #u0a129/-256 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 29d3d30 #u0a129/-256 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 21af03a #u0a129/-324 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 18624eb #u0a129/-486 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 18624eb #u0a129/-486 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 12feb56 #u0a129/-370 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.714  1710  1710 I JobScheduler: isComponentUsable: 12feb56 #u0a129/-370 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.715  1710  1710 I JobScheduler: isComponentUsable: 2e7439 #u0a129/-362 com.google.android.googlequicksearchbox/com.google.android.apps.gsa.tasks.BackgroundTasksJobService component not present
+09-22 22:23:49.715  1710  1710 I JobScheduler: Ready to Be Executed: 94bbc9f #u0a116/10171 com.android.vending/com.google.android.finsky.scheduler.process.backgroundimpl.PhoneskyJobServiceBackground pending=false active=true
+09-22 22:23:49.716  1710  1710 I JobScheduler: isComponentUsable: 5f47bf2 #1001/10 com.huawei.hwvoipservice/.statistical.EventHandler$UploadStaticsJob component not present
+09-22 22:23:49.717  1710  5933 D SecurityProfile_Permission: Abroad area do not show policy.
+09-22 22:23:49.723 31633 31633 I HwLauncher: Model onPackageChanged userAppPackage:Package:com.blizzard.arc,User:UserHandle{0},IsClone:false
+09-22 22:23:49.716  1710  1710 I JobScheduler: isComponentUsable: 5f47bf2 #1001/10 com.huawei.hwvoipservice/.statistical.EventHandler$UploadStaticsJob component not present
+09-22 22:23:49.724  1710  1916 I RoleUserState: Wrote roles.xml successfully
+09-22 22:23:49.724  1710  1916 I HWMW_HwMagicWindowManagerService: case Utils.MSG_INSTALL_APP_CONFIG
+09-22 22:23:49.725  1710  1916 I NetworkPolicy: upPwResUL:10225,idle:0,resPw:0,dIdle:0,fg=1,white=0,old=32,new=0,newUid=0,oldUid=32,resBg=0
+09-22 22:23:49.725  1710  1710 W Looper  : Drained
+09-22 22:23:49.727 31633 31633 I HwLauncher: PowerSaveLauncherModel onPackageChanged:Package:com.blizzard.arc,User:UserHandle{0},IsClone:false
+09-22 22:23:49.727 31633 31633 E HwLauncher: PowerSaveLauncherModel onPackageChanged: not inPowerSaveLauncher 
+09-22 22:23:49.727 31633 31633 I HwLauncher: StreetModeLauncherModel onPackageChanged:Package:com.blizzard.arc,User:UserHandle{0},IsClone:false
+09-22 22:23:49.727 31633 31633 E HwLauncher: StreetModeLauncherModel onPackageChanged: not inStreetModeLauncher 
+09-22 22:23:49.727 31633 31681 I HwResourcesImpl: remove icon, packageName = com.blizzard.arc
+09-22 22:23:49.733 31633 31681 I Icon_Cache: add:2131558400#com.blizzard.arc
+09-22 22:23:49.891  1710  2100 I NetworkStats: performPollLocked, pid = 1710
+09-22 22:23:49.891  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:49.913   679  1353 I netd    : trafficSwapActiveStatsMap() <20.68ms>
+09-22 22:23:49.916   679  1353 I netd    : tetherGetStats() <1.31ms>
+09-22 22:23:49.919  1710  2100 I HwNetworkStatsServiceEx: hwRecordUidAndProcSnapshotLocked currentTime = 1758569029897
+09-22 22:23:49.932  1710  2103 I TrafficMonitor: update:rxPkts:2217,txPkts:276,rxBytes:2780553,txBytes:26025
+09-22 22:23:49.932  1710  2103 I TrafficMonitor: gettimer:interval=2000
+09-22 22:23:49.937  1710  2100 I HwNetworkManagementService: request swap success.
+09-22 22:23:49.943  1710  2100 I NetworkStatsCollection: getSummary, uid = 1000stats size = 2
+09-22 22:23:49.943  1710  2100 I NetworkStatsCollection: getSummary, uid = 1000stats size = 2
+09-22 22:23:49.943  1710  2100 I NetworkStatsCollection: getSummary, uid = 1000stats size = 109
+09-22 22:23:49.943  1710  2100 I NetworkStatsCollection: getSummary, uid = 1000stats size = 2
+09-22 22:23:49.943  1710  2100 I NetworkStatsCollection: getSummary, uid = 1000stats size = 2
+09-22 22:23:49.943  1710  2100 I NetworkStatsCollection: getSummary, uid = 1000stats size = 109
+09-22 22:23:49.945  1710  1933 I PowerManagerService: handleSandman: wakefulness: 1,startDreaming: false
+09-22 22:23:49.945   679  1353 I netd    : bandwidthSetGlobalAlert(2097152) <0.38ms>
+09-22 22:23:49.953  2460  2784 W HSM_BG-11.1.1.361: NormalTrafficAnalysis:Alert byte is 0, so return
+09-22 22:23:49.957  2916  6726 I HwSearchService: [IndexServiceGuarderHandler]: IndexRAMMonitor: 25MB ram is used
+09-22 22:23:49.966   766   766 D AudioPolicyService: getUidState(10225) cacheIter->second.first, return cacheIter->second.second(6)
+09-22 22:23:49.966   766   766 D AudioPolicyService: getUidState(10029) cacheIter->second.first, return cacheIter->second.second(6)
+09-22 22:23:50.606    53    53 W migration/7: type=1400 audit(0.0:32383): avc: granted { setsched } for pid=53 scontext=u:r:kernel:s0 tcontext=u:r:kernel:s0 tclass=process
+09-22 22:23:50.630  2588  4146 I Booster_Qoe: AdaBoostPredict rlt,index:6,NisPsSlow:0,NProba:315,rsrp(rssi):-40,rsrq(noise):-78,rtt(chload):37,buffhigh(uldelay):0,buffcomm(rtt):0
+09-22 22:23:50.630  2588  4146 I Booster_Qoe: AdaBoostPredict rlt,index:2,NisPsSlow:0,NProba:315,rsrp(rssi):-40,rsrq(noise):-78,rtt(chload):37,buffhigh(uldelay):0,buffcomm(rtt):73
+09-22 22:23:50.630  2588  4146 I Collector: HandleRawWifiInfo: flag:0, netId:0!
+09-22 22:23:50.630  2588  2822 I NetworkQoeProxy: channelId:2 upRate:184, downRate333547
+09-22 22:23:50.632  2588  2822 D NpdcpAliveManager: ro.odm.npdcp_alive_cfg_enable is false
+09-22 22:23:50.632  2588  3857 I Hicom_Monitor: handleNetworkQoeReport. foregroundAppTcpRtt: 0, maxRatioChannelId: 2
+09-22 22:23:50.632  2588  3857 I Hicom_Monitor: handleNetworkQoeReport. qoeString: 10983,4,0,315,1,2,4,0,315,866700,780000,10,10,0,184,333547,0
+09-22 22:23:50.632  1710  2201 I WiFi_PRO_WifiProStateMachine: APP_SERVICE_QOE_NOTIFY Qoe info 10983,4,0,315,1,2,4,0,315,866700,780000,10,10,0,184,333547,0 CID 2 mMasterWifiRssi -30 mMasterCardAmbr 1048576 mSlaveCardAmbr 1048576
+09-22 22:23:50.633  1710  2201 I HwWifiProServiceProxy: ctrlHwWifiNetwork pkgName: WIFIPRO_SERVICE interfaceId: 9
+09-22 22:23:50.633  1710  2201 I WiFi_PRO_WifiProStateMachine: isWifi2WifiProcess = false, mIsNeedIgnoreQoeUpdate = false, mIsAppInBlacklist = false, mIsAppInBlacklistFullScreen = false, mIsWiFiNoInternet false, screen on = true, full screen = false, isLandscapeMode = false, mNotifyWifiLinkPoorReason = -1
+09-22 22:23:50.633  1710  2201 I WiFi_PRO_WifiProStateMachine: ignore app qoe info update, because current wifi link rate is good
+09-22 22:23:50.928  1710  2103 I TrafficMonitor: expired arrive. level:-1
+09-22 22:23:50.928  1710  2103 I TrafficMonitor: during_ms:2003,period_ms:2000
+09-22 22:23:50.928  1710  2103 I TrafficMonitor: count:414,rx_sum:2217,tx_sum:276,rxBytes:2780553,during_ms:2003,rx_speed:1388194.2086869695,tx_speed:12993.01048427359,rto:8.032608695652174
+09-22 22:23:50.929  1710  2103 I HuaweiWifiWatchdogStateMachine: Get speed information rx_speed = 1388194 ,tx_speed = 12993 ,isSpeedOk = true ,mBestSpeedInPeriod = 1388194
+09-22 22:23:51.486  1034  1034 E Thermal-daemon:hw_thermal: [shell_frame] tempNew :34  tempOld :33
+09-22 22:23:51.487  1034  1034 E Thermal-daemon:hw_thermal: Report temperature: [shell_frame] temp :34  reportThreshold:1
+09-22 22:23:51.488  1034  1034 E Thermal-daemon:hw_thermal: [ap] tempNew :37  tempOld :36
+09-22 22:23:51.488  1034  1034 E Thermal-daemon:hw_thermal: Report temperature: [ap] temp :37  reportThreshold:1
+09-22 22:23:51.490  2715  3875 I ThermalTraceService: code:1, appInfo:com.x699tomas.warrilomobile#10000, levelInfo:0,warm_system_h,2

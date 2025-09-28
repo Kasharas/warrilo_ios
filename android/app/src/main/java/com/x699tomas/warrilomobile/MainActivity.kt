@@ -1,4 +1,4 @@
-package com.warrilo.mobile
+package com.x699tomas.warrilomobile
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

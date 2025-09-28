@@ -1,0 +1,44 @@
+C:\warrilo-mobile\android\log_oauth_return2.txt:99:09-22 22:28:10.399 10048 10081 I ReactNativeJS: === GOOGLE LOGIN DEBUG START ===
+C:\warrilo-mobile\android\log_oauth_return2.txt:101:09-22 22:28:10.399 10048 10081 I ReactNativeJS: 1. Button clicked, using auth system...
+C:\warrilo-mobile\android\log_oauth_return2.txt:102:09-22 22:28:10.400 10048 10081 I ReactNativeJS: '2. Current auth state:', { loading: false, error: null }
+C:\warrilo-mobile\android\log_oauth_return2.txt:103:09-22 22:28:10.400 10048 10081 I ReactNativeJS: 3. Calling signInWithGoogle function...
+C:\warrilo-mobile\android\log_oauth_return2.txt:104:09-22 22:28:10.400 10048 10081 I ReactNativeJS: === GOOGLE SIGN-IN WITH REACT NATIVE GOOGLE SIGNIN ===
+C:\warrilo-mobile\android\log_oauth_return2.txt:105:09-22 22:28:10.400 10048 10081 I ReactNativeJS: 'Platform detected:', 'android'
+C:\warrilo-mobile\android\log_oauth_return2.txt:106:09-22 22:28:10.400 10048 10081 I ReactNativeJS: Mobile: Using OAuth with deep linking...
+C:\warrilo-mobile\android\log_oauth_return2.txt:107:09-22 22:28:10.428 10048 10081 W ReactNativeJS: WebCrypto API is not supported. Code challenge method will default to use plain instead of sha256.
+C:\warrilo-mobile\android\log_oauth_return2.txt:108:09-22 22:28:10.432 10048 10081 I ReactNativeJS: '‘£‡ Mobile OAuth initiated, opening browser URL:', 'https://bykxbhibrfgrdjnvtlaj.supabase.co/auth/v1/authorize?provider=google&redirect_to=warrilo%3A%2F%2Fauth-callback&code_challenge=RyiVt9Px9SJeWFeqeuIRwV0ijf_PR.Ix%7EI-GVfrX2nlGTftquxMAS2-c&code_challenge_method=plain&access_type=offline&prompt=consent'
+C:\warrilo-mobile\android\log_oauth_return2.txt:128:09-22 22:28:10.469 10048 10081 I ReactNativeJS: 4. OAuth flow started successfully - redirecting to Google...
+C:\warrilo-mobile\android\log_oauth_return2.txt:129:09-22 22:28:10.469 10048 10081 I ReactNativeJS: 5. User should see Google account selection page now
+C:\warrilo-mobile\android\log_oauth_return2.txt:130:09-22 22:28:10.469 10048 10081 I ReactNativeJS: === GOOGLE LOGIN DEBUG END ===
+C:\warrilo-mobile\android\log_oauth_return2.txt:1105:09-22 22:28:15.827 10048 10081 I ReactNativeJS: '≠ÉÙ¶ Deep link received:', 'warrilo://auth-callback?code=36272d17-06dd-4968-899c-66751e646a0f'
+C:\warrilo-mobile\android\log_oauth_return2.txt:1106:09-22 22:28:15.827 10048 10081 I ReactNativeJS: ≠Éˆ‰ Routing to auth callback...
+C:\warrilo-mobile\android\log_oauth_return2.txt:1206:09-22 22:28:15.864 10048 10081 I ReactNativeJS: ≠Éˆ‰ Processing OAuth callback...
+C:\warrilo-mobile\android\log_oauth_return2.txt:1217:09-22 22:28:15.864 10048 10081 I ReactNativeJS: ≠Éˆ‰ Processing OAuth callback...
+C:\warrilo-mobile\android\log_oauth_return2.txt:1233:09-22 22:28:15.894 10048 10081 I ReactNativeJS: ≠Éˆ‰ Processing OAuth callback...
+C:\warrilo-mobile\android\log_oauth_return2.txt:1235:09-22 22:28:15.894 10048 10081 I ReactNativeJS: ≠Éˆ‰ Processing OAuth callback...
+C:\warrilo-mobile\android\log_oauth_return2.txt:1236:09-22 22:28:15.899 10048 10081 I ReactNativeJS: '≠Éˆ˘ Incoming OAuth URL:', 'null'
+C:\warrilo-mobile\android\log_oauth_return2.txt:1237:09-22 22:28:15.899 10048 10081 W ReactNativeJS: ‘‹·¥©≈ No authorization code found in callback URL
+C:\warrilo-mobile\android\log_oauth_return2.txt:1336:09-22 22:28:16.185 10048 10081 E ReactNativeJS: '‘ÿÓ Code exchange error:', { [AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string]
+C:\warrilo-mobile\android\log_oauth_return2.txt:1337:09-22 22:28:16.185 10048 10081 E ReactNativeJS:   __isAuthError: true,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1338:09-22 22:28:16.185 10048 10081 E ReactNativeJS:   name: 'AuthApiError',
+C:\warrilo-mobile\android\log_oauth_return2.txt:1339:09-22 22:28:16.185 10048 10081 E ReactNativeJS:   status: 400,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1340:09-22 22:28:16.185 10048 10081 E ReactNativeJS:   code: 'bad_json' }
+C:\warrilo-mobile\android\log_oauth_return2.txt:1341:09-22 22:28:16.186 10048 10082 E unknown:ReactNative: console.error: ‘ÿÓ Code exchange error: AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string, js engine: hermes, stack:
+C:\warrilo-mobile\android\log_oauth_return2.txt:1391:09-22 22:28:16.450 10048 10081 E ReactNativeJS: '‘ÿÓ Code exchange error:', { [AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string]
+C:\warrilo-mobile\android\log_oauth_return2.txt:1392:09-22 22:28:16.450 10048 10081 E ReactNativeJS:   __isAuthError: true,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1393:09-22 22:28:16.450 10048 10081 E ReactNativeJS:   name: 'AuthApiError',
+C:\warrilo-mobile\android\log_oauth_return2.txt:1394:09-22 22:28:16.450 10048 10081 E ReactNativeJS:   status: 400,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1395:09-22 22:28:16.450 10048 10081 E ReactNativeJS:   code: 'bad_json' }
+C:\warrilo-mobile\android\log_oauth_return2.txt:1396:09-22 22:28:16.451 10048 10082 E unknown:ReactNative: console.error: ‘ÿÓ Code exchange error: AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string, js engine: hermes, stack:
+C:\warrilo-mobile\android\log_oauth_return2.txt:1412:09-22 22:28:16.583 10048 10081 E ReactNativeJS: '‘ÿÓ Code exchange error:', { [AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string]
+C:\warrilo-mobile\android\log_oauth_return2.txt:1413:09-22 22:28:16.583 10048 10081 E ReactNativeJS:   __isAuthError: true,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1414:09-22 22:28:16.583 10048 10081 E ReactNativeJS:   name: 'AuthApiError',
+C:\warrilo-mobile\android\log_oauth_return2.txt:1415:09-22 22:28:16.583 10048 10081 E ReactNativeJS:   status: 400,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1416:09-22 22:28:16.583 10048 10081 E ReactNativeJS:   code: 'bad_json' }
+C:\warrilo-mobile\android\log_oauth_return2.txt:1417:09-22 22:28:16.584 10048 10082 E unknown:ReactNative: console.error: ‘ÿÓ Code exchange error: AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string, js engine: hermes, stack:
+C:\warrilo-mobile\android\log_oauth_return2.txt:1428:09-22 22:28:16.618 10048 10081 E ReactNativeJS: '‘ÿÓ Code exchange error:', { [AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string]
+C:\warrilo-mobile\android\log_oauth_return2.txt:1429:09-22 22:28:16.618 10048 10081 E ReactNativeJS:   __isAuthError: true,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1430:09-22 22:28:16.618 10048 10081 E ReactNativeJS:   name: 'AuthApiError',
+C:\warrilo-mobile\android\log_oauth_return2.txt:1431:09-22 22:28:16.618 10048 10081 E ReactNativeJS:   status: 400,
+C:\warrilo-mobile\android\log_oauth_return2.txt:1432:09-22 22:28:16.618 10048 10081 E ReactNativeJS:   code: 'bad_json' }
+C:\warrilo-mobile\android\log_oauth_return2.txt:1433:09-22 22:28:16.619 10048 10082 E unknown:ReactNative: console.error: ‘ÿÓ Code exchange error: AuthApiError: Could not parse request body as JSON: json: cannot unmarshal object into Go struct field PKCEGrantParams.auth_code of type string, js engine: hermes, stack:

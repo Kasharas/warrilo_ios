@@ -28,22 +28,29 @@ const checkConnectivity = async (): Promise<boolean> => {
 
 export const warrantyAlertService = {
   async fetchUserAlerts(userId: string): Promise<SupabaseWarrantyAlert[]> {
-    const isConnected = await checkConnectivity();
-    if (!isConnected) {
-      throw new Error('No internet connection');
-    }
+    console.log('STEP 1: Starting fetchUserAlerts for:', userId);
+    
+    // Skip all connectivity checks for now
+    console.log('STEP 2: Skipping connectivity check');
     
     try {
+      console.log('STEP 3: About to execute Supabase query...');
+      
       const { data, error } = await supabase
         .from('warranty_reminders')
         .select('id, device_id, user_id, reminder_date, warranty_expire_date, created_at')
         .eq('user_id', userId)
         .order('reminder_date', { ascending: true });
       
+      console.log('STEP 4: Supabase query completed:', { 
+        dataLength: data?.length, 
+        hasError: !!error 
+      });
+      
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching warranty alerts:', error);
+      console.error('STEP 5: Query failed with error:', error);
       throw error;
     }
   },
@@ -154,5 +161,16 @@ export const warrantyAlertService = {
   
   async isOnline(): Promise<boolean> {
     return await checkConnectivity();
+  },
+
+  async testConnection(): Promise<void> {
+    console.log('TESTING: Simple Supabase connection...');
+    
+    const { data, error } = await supabase
+      .from('warranty_reminders')
+      .select('count(*)')
+      .limit(1);
+      
+    console.log('TEST RESULT:', { data, error });
   }
 };

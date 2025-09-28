@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Linking from 'expo-linking';
@@ -7,28 +7,35 @@ import { supabase } from '@/lib/supabaseClient';
 export default function AuthCallback() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
     const handleAuthCallback = async () => {
       try {
         console.log('🔄 Processing OAuth callback...');
 
-        // Try to get the deep link URL from params (when app was already open) or initial URL (cold start)
-        let incomingUrl: string | null = null;
-        if (typeof params?.url === 'string') {
-          incomingUrl = decodeURIComponent(params.url);
-        } else {
-          incomingUrl = await Linking.getInitialURL();
-        }
+        // Prefer reading the auth code directly from route params (string or string[])
+        const rawCodeParam = (params as any)?.code as unknown;
+        let code: string | undefined = Array.isArray(rawCodeParam)
+          ? (typeof rawCodeParam[0] === 'string' ? rawCodeParam[0] : undefined)
+          : (typeof rawCodeParam === 'string' ? rawCodeParam : undefined);
 
-        console.log('🔗 Incoming OAuth URL:', incomingUrl || 'null');
-
-        // Parse code from the URL
-        let code: string | undefined = undefined;
-        if (incomingUrl) {
-          const parsed = Linking.parse(incomingUrl);
-          const qp: any = parsed?.queryParams || {};
-          code = typeof qp.code === 'string' ? qp.code : undefined;
+        // Fallback: get full URL (cold start) and parse code parameter
+        if (!code) {
+          let incomingUrl: string | null = null;
+          if (typeof (params as any)?.url === 'string') {
+            incomingUrl = decodeURIComponent((params as any).url as string);
+          } else {
+            incomingUrl = await Linking.getInitialURL();
+          }
+          console.log('🔗 Incoming OAuth URL:', incomingUrl || 'null');
+          if (incomingUrl) {
+            const parsed = Linking.parse(incomingUrl);
+            const qp: any = parsed?.queryParams || {};
+            code = typeof qp.code === 'string' ? qp.code : undefined;
+          }
         }
 
         if (!code) {
@@ -38,7 +45,7 @@ export default function AuthCallback() {
         }
 
         // Exchange the authorization code for a session (PKCE)
-        const { data, error } = await supabase.auth.exchangeCodeForSession({ code });
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
           console.error('❌ Code exchange error:', error);
           router.replace('/login');

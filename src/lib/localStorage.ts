@@ -1230,10 +1230,12 @@ export class DeviceLocalStorage {
    */
   static async clearAll(): Promise<void> {
     const allKeys = [
-      STORAGE_KEYS.DEVICES,
-      STORAGE_KEYS.PENDING_SYNC,
-      STORAGE_KEYS.SYNC_STATUS,
-      STORAGE_KEYS.VERSION
+      STORAGE_KEYS.DEVICES,        // 'warrilo_devices'
+      STORAGE_KEYS.PENDING_SYNC,   // 'warrilo_pending_sync'
+      STORAGE_KEYS.SYNC_STATUS,    // 'warrilo_sync_status'
+      STORAGE_KEYS.VERSION,        // 'warrilo_storage_version'
+      'warranty_alerts',           // ← ADD THIS
+      'devices'                    // ← ADD THIS
     ];
     
     try {

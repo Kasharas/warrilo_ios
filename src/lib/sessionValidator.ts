@@ -11,8 +11,15 @@ export const validateSupabaseSession = async (): Promise<SessionValidationResult
   try {
     console.log('Mobile sync: Starting session validation...');
 
-    // Get current session
-    const { data: { session }, error } = await supabase.auth.getSession();
+    // Get current session with timeout
+    console.log('Mobile sync: Calling supabase.auth.getSession()...');
+    const sessionPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Session validation timeout')), 10000)
+    );
+    
+    const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+    console.log('Mobile sync: supabase.auth.getSession() completed', { hasSession: !!session, hasError: !!error });
 
     if (error) {
       console.error('Mobile sync: Session validation error:', {

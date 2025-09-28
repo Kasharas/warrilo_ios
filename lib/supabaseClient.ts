@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SUPABASE_CONFIG } from './config';
 import { getOAuthRedirectUrl } from './urlConfig';
@@ -55,28 +55,42 @@ export const signInWithGoogle = async () => {
       console.log('Web OAuth initiated successfully');
       return { error: null };
     } else {
-      // Mobile: Use OAuth with deep linking
+      // Mobile: Use OAuth with deep linking (force-launch browser via Linking)
       console.log('Mobile: Using OAuth with deep linking...');
-      
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: getOAuthRedirectUrl(), // Deep link to your app
+          redirectTo: getOAuthRedirectUrl(),
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
           },
-          skipBrowserRedirect: false
-        }
+          // Prevent supabase-js from trying to handle the browser
+          // so we can open it explicitly with React Native Linking
+          skipBrowserRedirect: true,
+        },
       });
-      
+
       if (error) {
         console.error('❌ Mobile OAuth error:', error);
-        return { error: error.message };
+        return { error: (error as any)?.message ?? String(error) };
       }
-      
-      console.log('✅ Mobile OAuth initiated');
-      return { data, error: null };
+
+      const authUrl = (data as any)?.url;
+      if (authUrl) {
+        console.log('✅ Mobile OAuth initiated, opening browser URL:', authUrl);
+        try {
+          await Linking.openURL(authUrl);
+        } catch (openErr) {
+          console.error('❌ Failed to open auth URL via Linking:', openErr);
+          return { error: 'Failed to open browser for Google sign-in' };
+        }
+        return { data: { url: authUrl }, error: null } as any;
+      }
+
+      console.error('❌ No auth URL returned from Supabase OAuth initiation');
+      return { error: 'No auth URL returned from Supabase' };
     }
   } catch (error) {
     console.error('Google Sign-In exception:', error);

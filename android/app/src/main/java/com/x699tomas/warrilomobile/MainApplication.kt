@@ -1,4 +1,4 @@
-package com.warrilo.mobile
+package com.x699tomas.warrilomobile
 
 import android.app.Application
 import android.content.res.Configuration

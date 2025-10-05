@@ -29,17 +29,9 @@ export const prepareDeviceData = (
     warrantyEndDate = endDate.toISOString().split('T')[0]
   }
 
-  // Prepare identifiers JSON
-  const identifiers: Record<string, string | null> = {}
-  if (formData.modelNumber) {
-    identifiers.model = formData.modelNumber
-  }
-  if (formData.serialNumber) {
-    identifiers.serial = formData.serialNumber
-  }
-  
-  const identifiersJson = Object.keys(identifiers).length > 0 
-    ? JSON.stringify(identifiers) 
+  // Store identifiers as plain serial text (no JSON)
+  const identifiersPlain: string | null = formData.serialNumber
+    ? formData.serialNumber.trim()
     : null
 
   // Prepare device data for insertion
@@ -55,7 +47,7 @@ export const prepareDeviceData = (
     warranty_end_date: warrantyEndDate,
     photo_irl: photoUrl,
     invoice_url: receiptUrl,
-    identifiers: identifiersJson,
+    identifiers: identifiersPlain,
     notes: formData.notes?.trim() || null,
   }
 

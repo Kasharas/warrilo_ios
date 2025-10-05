@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Svg, { Path } from 'react-native-svg';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -70,9 +71,22 @@ export default function WelcomeScreen() {
             },
           ]}
         >
-          <View style={styles.logo}>
-            <Ionicons name="shield" size={60} color={theme.colors.systemBlue} />
-          </View>
+          <Svg width={120} height={120} viewBox="0 0 24 28" fill="none">
+            <Path
+              d="M11 2.2 
+           Q12 1.8 13 2.2
+           Q16 4.5 21 6
+           V13 
+           C21 18.55 17.16 23.74 12 25
+           C6.84 23.74 3 18.55 3 13
+           V6
+           Q8 4.5 11 2.2Z"
+              fill="none"
+              stroke="#1976d2"
+              strokeWidth={2.2}
+              strokeLinejoin="round"
+            />
+          </Svg>
         </Animated.View>
 
         {/* Title and Subtitle */}

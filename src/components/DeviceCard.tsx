@@ -33,9 +33,15 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
   
   // Helper function to check if image URL is valid
   const isValidImageUrl = (url?: string) => {
-    if (!url) return false;
-    // Check if it's a base64 data URL, HTTP/HTTPS URL, or local file URI
-    return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('file://');
+    if (!url) {
+      console.log('[DeviceCard] No image URL provided for device:', device.name);
+      return false;
+    }
+    const valid = url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('file://');
+    if (!valid) {
+      console.log('[DeviceCard] Invalid image URL format detected:', { device: device.name, url });
+    }
+    return valid;
   };
 
   // Helper function to get image source
@@ -108,26 +114,29 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
     // Test if the image URL is actually accessible
     if (device.photo_irl && isValidImageUrl(device.photo_irl)) {
       console.log('=== TESTING IMAGE ACCESSIBILITY ===');
-      console.log('Testing URL:', device.photo_irl);
+      console.log('[DeviceCard] Testing URL:', device.photo_irl);
+      console.log('[DeviceCard] Device:', device.name, 'ID:', device.id);
       
       // For local file URIs, we don't need to test accessibility via fetch
       if (device.photo_irl.startsWith('file://')) {
-        console.log('Local file URI detected, skipping fetch test');
+        console.log('[DeviceCard] Local file URI detected, skipping fetch test');
         return;
       }
       
       // Test fetch to see if image is accessible (only for HTTP/HTTPS URLs)
       fetch(device.photo_irl)
         .then(response => {
-          console.log('Image fetch response status:', response.status);
-          console.log('Image fetch response ok:', response.ok);
+          const contentType = response.headers.get('content-type');
+          const contentLength = response.headers.get('content-length');
+          console.log('[DeviceCard] Image fetch response status:', response.status, 'ok:', response.ok);
+          console.log('[DeviceCard] Image response headers:', { contentType, contentLength });
           if (!response.ok) {
-            console.log('Image not accessible, setting error');
+            console.log('[DeviceCard] Image not accessible, setting error');
             setImageLoadError(true);
           }
         })
         .catch(error => {
-          console.log('Image fetch error:', error);
+          console.log('[DeviceCard] Image fetch error:', error);
           setImageLoadError(true);
         });
     }
@@ -234,7 +243,16 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
               source={getImageSource(device.photo_irl)!}
               style={styles.deviceImage}
               resizeMode="contain"
-              onError={() => setImageLoadError(true)}
+              onLoadStart={() => {
+                console.log('[DeviceCard] Image load start:', { device: device.name, url: device.photo_irl });
+              }}
+              onLoad={(e) => {
+                console.log('[DeviceCard] Image loaded successfully:', { device: device.name, url: device.photo_irl });
+              }}
+              onError={(e) => {
+                console.log('[DeviceCard] Image onError fired:', { device: device.name, url: device.photo_irl, error: e?.nativeEvent });
+                setImageLoadError(true);
+              }}
             />
           ) : (
             <View style={styles.placeholderImage}>

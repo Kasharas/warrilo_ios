@@ -88,6 +88,14 @@ export default function DeviceListScreen() {
     return matchesSearch && matchesFilter;
   });
 
+  // Sort by nearest warranty_end_date (ascending), null/invalid last
+  const toTime = (d?: string | null) => {
+    if (!d) return Number.POSITIVE_INFINITY;
+    const t = new Date(d).getTime();
+    return isNaN(t) ? Number.POSITIVE_INFINITY : t;
+  };
+  const sortedFilteredDevices = [...filteredDevices].sort((a, b) => toTime(a.warranty_end_date) - toTime(b.warranty_end_date));
+
   // Debug logging for device filtering
   useEffect(() => {
     console.log('🔍 Devices Screen: Filtering results:', {
@@ -257,7 +265,7 @@ export default function DeviceListScreen() {
       ) : (
         // Device List
         <FlatList 
-          data={filteredDevices}
+          data={sortedFilteredDevices}
           renderItem={({ item }) => (
             <View key={item.id} style={styles.deviceCardWrapper}>
               <DeviceCard

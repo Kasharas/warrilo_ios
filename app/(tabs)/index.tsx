@@ -387,7 +387,16 @@ export default function DashboardScreen() {
             </View>
             
             <View style={styles.deviceGrid}>
-              {devices.filter(device => device && device.name).map((device) => {
+              {(() => {
+                const toTime = (d?: string | null) => {
+                  if (!d) return Number.POSITIVE_INFINITY;
+                  const t = new Date(d).getTime();
+                  return isNaN(t) ? Number.POSITIVE_INFINITY : t;
+                };
+                const orderedDevices = [...devices]
+                  .filter(device => device && device.name)
+                  .sort((a, b) => toTime(a.warranty_end_date) - toTime(b.warranty_end_date));
+                return orderedDevices.map((device) => {
                 const getIconComponent = (category?: string) => {
                   switch (category?.toLowerCase()) {
                     case 'electronics': return Smartphone;
@@ -465,7 +474,8 @@ export default function DashboardScreen() {
                     <Text style={styles.deviceName}>{device.name}</Text>
                   </Pressable>
                 );
-              })}
+                });
+              })()}
             </View>
           </>
         )}

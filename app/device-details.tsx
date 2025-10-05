@@ -22,6 +22,8 @@ export default function DeviceDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
+  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
   
   // Delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -250,13 +252,20 @@ export default function DeviceDetailsScreen() {
           <View style={styles.uploadRow}>
             <View style={styles.uploadZone}>
               {device.photo_irl ? (
-                <View style={styles.imagePreviewContainer}>
+                <Pressable 
+                  style={styles.imagePreviewContainer}
+                  onPress={() => { setImagePreviewUri(device.photo_irl); setImagePreviewVisible(true); }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
                   <Image 
                     source={{ uri: device.photo_irl }} 
                     style={styles.imagePreview}
                     resizeMode="contain"
+                    onError={(e) => {
+                      console.log('DeviceDetails image error (device photo):', e?.nativeEvent);
+                    }}
                   />
-                </View>
+                </Pressable>
               ) : (
                 <View style={styles.uploadContent}>
                   <Ionicons name="camera" size={32} color={theme.colors.neutral[400]} />
@@ -268,13 +277,20 @@ export default function DeviceDetailsScreen() {
             {/* Receipt Image */}
             <View style={styles.uploadZone}>
               {device.invoice_url ? (
-                <View style={styles.imagePreviewContainer}>
+                <Pressable 
+                  style={styles.imagePreviewContainer}
+                  onPress={() => { setImagePreviewUri(device.invoice_url); setImagePreviewVisible(true); }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
                   <Image 
                     source={{ uri: device.invoice_url }} 
                     style={styles.imagePreview}
                     resizeMode="contain"
+                    onError={(e) => {
+                      console.log('DeviceDetails image error (receipt):', e?.nativeEvent);
+                    }}
                   />
-                </View>
+                </Pressable>
               ) : (
                 <View style={styles.uploadContent}>
                   <Ionicons name="folder-open" size={32} color={theme.colors.neutral[400]} />
@@ -369,7 +385,7 @@ export default function DeviceDetailsScreen() {
           <Text style={styles.sectionTitle}>Additional Notes</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}>
+            <Text style={styles.textInput}>
               {device.notes || 'No additional notes'}
             </Text>
           </View>
@@ -403,6 +419,28 @@ export default function DeviceDetailsScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      {/* Full-screen Image Preview Modal */}
+      <Modal
+        visible={imagePreviewVisible}
+        transparent={false}
+        animationType="fade"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setImagePreviewVisible(false)}
+      >
+        <SafeAreaView style={styles.previewModalContainer}>
+          <Pressable style={styles.previewCloseButton} onPress={() => setImagePreviewVisible(false)}>
+            <Ionicons name="close" size={28} color={theme.colors.systemBackground} />
+          </Pressable>
+          {imagePreviewUri ? (
+            <Image
+              source={{ uri: imagePreviewUri }}
+              style={styles.previewImage}
+              resizeMode="contain"
+            />
+          ) : null}
+        </SafeAreaView>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -525,6 +563,25 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     borderRadius: theme.borderRadius.md,
+  },
+  previewModalContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  previewCloseButton: {
+    position: 'absolute',
+    top: theme.spacing.lg,
+    right: theme.spacing.lg,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.pill,
   },
   uploadContent: {
     alignItems: 'center',

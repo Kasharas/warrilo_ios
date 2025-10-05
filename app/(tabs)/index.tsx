@@ -328,9 +328,34 @@ export default function DashboardScreen() {
             {totalValue > 0 ? `$${totalValue.toLocaleString()}` : 'No prices set'}
           </Text>
           <View style={styles.warrantyValueFooter}>
-            <View style={styles.deviceCountBadge}>
-              <Text style={styles.deviceCountText}>{deviceCount} devices</Text>
-            </View>
+            {(() => {
+              const today = new Date();
+              const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+              const isExpired = (d?: string | null) => {
+                if (!d) return false;
+                const end = new Date(d);
+                const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                return endDay < startOfToday;
+              };
+              const isActive = (d?: string | null) => {
+                if (!d) return false;
+                const end = new Date(d);
+                const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                return endDay >= startOfToday;
+              };
+              const activeCount = devices.filter(d => isActive(d.warranty_end_date)).length;
+              const expiredCount = devices.filter(d => isExpired(d.warranty_end_date)).length;
+              return (
+                <>
+                  <View style={styles.deviceCountBadge}>
+                    <Text style={styles.deviceCountText}>{activeCount} Active</Text>
+                  </View>
+                  <View style={styles.expiredCountBadge}>
+                    <Text style={styles.expiredCountText}>{expiredCount} Expired</Text>
+                  </View>
+                </>
+              );
+            })()}
             {devicesWithPrices.length !== deviceCount && (
               <View style={styles.priceCountBadge}>
                 <Text style={styles.priceCountText}>{devicesWithPrices.length} with prices</Text>
@@ -634,6 +659,19 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
     color: theme.colors.whiteA90,
     fontWeight: '500',
+  },
+  expiredCountBadge: {
+    backgroundColor: theme.colors.systemRed,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: theme.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.systemRed,
+  },
+  expiredCountText: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.white,
+    fontWeight: '700',
   },
   alertCard: {
     backgroundColor: theme.colors.warning[50],

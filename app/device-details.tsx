@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator, RefreshControl, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, ActivityIndicator, RefreshControl, Modal, Platform } from 'react-native';
+import { requestMediaLibraryWritePermissions } from '../src/utils/permissions';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +9,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import { LocalDevice } from '@/src/lib/localStorage';
 import { useDeviceOperations } from '@/src/hooks/useDeviceOperations';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
 
 export default function DeviceDetailsScreen() {
   const router = useRouter();
@@ -24,6 +28,7 @@ export default function DeviceDetailsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
+  const [askedMediaPermission, setAskedMediaPermission] = useState(false);
   
   // Delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -135,6 +140,29 @@ export default function DeviceDetailsScreen() {
     setShowDeleteModal(false);
   };
 
+  // Preflight permission prompt when opening preview on Android
+  useEffect(() => {
+    const maybeAskPermission = async () => {
+      if (Platform.OS !== 'android') return;
+      if (!imagePreviewVisible) return;
+      if (askedMediaPermission) return;
+      try {
+        const existing = await MediaLibrary.getPermissionsAsync();
+        if (existing.status !== 'granted') {
+          const hasPermission = await requestMediaLibraryWritePermissions();
+          if (hasPermission) {
+            setAskedMediaPermission(true);
+          }
+        } else {
+          setAskedMediaPermission(true);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    maybeAskPermission();
+  }, [imagePreviewVisible, askedMediaPermission]);
+
 
 
   const formatDate = (dateString: string) => {
@@ -181,6 +209,84 @@ export default function DeviceDetailsScreen() {
     } catch (error) {
       // If it's not JSON, return the original string
       return identifiers;
+    }
+  };
+
+  const handleDownload = async (uri?: string | null) => {
+    if (!uri) {
+      console.log('Download error: No URI provided');
+      return;
+    }
+    
+    try {
+      console.log('Starting download for URI:', uri);
+      
+      // Request permission
+      const hasPermission = await requestMediaLibraryWritePermissions();
+      if (!hasPermission) {
+        console.log('Download error: Permission denied');
+        return;
+      }
+      
+      console.log('Permission granted, downloading file...');
+      
+      // Use documentDirectory instead of cacheDirectory
+      const fileExtension = uri.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `warrilo_image_${Date.now()}.${fileExtension}`;
+      const targetPath = `${FileSystem.documentDirectory}${fileName}`;
+      
+      const downloadResult = await FileSystem.downloadAsync(uri, targetPath);
+      console.log('File downloaded to:', downloadResult.uri);
+      
+      // Verify file exists
+      const fileInfo = await FileSystem.getInfoAsync(downloadResult.uri);
+      if (!fileInfo.exists) {
+        throw new Error('Downloaded file does not exist');
+      }
+      console.log('File verified, size:', fileInfo.size);
+      
+      // Try MediaLibrary first
+      try {
+        const asset = await MediaLibrary.createAssetAsync(downloadResult.uri);
+        console.log('Asset created via MediaLibrary:', asset.id);
+        
+        try {
+          const album = await MediaLibrary.getAlbumAsync('Warrilo');
+          if (album) {
+            await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+          } else {
+            await MediaLibrary.createAlbumAsync('Warrilo', asset, false);
+          }
+        } catch (albumErr) {
+          console.log('Album operation failed (non-critical):', albumErr);
+        }
+        
+        Alert.alert('Saved', 'Image saved to Photos');
+        return;
+        
+      } catch (mediaLibErr: any) {
+        console.log('MediaLibrary failed, trying Sharing API:', mediaLibErr);
+        
+        // Fallback to sharing API
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(downloadResult.uri, {
+            mimeType: `image/${fileExtension}`,
+            dialogTitle: 'Save image',
+            UTI: `public.${fileExtension}`,
+          });
+          console.log('File shared via system dialog');
+        } else {
+          throw new Error('Neither MediaLibrary nor Sharing is available');
+        }
+      }
+      
+    } catch (e: any) {
+      console.error('Download error details:', {
+        message: e?.message,
+        code: e?.code,
+      });
+      Alert.alert('Error', `Failed to save image: ${e?.message || 'Unknown error'}`);
     }
   };
 
@@ -250,54 +356,54 @@ export default function DeviceDetailsScreen() {
           
           {/* Device Image */}
           <View style={styles.uploadRow}>
-            <View style={styles.uploadZone}>
-              {device.photo_irl ? (
-                <Pressable 
-                  style={styles.imagePreviewContainer}
-                  onPress={() => { setImagePreviewUri(device.photo_irl); setImagePreviewVisible(true); }}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Image 
-                    source={{ uri: device.photo_irl }} 
-                    style={styles.imagePreview}
-                    resizeMode="contain"
-                    onError={(e) => {
-                      console.log('DeviceDetails image error (device photo):', e?.nativeEvent);
-                    }}
-                  />
-                </Pressable>
-              ) : (
+            {device.photo_irl ? (
+              <Pressable 
+                style={styles.uploadZone}
+                onPress={() => { setImagePreviewUri(device.photo_irl); setImagePreviewVisible(true); }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Image 
+                  source={{ uri: device.photo_irl }} 
+                  style={styles.imagePreview}
+                  resizeMode="cover"
+                  onError={(e) => {
+                    console.log('DeviceDetails image error (device photo):', e?.nativeEvent);
+                  }}
+                />
+              </Pressable>
+            ) : (
+              <Pressable style={styles.uploadZone}>
                 <View style={styles.uploadContent}>
                   <Ionicons name="camera" size={32} color={theme.colors.neutral[400]} />
                   <Text style={styles.uploadText}>No Device Image</Text>
                 </View>
-              )}
-            </View>
+              </Pressable>
+            )}
             
             {/* Receipt Image */}
-            <View style={styles.uploadZone}>
-              {device.invoice_url ? (
-                <Pressable 
-                  style={styles.imagePreviewContainer}
-                  onPress={() => { setImagePreviewUri(device.invoice_url); setImagePreviewVisible(true); }}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Image 
-                    source={{ uri: device.invoice_url }} 
-                    style={styles.imagePreview}
-                    resizeMode="contain"
-                    onError={(e) => {
-                      console.log('DeviceDetails image error (receipt):', e?.nativeEvent);
-                    }}
-                  />
-                </Pressable>
-              ) : (
+            {device.invoice_url ? (
+              <Pressable 
+                style={styles.uploadZone}
+                onPress={() => { setImagePreviewUri(device.invoice_url); setImagePreviewVisible(true); }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Image 
+                  source={{ uri: device.invoice_url }} 
+                  style={styles.imagePreview}
+                  resizeMode="cover"
+                  onError={(e) => {
+                    console.log('DeviceDetails image error (receipt):', e?.nativeEvent);
+                  }}
+                />
+              </Pressable>
+            ) : (
+              <Pressable style={styles.uploadZone}>
                 <View style={styles.uploadContent}>
                   <Ionicons name="folder-open" size={32} color={theme.colors.neutral[400]} />
                   <Text style={styles.uploadText}>No Receipt</Text>
                 </View>
-              )}
-            </View>
+              </Pressable>
+            )}
           </View>
         </View>
 
@@ -432,6 +538,13 @@ export default function DeviceDetailsScreen() {
           <Pressable style={styles.previewCloseButton} onPress={() => setImagePreviewVisible(false)}>
             <Ionicons name="close" size={28} color={theme.colors.systemBackground} />
           </Pressable>
+          <Pressable 
+            style={[styles.previewCloseButton, { right: theme.spacing.lg * 4 }]}
+            onPress={() => handleDownload(imagePreviewUri)}
+            accessibilityLabel="Download image"
+          >
+            <Ionicons name="download" size={28} color={theme.colors.systemBackground} />
+          </Pressable>
           {imagePreviewUri ? (
             <Image
               source={{ uri: imagePreviewUri }}
@@ -527,19 +640,22 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
   },
   uploadRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: theme.spacing.md,
   },
   uploadZone: {
-    flex: 1,
+    // fixed-size container for images
+    // Remove flex so it doesn't grow; make it full width inside the row
+    width: '100%',
     backgroundColor: theme.colors.neutral[100],
     borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.lg,
+    padding: 0,
     borderWidth: 1,
     borderColor: theme.colors.neutral[200],
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 140,
+    height: 250,
+    overflow: 'hidden',
     shadowColor: theme.colors.label,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -547,22 +663,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   imagePreviewContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 140,
-    width: '100%',
-    backgroundColor: theme.colors.systemBackground,
-    borderRadius: theme.borderRadius.md,
-    shadowColor: theme.colors.label,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    // removed - container no longer used
   },
   imagePreview: {
     width: '100%',
-    height: 200,
-    borderRadius: theme.borderRadius.md,
+    height: 250,
   },
   previewModalContainer: {
     flex: 1,
@@ -585,6 +690,7 @@ const styles = StyleSheet.create({
   },
   uploadContent: {
     alignItems: 'center',
+    padding: theme.spacing.lg,
   },
   uploadText: {
     fontSize: theme.fontSize.body,

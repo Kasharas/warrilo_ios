@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
 import { Alert, Platform } from 'react-native';
 
 export const requestImagePermissions = async (): Promise<boolean> => {
@@ -70,4 +71,34 @@ export const requestAllPermissions = async (): Promise<{
     imagePermissions,
     notificationPermissions
   };
+};
+
+// Write-only Photos permission (for saving downloads)
+export const requestMediaLibraryWritePermissions = async (): Promise<boolean> => {
+  try {
+    // Check current permission status first
+    const { status: existingStatus } = await MediaLibrary.getPermissionsAsync();
+    
+    if (existingStatus === 'granted') {
+      return true;
+    }
+    
+    // Request permission without writeOnly parameter (Android compatibility)
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission Required',
+        'Please grant Photos access to save images to your device.',
+        [{ text: 'OK' }]
+      );
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error requesting media library write permissions:', error);
+    Alert.alert('Error', 'Failed to request permissions');
+    return false;
+  }
 };

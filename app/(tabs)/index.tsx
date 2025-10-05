@@ -82,33 +82,70 @@ export default function DashboardScreen() {
     });
   };
 
-  // Function to get the most urgent warranty alert
+  // Function to get the most urgent upcoming (future) warranty expiry
   const getMostUrgentWarrantyAlert = () => {
     console.log(`📖 Dashboard: getMostUrgentWarrantyAlert called with ${warrantyAlerts?.length || 0} alerts`);
-    
     if (!warrantyAlerts || warrantyAlerts.length === 0) {
       console.log('📖 Dashboard: No warranty alerts available');
       return null;
     }
 
-    const urgentAlerts = filterCurrentWarrantyAlerts(warrantyAlerts);
-    console.log(`📖 Dashboard: Filtered warranty alerts:`, urgentAlerts);
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-    // Sort by reminder date (most urgent first) and return the first one
-    const sortedAlerts = urgentAlerts.sort((a, b) => 
-      new Date(a.reminder_date).getTime() - new Date(b.reminder_date).getTime()
-    );
+    // Consider only alerts whose warranty has not yet expired
+    const futureAlerts = (warrantyAlerts || []).filter(alert => {
+      if (!alert?.warranty_expire_date) return false;
+      const exp = new Date(alert.warranty_expire_date);
+      const expDay = new Date(exp.getFullYear(), exp.getMonth(), exp.getDate());
+      return expDay > startOfToday; // strictly in the future
+    });
 
-    const mostUrgent = sortedAlerts.length > 0 ? sortedAlerts[0] : null;
-    console.log(`📖 Dashboard: Most urgent alert:`, mostUrgent);
-    
+    if (futureAlerts.length === 0) {
+      console.log('📖 Dashboard: No upcoming (future) expiries to show');
+      return null;
+    }
+
+    // Sort by closest positive days until expiry
+    const sortedByClosestExpiry = futureAlerts.sort((a, b) => {
+      const aT = new Date(a.warranty_expire_date).getTime();
+      const bT = new Date(b.warranty_expire_date).getTime();
+      return aT - bT;
+    });
+
+    const mostUrgent = sortedByClosestExpiry[0] || null;
+    console.log('📖 Dashboard: Most urgent alert:', mostUrgent);
     return mostUrgent;
   };
 
-  // Function to get device name from device ID
-  const getDeviceNameFromAlert = (deviceId: string) => {
-    const device = devices.find(d => d.id === deviceId || d.local_id === deviceId);
-    return device?.name || 'Unknown Device';
+  // Resolve device name using both id and local_id like alerts screen
+  const getDeviceNameFromAlert = (deviceId?: string, localDeviceId?: string, fallbackName?: string) => {
+    if (!devices || devices.length === 0) return fallbackName || 'Unknown Device';
+    // Try direct server id match, then local_id match against server id (in case of swapped storage)
+    if (deviceId) {
+      const byServer = devices.find(d => d.id === deviceId || (d as any).local_id === deviceId);
+      if (byServer) return byServer.name || fallbackName || 'Unknown Device';
+    }
+    // Try local id: could match either device.id or device.local_id
+    if (localDeviceId) {
+      const byLocal = devices.find(d => d.id === localDeviceId || (d as any).local_id === localDeviceId);
+      if (byLocal) return byLocal.name || fallbackName || 'Unknown Device';
+    }
+    return fallbackName || 'Unknown Device';
+  };
+
+  // Resolve a navigable id for details (prefer current matching device id/local_id)
+  const getNavIdForAlert = (deviceId?: string, localDeviceId?: string): string | null => {
+    // Prefer matching any known device by comparing both identifiers in both fields
+    if (deviceId) {
+      const byServer = devices.find(d => d.id === deviceId || (d as any).local_id === deviceId);
+      if (byServer) return byServer.local_id || byServer.id;
+    }
+    if (localDeviceId) {
+      const byLocal = devices.find(d => d.id === localDeviceId || (d as any).local_id === localDeviceId);
+      if (byLocal) return byLocal.local_id || byLocal.id;
+    }
+    return null;
   };
 
   // Function to calculate days until warranty expires
@@ -369,8 +406,11 @@ export default function DashboardScreen() {
           const urgentAlert = getMostUrgentWarrantyAlert();
           if (!urgentAlert) return null;
 
-          const deviceName = getDeviceNameFromAlert(urgentAlert.device_id);
+          const deviceName = getDeviceNameFromAlert(urgentAlert.device_id, urgentAlert.local_device_id, urgentAlert.device_name);
           const daysUntilExpiry = getDaysUntilExpiry(urgentAlert.warranty_expire_date);
+          if (daysUntilExpiry <= 0) return null; // hide if expired or today
+          const navId = getNavIdForAlert(urgentAlert.device_id, urgentAlert.local_device_id);
+          if (!navId) return null; // hide if we cannot navigate
           
           return (
             <View style={styles.alertCard}>
@@ -391,7 +431,7 @@ export default function DashboardScreen() {
               <View style={styles.alertActions}>
                 <Pressable 
                   style={styles.alertButton}
-                  onPress={() => handleDevicePress(urgentAlert.device_id)}
+                  onPress={() => handleDevicePress(navId)}
                 >
                   <Ionicons name="eye" size={18} color={theme.colors.white} />
                   <Text style={styles.alertButtonText}>View Details</Text>

@@ -118,9 +118,6 @@ export default function DeviceDetailsScreen() {
       await deleteDevice(device);
       console.log('✅ Device Details: Device deleted successfully');
       
-      // Navigate back to previous screen after successful deletion
-      router.back();
-      
     } catch (error) {
       console.error('❌ Device Details: Error deleting device:', error);
       setError(error.message || 'Failed to delete device');

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { backgroundSyncService } from '@/src/services/backgroundSyncService';
+import { backgroundSyncService, SyncResult } from '@/src/services/backgroundSyncService';
 import { useAuth } from './AuthContext';
 
 export interface SyncStatus {
@@ -14,7 +14,7 @@ export interface SyncStatus {
 interface SyncContextType {
   syncStatus: SyncStatus;
   lastSyncTime: Date | null;
-  triggerSync: () => Promise<void>;
+  triggerSync: () => Promise<SyncResult | undefined>;
   syncInProgress: boolean;
   resetSyncStatus: () => void;
 }
@@ -48,7 +48,7 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const triggerSync = useCallback(async () => {
     if (!user?.id || !syncReady) {
       console.log('Sync not ready - user:', !!user?.id, 'syncReady:', syncReady);
-      return;
+      return undefined;
     }
 
     try {
@@ -61,7 +61,7 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }));
 
       const result = await backgroundSyncService.performSync(user.id);
-      
+
       if (result.success) {
         console.log('Sync context sync completed successfully');
         setSyncStatus({
@@ -82,6 +82,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
           operationsFailed: result.operationsFailed
         });
       }
+
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown sync error';
       console.error('Error in sync context sync:', errorMessage);
@@ -93,6 +95,7 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
         operationsCompleted: 0,
         operationsFailed: 1
       });
+      return undefined;
     }
   }, [user?.id, syncReady]);
 

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Warrilo",
-    "slug": "warrilo-mobile",
+    "slug": "warrilo",
     "version": "1.0.0",
     "newArchEnabled": true,
     "scheme": "warrilo",
@@ -19,13 +19,35 @@
         "projectId": "fcdfa3c1-d304-45d5-a77f-feccb85ea850"
       }
     },
+    "ios": {
+      "bundleIdentifier": "com.x699tomas.warrilomobile",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Warrilo needs access to your camera to take photos of your devices and receipts.",
+        "NSPhotoLibraryUsageDescription": "Warrilo needs access to your photo library to select device and receipt photos.",
+        "NSPhotoLibraryAddUsageDescription": "Warrilo needs permission to save photos to your library when you download warranty documents.",
+        "NSUserNotificationsUsageDescription": "Warrilo uses notifications to remind you when your warranties are about to expire.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "warrilo"
+            ]
+          }
+        ]
+      }
+    },
     "android": {
       "package": "com.x699tomas.warrilomobile",
       "intentFilters": [
         {
           "action": "VIEW",
+          "autoVerify": true,
           "data": [
-            { "scheme": "warrilo" }
+            {
+              "scheme": "warrilo",
+              "host": "auth-callback"
+            }
           ],
           "category": [
             "BROWSABLE",
@@ -33,6 +55,18 @@
           ]
         }
       ]
-    }
+    },
+    "plugins": [
+      [
+        "expo-secure-store"
+      ],
+      [
+        "expo-router",
+        {
+          "origin": "warrilo://"
+        }
+      ],
+      "expo-web-browser"
+    ]
   }
 }

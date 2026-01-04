@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Alert, ActivityIndicator, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Alert, ActivityIndicator, Keyboard, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
 import { theme } from '@/src/styles/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signInWithGoogle, signIn, resetPassword, resendVerification } = useAuth();
+  const { signInWithGoogle, signInWithApple, signIn, resetPassword, resendVerification } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,13 +34,13 @@ export default function LoginScreen() {
     console.log('2. Email:', email);
     console.log('3. Password length:', password.length);
     console.log('4. Current loading state:', loading);
-    
+
     // Prevent multiple simultaneous login attempts
     if (loading) {
       console.log('4. Login already in progress, ignoring duplicate call');
       return;
     }
-    
+
     if (!email || !password) {
       console.log('4. Validation failed: Missing email or password');
       setError('Please fill in all fields');
@@ -61,11 +62,11 @@ export default function LoginScreen() {
     console.log('4. Validation passed, starting login process...');
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('5. Calling signIn function from AuthContext...');
       const { error, needsVerification } = await signIn(email, password);
-      
+
       if (needsVerification) {
         console.log('6. Email needs verification - showing verification popup');
         Alert.alert(
@@ -96,19 +97,19 @@ export default function LoginScreen() {
       console.log('8. Login process completed, setting loading to false');
       setLoading(false);
     }
-    
+
     console.log('=== EMAIL LOGIN DEBUG END ===');
   };
 
   const handleResendVerification = async (email: string) => {
     console.log('=== RESEND VERIFICATION DEBUG START ===');
     console.log('1. Resend verification requested for email:', email);
-    
+
     setLoading(true);
-    
+
     try {
       const { error } = await resendVerification(email);
-      
+
       if (error) {
         console.error('2. Resend verification error:', error.message);
         Alert.alert('Error', error.message);
@@ -127,14 +128,14 @@ export default function LoginScreen() {
       console.log('4. Resend verification process completed');
       setLoading(false);
     }
-    
+
     console.log('=== RESEND VERIFICATION DEBUG END ===');
   };
 
   const handleForgotPassword = async () => {
     console.log('=== FORGOT PASSWORD DEBUG START ===');
     console.log('1. Forgot password clicked for email:', email);
-    
+
     if (!email) {
       console.log('2. No email provided, showing alert');
       Alert.alert(
@@ -147,10 +148,10 @@ export default function LoginScreen() {
 
     console.log('3. Email provided, starting password reset...');
     setLoading(true);
-    
+
     try {
       const { error } = await resetPassword(email);
-      
+
       if (error) {
         console.error('4. Password reset error:', error.message);
         Alert.alert('Error', error.message);
@@ -169,17 +170,17 @@ export default function LoginScreen() {
       console.log('6. Password reset process completed');
       setLoading(false);
     }
-    
+
     console.log('=== FORGOT PASSWORD DEBUG END ===');
   };
 
   const handleGoogleLogin = async () => {
     if (googleLoading) return; // Prevent multiple clicks for Google only
-    
+
     console.log('=== GOOGLE LOGIN DEBUG START ===');
     console.log('1. Button clicked, using auth system...');
     console.log('2. Current auth state:', { loading, error });
-    
+
     try {
       setGoogleLoading(true);
       console.log('3. Calling signInWithGoogle function...');
@@ -197,7 +198,7 @@ export default function LoginScreen() {
     } finally {
       setGoogleLoading(false);
     }
-    
+
     console.log('=== GOOGLE LOGIN DEBUG END ===');
   };
 
@@ -237,7 +238,7 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor={theme.colors.neutral[400]}
-            onSubmitEditing={() => {}}
+            onSubmitEditing={() => { }}
           />
 
           <View style={styles.passwordContainer}>
@@ -248,7 +249,7 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               placeholderTextColor={theme.colors.neutral[400]}
-              onSubmitEditing={() => {}}
+              onSubmitEditing={() => { }}
             />
             <Pressable
               style={styles.passwordToggle}
@@ -257,7 +258,7 @@ export default function LoginScreen() {
               {showPassword ? (
                 <Ionicons name="eye-off" size={20} color={"#007AFF"} />
               ) : (
-                                  <Ionicons name="eye" size={20} color={"#007AFF"} />
+                <Ionicons name="eye" size={20} color={"#007AFF"} />
               )}
             </Pressable>
           </View>
@@ -267,8 +268,8 @@ export default function LoginScreen() {
             <Text style={styles.forgotPasswordText}>Forgot password?</Text>
           </Pressable>
 
-          <Pressable 
-            style={[styles.primaryButton, loading && styles.primaryButtonDisabled]} 
+          <Pressable
+            style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
             onPress={handleLogin}
             disabled={loading}
           >
@@ -281,7 +282,7 @@ export default function LoginScreen() {
 
           <Text style={styles.dividerText}>or continue with</Text>
 
-          <Pressable 
+          <Pressable
             style={[
               styles.secondaryButton,
               googleLoading && styles.secondaryButtonDisabled
@@ -300,6 +301,25 @@ export default function LoginScreen() {
               <Text style={styles.secondaryButtonText}>Sign in with Google</Text>
             )}
           </Pressable>
+
+          {Platform.OS === 'ios' && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={5}
+              style={styles.appleButton}
+              onPress={async () => {
+                try {
+                  const { error } = await signInWithApple();
+                  if (error) {
+                    Alert.alert('Error', error.message);
+                  }
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+            />
+          )}
 
           {error && (
             <Text style={styles.errorText}>
@@ -470,5 +490,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: theme.spacing.sm,
     marginBottom: theme.spacing.sm,
+  },
+  appleButton: {
+    width: '100%',
+    height: 44,
+    marginBottom: theme.spacing.lg,
   },
 });

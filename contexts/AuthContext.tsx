@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef } from 'r
 import { User, Session } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { supabase, signInWithGoogle as supabaseSignInWithGoogle } from '../lib/supabaseClient';
+import * as Linking from 'expo-linking';
 import { DeviceLocalStorage } from '../src/lib/localStorage';
 import { validateSupabaseSession } from '../src/lib/sessionValidator';
 import { syncResetService } from '../src/services/syncResetService';
@@ -15,6 +16,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any; needsVerification?: boolean; needsGoogleAuth?: boolean }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: (options?: { redirectTo?: string }) => Promise<{ error: any }>;
+  signInWithApple: () => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   resendVerification: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -45,27 +47,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       userExists: !!user,
       sessionExists: !!session
     });
-    
+
     // Prevent multiple initializations
     if (isInitialized.current) {
       console.log('=== AUTH CONTEXT: Already initialized, skipping ===');
       return;
     }
-    
+
     console.log('=== AUTH CONTEXT useEffect TRIGGERED ===');
     console.log('0a. useEffect dependency array changed');
-    
+
     // Platform-specific URL logging (guard window access on native)
     const isWeb = Platform.OS === 'web';
     const currentHref = isWeb ? (typeof window !== 'undefined' ? (window.location?.href ?? 'N/A') : 'N/A') : 'N/A (mobile)';
     const currentSearch = isWeb ? (typeof window !== 'undefined' ? (window.location?.search ?? 'N/A') : 'N/A') : 'N/A (mobile)';
     console.log('0b. Current window.location.href:', currentHref);
     console.log('0c. Current window.location.search:', currentSearch);
-    
+
     const getInitialSession = async () => {
       console.log('=== AUTH CONTEXT INITIALIZATION ===');
       console.log('1. Getting initial session...');
-      
+
       try {
         // Regular session check
         console.log('4. Checking regular session...');
@@ -108,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('1b. Supabase auth available:', !!supabase.auth);
       console.log('1c. Supabase auth methods:', Object.keys(supabase.auth || {}));
       console.log('1d. Supabase auth methods ready');
-      
+
       getInitialSession();
     }, 100);
 
@@ -121,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('User ID:', session?.user?.id || 'No user');
         console.log('User email:', session?.user?.email || 'No email');
         console.log('Access token exists:', !!session?.access_token);
-        
+
         // Always update state for auth state changes
         console.log('Updating AuthContext state for event:', event);
         setSession(session);
@@ -156,11 +158,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await createUserPreferencesIfNeeded(session.user.id);
           }, 2000);
         }
-        
+
         if (event === 'TOKEN_REFRESHED') {
           console.log('DEBUG: Token refreshed for user:', session?.user?.id);
         }
-        
+
         if (event === 'SIGNED_OUT') {
           console.log('DEBUG: User signed out');
           setSyncReady(false); // NEW: Reset sync readiness on sign out
@@ -171,7 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Mark as initialized to prevent re-runs
     isInitialized.current = true;
-    
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -199,27 +201,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     console.log('=== SUPABASE SIGNIN DEBUG START ===');
     console.log('1. Calling supabase.auth.signInWithPassword with email:', email);
-    
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       console.log('2. Supabase signIn response data:', data);
       console.log('3. Supabase signIn response error:', error);
-      
+
       if (error) {
         console.error('4. SignIn failed with error:', error.message);
-        
+
         // Only check for actual email verification errors, not "Invalid login credentials"
-        if (error.message.includes('email not confirmed') || 
-            error.message.includes('not verified') ||
-            error.message.includes('confirm your email')) {
+        if (error.message.includes('email not confirmed') ||
+          error.message.includes('not verified') ||
+          error.message.includes('confirm your email')) {
           console.log('5. Email verification required');
           return { error: null, needsVerification: true };
         }
-        
+
         // Return the actual error for all other cases (wrong password, etc.)
         return { error };
       } else {
@@ -240,16 +242,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('=== SUPABASE SIGNUP DEBUG START ===');
     console.log('1. Calling supabase.auth.signUp with email:', email);
     console.log('1a. AUTH CONTEXT VERSION: Enhanced with detailed logging');
-    
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
-      
+
       console.log('2. Supabase signUp response data:', data);
       console.log('3. Supabase signUp response error:', error);
-      
+
       if (error) {
         console.error('4. SignUp failed with error:', error.message);
         return { error };
@@ -271,19 +273,119 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithGoogle = async (options?: { redirectTo?: string }) => {
-    const { error } = await supabaseSignInWithGoogle();
-    return { error };
+    try {
+      const { result, error } = await supabaseSignInWithGoogle();
+
+      if (error) return { error };
+
+      if (result?.type === 'success' && result.url) {
+        console.log('🔄 AuthContext: OAuth success, processing URL...');
+
+        // Parse the URL to get the code
+        const parsed = Linking.parse(result.url);
+        const code = parsed.queryParams?.code as string;
+
+        if (code) {
+          console.log('🔑 AuthContext: Exchanging code for session...');
+          const { data, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+
+          if (sessionError) {
+            console.error('❌ AuthContext: Exchange error:', sessionError.message);
+            return { error: sessionError };
+          }
+
+          if (data.session) {
+            console.log('✅ AuthContext: Session exchanged successfully');
+            setSession(data.session);
+            setUser(data.session.user);
+          }
+        } else {
+          console.warn('⚠️ AuthContext: No code found in redirect URL');
+        }
+      }
+
+      return { error: null };
+    } catch (e: any) {
+      console.error('❌ AuthContext: Google Sign-In Error:', e.message);
+      return { error: e };
+    }
+  };
+
+  const signInWithApple = async () => {
+    console.log('=== APPLE SIGNIN DEBUG START ===');
+    try {
+      if (Platform.OS !== 'ios') {
+        throw new Error('Apple Sign-In is only supported on iOS');
+      }
+
+      const { signInAsync, AppleAuthenticationScope } = await import('expo-apple-authentication');
+      const Crypto = await import('expo-crypto');
+
+      // Generate a random nonce
+      const rawNonce = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+      // Use the algorithm directly as a string to avoid enum import issues
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        rawNonce
+      );
+
+      console.log('1. Generated nonce:', { rawNonce, hashedNonce });
+
+      const credential = await signInAsync({
+        requestedScopes: [
+          AppleAuthenticationScope.FULL_NAME,
+          AppleAuthenticationScope.EMAIL,
+        ],
+        nonce: hashedNonce,
+      });
+
+      console.log('2. Apple credential received');
+      console.log('   Identity Token length:', credential.identityToken?.length);
+      console.log('   Auth Code length:', credential.authorizationCode?.length);
+
+      if (!credential.identityToken) {
+        throw new Error('No identity token provided by Apple');
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+        nonce: rawNonce, // Supabase expects the RAW nonce, not the hashed one
+      });
+
+      console.log('3. Supabase signInWithIdToken result:', error ? 'Error' : 'Success');
+
+      if (error) {
+        console.error('!!! SUPABASE ERROR DETAILS !!!');
+        console.error(JSON.stringify(error, null, 2));
+        return { error };
+      }
+
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.session.user);
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Apple Sign-In Error:', error);
+      console.error('Full Error Object:', JSON.stringify(error, null, 2));
+      return { error };
+    } finally {
+      console.log('=== APPLE SIGNIN DEBUG END ===');
+    }
   };
 
   const resetPassword = async (email: string) => {
     console.log('=== PASSWORD RESET DEBUG START ===');
     console.log('1. Password reset requested for email:', email);
-    
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'com.warrilo.mobile://reset-password',
       });
-      
+
       if (error) {
         console.error('2. Password reset error:', error.message);
         return { error };
@@ -302,13 +404,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resendVerification = async (email: string) => {
     console.log('=== RESEND VERIFICATION DEBUG START ===');
     console.log('1. Resend verification requested for email:', email);
-    
+
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email
       });
-      
+
       if (error) {
         console.error('2. Resend verification error:', error.message);
         return { error };
@@ -329,7 +431,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('🔄 AuthContext: Starting sign out process...');
       console.log('🔄 AuthContext: Current user ID:', user?.id);
       console.log('🔄 AuthContext: Current session exists:', !!session);
-      
+
       // Clear all local storage data first
       console.log('🗑️ AuthContext: Clearing local storage data...');
       try {
@@ -339,11 +441,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('⚠️ AuthContext: Local storage clear warning:', storageError);
         // Continue with sign out even if storage clear fails
       }
-      
+
       // Reset all sync states (including hasInitialSyncedRef)
       console.log('🔄 AuthContext: Resetting sync states...');
       syncResetService.resetAllSyncStates();
-      
+
       // Sign out from Supabase
       console.log('🔐 AuthContext: Signing out from Supabase...');
       const { error } = await supabase.auth.signOut();
@@ -351,11 +453,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('❌ AuthContext: Supabase sign out error:', error);
         throw error;
       }
-      
+
       console.log('✅ AuthContext: Supabase sign out completed successfully');
-      
+
       console.log('✅ AuthContext: Supabase sign out completed - auth state listener will handle state updates');
-      
+
     } catch (error) {
       console.error('❌ AuthContext: Error during sign out:', error);
       throw error;
@@ -371,6 +473,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signInWithGoogle,
+    signInWithApple,
     resetPassword,
     resendVerification,
     signOut,

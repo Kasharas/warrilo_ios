@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { AppState, AppStateStatus } from 'react-native'
-import { backgroundSyncService } from '../services/backgroundSyncService'
+import { backgroundSyncService } from '../services/backgroundSyncService' // Kept for type usage if needed, or remove if unused
 import { syncStatusService } from '../services/syncStatusService'
 import { syncResetService } from '../services/syncResetService'
 import { useAuth } from '../../contexts/AuthContext'
+import { useSync } from '../../contexts/SyncContext'
 
 interface UseStartupSyncOptions {
   enableAutoSync?: boolean
@@ -23,7 +24,8 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
   } = options
 
   const { user, loading: authLoading, syncReady } = useAuth()
-  
+  const { triggerSync } = useSync()
+
   const retryCountRef = useRef(0)
   const syncIntervalRef = useRef<number | null>(null)
   const hasInitialSyncedRef = useRef(false)
@@ -48,15 +50,16 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
     console.log('Retry attempt:', retryCountRef.current + 1)
 
     try {
-      const result = await backgroundSyncService.performSync(user.id)
-      
-      if (result.success) {
+      // Use triggerSync from context so UI gets updated
+      const result = await triggerSync()
+
+      if (result?.success) {
         retryCountRef.current = 0 // Reset retry count on success
         console.log('Startup sync completed successfully')
       } else if (retryOnFailure && retryCountRef.current < maxRetries) {
         retryCountRef.current++
         console.log(`Sync failed, scheduling retry ${retryCountRef.current}/${maxRetries}`)
-        
+
         // Exponential backoff: 2s, 4s, 8s
         const retryDelay = Math.pow(2, retryCountRef.current) * 1000
         setTimeout(performSyncWithRetry, retryDelay)
@@ -75,10 +78,10 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
 
   // Initial sync on app startup
   useEffect(() => {
-    if (!authLoading && user?.id && enableAutoSync && !hasInitialSyncedRef.current) {
+    if (!authLoading && user?.id && enableAutoSync && !hasInitialSyncedRef.current && syncReady) {
       console.log('Triggering initial startup sync')
       hasInitialSyncedRef.current = true
-      
+
       // Small delay to ensure app is fully loaded
       const timeoutId = setTimeout(() => {
         performSyncWithRetry()
@@ -86,7 +89,7 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
 
       return () => clearTimeout(timeoutId)
     }
-  }, [user?.id, authLoading, enableAutoSync])
+  }, [user?.id, authLoading, enableAutoSync, syncReady])
 
   // Handle app state changes (foreground/background)
   useEffect(() => {
@@ -95,13 +98,13 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (nextAppState === 'active' && hasInitialSyncedRef.current) {
         console.log('App became active, checking sync status')
-        
+
         // Check if enough time has passed since last sync
         const lastSyncTime = syncStatusService.getLastSyncTime()
         if (lastSyncTime) {
           const timeSinceLastSync = Date.now() - lastSyncTime.getTime()
           const syncIntervalMs = syncIntervalMinutes * 60 * 1000
-          
+
           if (timeSinceLastSync > syncIntervalMs) {
             console.log('Sufficient time passed, triggering sync')
             retryCountRef.current = 0 // Reset retry count for app resume
@@ -123,7 +126,7 @@ export const useStartupSync = (options: UseStartupSyncOptions = {}) => {
     if (!user?.id || syncIntervalMinutes <= 0) return
 
     console.log(`Setting up periodic sync every ${syncIntervalMinutes} minutes`)
-    
+
     syncIntervalRef.current = setInterval(() => {
       if (!syncStatusService.isCurrentlySyncing()) {
         console.log('Periodic sync triggered')

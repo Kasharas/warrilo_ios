@@ -17,7 +17,7 @@ import { requestNotificationPermissions } from '@/src/utils/permissions';
 function AppContent() {
   const { user, syncReady, loading } = useAuth();
   const router = useRouter();
-  
+
   // Debug auth state changes
   useEffect(() => {
     console.log('🔐 APP CONTENT: Auth state changed');
@@ -25,20 +25,20 @@ function AppContent() {
     console.log('🔐 APP CONTENT: Loading:', loading);
     console.log('🔐 APP CONTENT: SyncReady:', syncReady);
   }, [user, loading, syncReady]);
-  
+
   // Auth-driven navigation guard
   useEffect(() => {
     console.log('🔐 AUTH GUARD: Checking auth state for navigation...');
     console.log('🔐 AUTH GUARD: Loading:', loading);
     console.log('🔐 AUTH GUARD: User exists:', !!user);
     console.log('🔐 AUTH GUARD: User ID:', user?.id || 'none');
-    
+
     // Don't navigate while still loading
     if (loading) {
       console.log('🔐 AUTH GUARD: Still loading, waiting...');
       return;
     }
-    
+
     // Navigate based on auth state
     if (user) {
       console.log('🔐 AUTH GUARD: User authenticated, ensuring in tabs');
@@ -50,7 +50,7 @@ function AppContent() {
       router.replace('/welcome');
     }
   }, [user, loading, router]);
-  
+
   // Additional effect to catch sign out specifically
   useEffect(() => {
     if (!loading && !user) {
@@ -58,17 +58,17 @@ function AppContent() {
       router.replace('/welcome');
     }
   }, [user, loading, router]);
-  
-  // App initialization and deep link handling
+
+  // App initialization
   useEffect(() => {
-    console.log('APP LAYOUT: Setting up app and deep link listeners...');
-    
+    console.log('APP LAYOUT: Setting up app...');
+
     // Test Secure Storage setup
     testSecureStorage();
-    
+
     // Validate Auth Configuration
     validateAuthConfiguration();
-    
+
     // Request notification permissions on app startup
     requestNotificationPermissions().then(granted => {
       if (granted) {
@@ -77,17 +77,17 @@ function AppContent() {
         console.log('❌ Notification permissions denied');
       }
     });
-    
+
     // Configure Google Sign-In (commented out until native build)
     // GoogleSignin.configure({
     //   webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com', // Replace with your actual web client ID
     //   // scopes: ['openid', 'profile', 'email'], // Optional
     // });
-    
-    // Note: Deep link handling no longer needed with React Native Google Sign-In
-    // The Google Sign-In flow handles authentication internally
-  }, [router]);
-  
+
+    // Note: Deep link handling is now automatically managed by Supabase SDK
+    // with detectSessionInUrl: true in lib/supabaseClient.ts
+  }, []);
+
   // Only trigger startup sync when both conditions are met
   useStartupSync({
     enableAutoSync: !!user && syncReady,
@@ -99,7 +99,7 @@ function AppContent() {
 
   return (
     <Stack
-      screenOptions={{ 
+      screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: theme.colors.white }
       }}
@@ -120,6 +120,7 @@ function AppContent() {
 }
 
 export default function RootLayout() {
+  console.log('🚀🚀🚀 ROOT LAYOUT INITIALIZING - BUNDLE VERSION: ' + new Date().getTime());
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -132,48 +133,9 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Deep link handling
-  useEffect(() => {
-    const handleDeepLink = (url: string) => {
-      console.log('📱 Deep link received:', url);
-      
-      if (url.includes('auth-callback')) {
-        console.log('🔄 Routing to auth callback...');
-        // Preserve query params (e.g., ?code=...) when navigating to the callback screen
-        const parsed = Linking.parse(url);
-        const queryParams: any = parsed?.queryParams || {};
-        const codeParam = typeof queryParams.code === 'string' ? queryParams.code : undefined;
-
-        if (codeParam) {
-          console.log('🔑 Found auth code, navigating with code:', codeParam);
-          router.push({ pathname: '/auth-callback', params: { code: codeParam } } as any);
-        } else {
-          console.warn('⚠️ No code found in deep link, passing full URL');
-          router.push({ pathname: '/auth-callback', params: { url: encodeURIComponent(url) } } as any);
-        }
-      }
-    };
-
-    // Handle deep links when app is already open
-    const subscription = Linking.addEventListener('url', ({ url }) => {
-      handleDeepLink(url);
-    });
-
-    // Handle deep links when app is opened from closed state
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink(url);
-      }
-    });
-
-    return () => {
-      subscription?.remove();
-    };
-  }, [router]);
-
   if (isLoading) {
     return (
-      <View style={{ flex:1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.white }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.white }}>
         <ActivityIndicator size="large" color={theme.colors.systemBlue} />
         <Text style={{ marginTop: 16, color: theme.colors.neutral[600] }}>Initializing...</Text>
       </View>

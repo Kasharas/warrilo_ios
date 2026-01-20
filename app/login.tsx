@@ -84,17 +84,25 @@ export default function LoginScreen() {
           ]
         );
       } else if (error) {
-        console.error('6. SignIn error:', error.message);
-        setError(error.message);
+        // Use warn instead of error to avoid dev popups
+        console.warn('6. SignIn failed handled in UI:', error.message);
+
+        // Handle specific error messages to be more user-friendly if needed
+        let userMessage = error.message;
+        if (error.message === 'Invalid login credentials') {
+          userMessage = 'Invalid email or password. Please try again.';
+        }
+
+        setError(userMessage);
       } else {
-        console.log('6. SignIn successful - user will be redirected automatically');
+        console.log('6. SignIn successful');
         // Success - user will be redirected automatically by AuthContext
       }
-    } catch (error) {
-      console.error('7. Unexpected error during signIn:', error);
-      setError('An unexpected error occurred');
+    } catch (e: any) {
+      console.error('7. Unexpected fatal error during signIn:', e);
+      setError('An unexpected error occurred. Please check your connection.');
     } finally {
-      console.log('8. Login process completed, setting loading to false');
+      console.log('8. Login process completed');
       setLoading(false);
     }
 

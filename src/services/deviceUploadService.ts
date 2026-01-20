@@ -10,215 +10,111 @@ import { validateSupabaseSession } from '../lib/sessionValidator'
 
 export const uploadDevice = async (
   formData: AddDeviceFormData,
-  fileData: DeviceFileData,
-  userId: string
+  fileData: DeviceFileData
 ): Promise<DeviceUploadResult> => {
   try {
-    console.log('Mobile upload: Starting device upload with files...', {
-      deviceName: formData.deviceName,
-      hasPhoto: !!fileData.devicePhoto,
-      hasReceipt: !!fileData.receiptPhoto,
-      platform: 'mobile'
-    });
+    console.log('========== UPLOAD START ==========');
 
-    // Validate session before upload operations
-    console.log('Mobile upload: Validating session...');
-    const sessionResult = await validateSupabaseSession();
-    
-    if (!sessionResult.isValid) {
-      console.error('Mobile upload: Aborted - invalid session:', {
-        error: sessionResult.error,
-        deviceName: formData.deviceName,
-        platform: 'mobile'
-      });
-      
-      return { 
-        success: false, 
-        error: `Upload failed: ${sessionResult.error}`,
-        details: 'Session validation failed before upload'
-      };
+    // Step 1: Validate session with refresh logic
+    console.log('Step 1: Validating session...');
+    let userId: string;
+
+    try {
+      // Try to refresh the session first
+      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshedSession) {
+        userId = refreshedSession.user.id;
+        console.log('✓ Session refreshed successfully');
+      } else {
+        // Fallback to existing session
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        if (!existingSession) {
+          throw new Error('No active session - please log in again');
+        }
+        userId = existingSession.user.id;
+        console.log('✓ Using existing session');
+      }
+    } catch (sessionError) {
+      console.error('❌ Session validation failed:', sessionError);
+      return { success: false, error: 'Authentication failed. Please log in again.' };
     }
-    
-    console.log('Mobile upload: Session validated successfully, proceeding with uploads...', {
-      userId: sessionResult.session?.user.id,
-      deviceName: formData.deviceName,
-      platform: 'mobile'
-    });
+    console.log('✓ User ID:', userId);
 
-    // Step 1: Upload files in parallel
-    const uploadPromises: Promise<any>[] = []
-    
+    // Step 2: Upload files
+    console.log('Step 2: Uploading files...');
+    const uploadPromises: Promise<any>[] = [];
+
     if (fileData.devicePhoto) {
-      uploadPromises.push(
-        uploadDevicePhoto({ 
-          userId, 
-          photo: fileData.devicePhoto 
-        })
-      )
+      uploadPromises.push(uploadDevicePhoto({ userId, photo: fileData.devicePhoto }));
     } else {
-      uploadPromises.push(Promise.resolve({ success: true, url: null }))
+      uploadPromises.push(Promise.resolve({ success: true, url: null }));
     }
 
     if (fileData.receiptPhoto) {
-      uploadPromises.push(
-        uploadReceiptPhoto({ 
-          userId, 
-          receipt: fileData.receiptPhoto 
-        })
-      )
+      uploadPromises.push(uploadReceiptPhoto({ userId, receipt: fileData.receiptPhoto }));
     } else {
-      uploadPromises.push(Promise.resolve({ success: true, url: null }))
+      uploadPromises.push(Promise.resolve({ success: true, url: null }));
     }
 
-    const [photoResult, receiptResult] = await Promise.all(uploadPromises)
+    const [photoResult, receiptResult] = await Promise.all(uploadPromises);
+    console.log('✓ Photo uploaded:', photoResult);
+    console.log('✓ Receipt uploaded:', receiptResult);
 
-    // Check for upload errors
-    if (!photoResult.success) {
-      return { 
-        success: false, 
-        error: `Photo upload failed: ${photoResult.error}` 
-      }
-    }
+    if (!photoResult.success) return { success: false, error: photoResult.error };
+    if (!receiptResult.success) return { success: false, error: receiptResult.error };
 
-    if (!receiptResult.success) {
-      return { 
-        success: false, 
-        error: `Receipt upload failed: ${receiptResult.error}` 
-      }
-    }
-
-    // Step 2: Prepare device data
+    // Step 3: Prepare data
+    console.log('Step 3: Preparing device data...');
     const deviceData = prepareDeviceData(
       formData,
       photoResult.url || null,
       receiptResult.url || null,
       userId
-    )
+    );
+    console.log('✓ Device data:', deviceData);
 
-    // Step 3: Insert device into database
+    // Step 4: Insert to database
+    console.log('Step 4: Inserting to database...');
     const { data: device, error: insertError } = await supabase
       .from('devices')
       .insert(deviceData)
       .select()
-      .single()
+      .single();
 
     if (insertError) {
-      console.error('Device insertion error:', insertError)
-      
-      // Rollback: Delete uploaded files if database insertion fails
-      if (photoResult.url) {
-        const photoPath = photoResult.url.split('/').slice(-2).join('/')
-        await supabase.storage.from('device-photos').remove([photoPath])
-      }
-      if (receiptResult.url) {
-        const receiptPath = receiptResult.url.split('/').slice(-2).join('/')
-        await supabase.storage.from('device-invoices').remove([receiptPath])
-      }
-
-      return { 
-        success: false, 
-        error: insertError.message 
-      }
+      console.error('❌ Database error:', {
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+        code: insertError.code
+      });
+      return { success: false, error: insertError.message };
     }
 
-    // ✅ STEP 1 COMPLETE: Create warranty alerts after successful device insertion
+
+    console.log('🔵 [STEP 6: ALERTS] Creating warranty reminders...');
     try {
-      console.log('🎯 Creating warranty alerts for device:', device.id);
-      console.log('🔍 Form data for warranty alerts:', {
-        deviceId: device.id,
-        userId: userId,
-        purchaseDate: formData.purchaseDate,
-        warrantyMonths: formData.warrantyMonths
-      });
-      
-      // Create 3 warranty alerts (30, 7, 1 day before expiry)
       const warrantyAlerts = createWarrantyAlerts({
         deviceId: device.id,
-        localDeviceId: formData.localDeviceId, // Include local device ID for local storage
+        localDeviceId: formData.localDeviceId,
         userId: userId,
         purchaseDate: formData.purchaseDate || '',
         warrantyMonths: formData.warrantyMonths || 0,
-        deviceName: formData.deviceName // Include device name for local storage
+        deviceName: formData.deviceName
       });
-      
-      console.log('📅 Warranty alerts created locally:', warrantyAlerts);
-      
+
       if (warrantyAlerts.length > 0) {
-        console.log(`📅 Created ${warrantyAlerts.length} warranty alerts`);
-        
-        // Store alerts in Supabase warranty_reminders table
-        const createdAlerts = await warrantyAlertService.createAlerts(warrantyAlerts);
-        console.log(`✅ Successfully stored ${createdAlerts.length} warranty alerts in Supabase`);
-        
-        // ADD THIS LOCAL STORAGE CODE:
-        if (createdAlerts && createdAlerts.length > 0) {
-          try {
-            // Store warranty alerts locally for AlertsScreen
-            await AsyncStorage.setItem('warranty_alerts', JSON.stringify(createdAlerts));
-            console.log(`💾 Stored ${createdAlerts.length} warranty alerts locally`);
-          } catch (error) {
-            console.error('Error storing warranty alerts locally:', error);
-          }
-        }
-      } else {
-        console.log('⚠️ No warranty alerts created (invalid warranty info)');
+        await warrantyAlertService.createAlerts(warrantyAlerts);
+        await AsyncStorage.setItem('warranty_alerts', JSON.stringify(warrantyAlerts));
+        console.log('✅ [STEP 6: SUCCESS] Alerts stored');
       }
-    } catch (alertError) {
-      // Don't fail the device upload if warranty alerts fail
-      console.error('❌ Error creating warranty alerts:', alertError);
-      console.log('⚠️ Device uploaded successfully, but warranty alerts failed');
-      
-      // ✅ ADDITIONAL DEBUGGING
-      if (alertError && typeof alertError === 'object') {
-        console.error('❌ Alert error details:', JSON.stringify(alertError, null, 2));
-      }
+    } catch (e) {
+      console.warn('⚠️ [STEP 6: WARNING] Alert creation non-fatal error:', e);
     }
 
-    // ✅ STEP 2: Update local device with Supabase ID
-    try {
-      console.log('🔄 Updating local device with Supabase ID:', device.id);
-      
-      // Get the original local device data
-      const devicesData = await AsyncStorage.getItem('devices');
-      if (devicesData) {
-        const devices = JSON.parse(devicesData);
-        // Find device by matching name and purchase date (most reliable way)
-        const localDeviceIndex = devices.findIndex((d: any) => 
-          d.name === formData.deviceName && 
-          d.purchase_date === formData.purchaseDate &&
-          d.sync_status === 'pending' // Only update devices that haven't been synced yet
-        );
-        
-        if (localDeviceIndex >= 0) {
-          // Update the local device with Supabase ID
-          devices[localDeviceIndex] = {
-            ...devices[localDeviceIndex],
-            id: device.id, // Update with Supabase ID
-            sync_status: 'synced',
-            last_sync: new Date().toISOString()
-          };
-          
-          await AsyncStorage.setItem('devices', JSON.stringify(devices));
-          console.log('✅ Local device updated with Supabase ID:', device.id);
-        } else {
-          console.warn('⚠️ Local device not found for name:', formData.deviceName, 'date:', formData.purchaseDate);
-        }
-      }
-    } catch (updateError) {
-      console.error('❌ Error updating local device with Supabase ID:', updateError);
-      // Don't fail the entire upload for this
-    }
-
-    return { 
-      success: true, 
-      deviceId: device.id 
-    }
-
+    return { success: true, deviceId: device.id };
   } catch (error) {
-    console.error('Device upload service error:', error)
-    return { 
-      success: false, 
-      error: 'An unexpected error occurred during upload' 
-    }
+    console.error('❌ [STEP 3: FATAL ERROR] Service level failure:', error);
+    return { success: false, error: 'Unexpected error' };
   }
 }

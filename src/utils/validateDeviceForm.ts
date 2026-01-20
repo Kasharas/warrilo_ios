@@ -7,7 +7,7 @@ export interface ValidationResult {
 
 export const validateDeviceForm = (formData: AddDeviceFormData): ValidationResult => {
   console.log('🔍 Validating form data:', formData);
-  
+
   const errors: Record<string, string> = {}
 
   // Required fields validation
@@ -36,15 +36,15 @@ export const validateDeviceForm = (formData: AddDeviceFormData): ValidationResul
   if (formData.purchaseDate) {
     const purchaseDate = new Date(formData.purchaseDate)
     const today = new Date()
-    
+
     if (purchaseDate > today) {
       errors.purchaseDate = 'Purchase date cannot be in the future'
     }
-    
+
     // Check if date is too far in the past (e.g., more than 50 years)
     const fiftyYearsAgo = new Date()
     fiftyYearsAgo.setFullYear(today.getFullYear() - 50)
-    
+
     if (purchaseDate < fiftyYearsAgo) {
       errors.purchaseDate = 'Purchase date seems too far in the past'
     }

@@ -7,10 +7,10 @@ type DeviceInsert = Database['public']['Tables']['devices']['Insert']
 // Safe date parsing function (same as in warrantyAlertUtils.ts)
 const parseDate = (dateString: string): Date => {
   if (!dateString) return new Date();
-  
+
   const isoDate = parseISO(dateString);
   if (isValid(isoDate)) return isoDate;
-  
+
   const fallbackDate = new Date(dateString);
   return isValid(fallbackDate) ? fallbackDate : new Date();
 };
@@ -42,7 +42,7 @@ export const prepareDeviceData = (
     category: formData.category || null,
     purchase_date: formData.purchaseDate || null,
     purchase_price: formData.purchasePrice || null,
-    store_name: formData.store.trim() || null,
+    supplier: formData.store.trim() || null,
     warranty_months: formData.warrantyMonths || null,
     warranty_end_date: warrantyEndDate,
     photo_irl: photoUrl,

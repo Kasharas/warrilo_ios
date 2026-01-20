@@ -19,7 +19,7 @@ export type Database = {
           category: string | null
           purchase_date: string | null
           purchase_price: number | null
-          store_name: string | null
+          supplier: string | null
           warranty_months: number | null
           warranty_end_date: string | null
           photo_irl: string | null
@@ -36,7 +36,7 @@ export type Database = {
           category?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
-          store_name?: string | null
+          supplier?: string | null
           warranty_months?: number | null
           warranty_end_date?: string | null
           photo_irl?: string | null

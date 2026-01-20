@@ -212,22 +212,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('3. Supabase signIn response error:', error);
 
       if (error) {
-        console.error('4. SignIn failed with error:', error.message);
+        // Use warn instead of error to avoid triggering dev-mode LogBox for expected auth failures
+        console.warn('4. SignIn failed:', error.message);
 
-        // Only check for actual email verification errors, not "Invalid login credentials"
-        if (error.message.includes('email not confirmed') ||
-          error.message.includes('not verified') ||
-          error.message.includes('confirm your email')) {
+        // Check for email verification errors
+        if (error.message.toLowerCase().includes('email not confirmed') ||
+          error.message.toLowerCase().includes('not verified') ||
+          error.message.toLowerCase().includes('confirm your email')) {
           console.log('5. Email verification required');
           return { error: null, needsVerification: true };
         }
 
-        // Return the actual error for all other cases (wrong password, etc.)
+        // Return the actual error for all other cases
         return { error };
       } else {
         console.log('4. SignIn successful');
-        console.log('5. User ID:', data.user?.id || 'No ID');
-        console.log('6. User email confirmed:', data.user?.email_confirmed_at ? 'Yes' : 'No');
         return { error: null };
       }
     } catch (error) {
@@ -427,40 +426,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    console.log('🔄 AuthContext: Starting robust sign out process...');
+
     try {
-      console.log('🔄 AuthContext: Starting sign out process...');
-      console.log('🔄 AuthContext: Current user ID:', user?.id);
-      console.log('🔄 AuthContext: Current session exists:', !!session);
+      // 1. Manually clear state immediately for instant UI feedback
+      console.log('🧹 AuthContext: Manually clearing user state...');
+      setUser(null);
+      setSession(null);
+      setSyncReady(false);
+      setLastSyncTime(null);
 
-      // Clear all local storage data first
-      console.log('🗑️ AuthContext: Clearing local storage data...');
-      try {
-        await DeviceLocalStorage.clearAll();
-        console.log('✅ AuthContext: Local storage cleared successfully');
-      } catch (storageError) {
-        console.warn('⚠️ AuthContext: Local storage clear warning:', storageError);
-        // Continue with sign out even if storage clear fails
-      }
+      // 2. Perform cleanup tasks in parallel (non-blocking if possible)
+      console.log('🗑️ AuthContext: Triggering secondary cleanup...');
 
-      // Reset all sync states (including hasInitialSyncedRef)
-      console.log('🔄 AuthContext: Resetting sync states...');
-      syncResetService.resetAllSyncStates();
+      // We wrap these in their own try/catch to ensure one failure doesn't stop others
+      Promise.allSettled([
+        DeviceLocalStorage.clearAll().catch(e => console.warn('LocalStorage clear failed:', e)),
+        Promise.resolve(syncResetService.resetAllSyncStates())
+      ]);
 
-      // Sign out from Supabase
-      console.log('🔐 AuthContext: Signing out from Supabase...');
+      // 3. Finally, tell Supabase to sign out
+      console.log('🔐 AuthContext: Calling Supabase signOut...');
       const { error } = await supabase.auth.signOut();
+
       if (error) {
-        console.error('❌ AuthContext: Supabase sign out error:', error);
-        throw error;
+        console.warn('⚠️ AuthContext: Supabase reported sign out error (ignoring):', error.message);
+      } else {
+        console.log('✅ AuthContext: Supabase sign out successful');
       }
-
-      console.log('✅ AuthContext: Supabase sign out completed successfully');
-
-      console.log('✅ AuthContext: Supabase sign out completed - auth state listener will handle state updates');
 
     } catch (error) {
-      console.error('❌ AuthContext: Error during sign out:', error);
-      throw error;
+      console.error('❌ AuthContext: Critical error during sign out:', error);
+      // Even on critical error, ensure we at least clear the local state
+      setUser(null);
+      setSession(null);
     }
   };
 

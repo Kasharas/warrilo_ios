@@ -1,10 +1,11 @@
 {
   "expo": {
     "name": "Warrilo",
-    "slug": "warrilo",
+    "slug": "warrilo-mobile",
     "version": "1.0.0",
     "newArchEnabled": true,
     "scheme": "warrilo",
+    "icon": "./assets/images/icon.png",
     "web": {
       "bundler": "metro",
       "output": "single",
@@ -28,6 +29,7 @@
         "NSPhotoLibraryUsageDescription": "Warrilo needs access to your photo library to select device and receipt photos.",
         "NSPhotoLibraryAddUsageDescription": "Warrilo needs permission to save photos to your library when you download warranty documents.",
         "NSUserNotificationsUsageDescription": "Warrilo uses notifications to remind you when your warranties are about to expire.",
+        "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
@@ -65,8 +67,7 @@
         {
           "origin": "warrilo://"
         }
-      ],
-      "expo-web-browser"
+      ]
     ]
   }
 }

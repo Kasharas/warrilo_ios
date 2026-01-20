@@ -1,4 +1,6 @@
 import { supabase } from '../../lib/supabaseClient'
+import * as FileSystem from 'expo-file-system'
+import { decode } from 'base64-arraybuffer'
 
 interface PhotoUploadOptions {
   userId: string
@@ -9,33 +11,33 @@ interface PhotoUploadOptions {
   }
 }
 
-export const uploadDevicePhoto = async ({ 
-  userId, 
-  photo 
+export const uploadDevicePhoto = async ({
+  userId,
+  photo
 }: PhotoUploadOptions): Promise<{ success: boolean; url?: string; error?: string }> => {
+  console.log('🔵 [STEP 4c: PHOTO] uploadDevicePhoto started (FileSystem)', { type: photo.type });
   try {
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!allowedTypes.includes(photo.type)) {
-      return { 
-        success: false, 
-        error: 'Invalid file type. Please use JPEG, PNG, WebP, or GIF.' 
-      }
+      console.error('❌ [STEP 4c: FAILED] Invalid type:', photo.type);
+      return { success: false, error: 'Invalid file type.' }
     }
 
-    // ✅ FIXED: Images are already compressed from the add/edit device screen
-    // No need to compress again - use the compressed URI directly
-    console.log('Using pre-compressed device photo for upload...');
-    const imageUriForUpload = photo.uri; // Already compressed from local storage
-
-    // Generate unique filename (always JPEG after compression)
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
 
-    // For React Native, we need to read the file as ArrayBuffer directly
-    const response = await fetch(imageUriForUpload);
-    const arrayBuffer = await response.arrayBuffer();
+    console.log('🔵 [STEP 4c: READING] Reading file from disk via FileSystem:', photo.uri);
 
-    // Upload to Supabase storage
+    // Use expo-file-system to read as Base64 (Reliable)
+    const base64 = await FileSystem.readAsStringAsync(photo.uri, {
+      encoding: FileSystem.EncodingType.Base64
+    });
+    console.log('   -> Read success. Base64 length:', base64.length);
+
+    // Decode base64 to ArrayBuffer using base64-arraybuffer
+    const arrayBuffer = decode(base64);
+    console.log('   -> Converted to ArrayBuffer. Size:', arrayBuffer.byteLength);
+
+    console.log('🔵 [STEP 4c: SUPABASE] Uploading to device-photos...');
     const { error: uploadError } = await supabase.storage
       .from('device-photos')
       .upload(fileName, arrayBuffer, {
@@ -44,28 +46,16 @@ export const uploadDevicePhoto = async ({
       })
 
     if (uploadError) {
-      console.error('Upload error:', uploadError)
-      return { 
-        success: false, 
-        error: uploadError.message 
-      }
+      console.error('❌ [STEP 4c: FAILED] Supabase error:', uploadError);
+      return { success: false, error: uploadError.message }
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('device-photos')
-      .getPublicUrl(fileName)
-
-    return { 
-      success: true, 
-      url: publicUrl 
-    }
+    // Return the relative path (not public URL) for private buckets
+    console.log('✅ [STEP 4c: SUCCESS] File path:', fileName);
+    return { success: true, url: fileName }  // Store path, not public URL
 
   } catch (error) {
-    console.error('Device photo upload error:', error)
-    return { 
-      success: false, 
-      error: 'Failed to upload device photo' 
-    }
+    console.error('❌ [STEP 4c: FATAL ERROR]', error);
+    return { success: false, error: 'Failed (FS)' }
   }
 }

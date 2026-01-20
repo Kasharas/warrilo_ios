@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabaseClient'
-// ✅ FIXED: Removed unused import since we're no longer compressing here
+import * as FileSystem from 'expo-file-system'
+import { decode } from 'base64-arraybuffer'
 
 interface ReceiptUploadOptions {
   userId: string
@@ -10,105 +11,60 @@ interface ReceiptUploadOptions {
   }
 }
 
-export const uploadReceiptPhoto = async ({ 
-  userId, 
-  receipt 
+export const uploadReceiptPhoto = async ({
+  userId,
+  receipt
 }: ReceiptUploadOptions): Promise<{ success: boolean; url?: string; error?: string }> => {
+  console.log('🔵 [STEP 4: UTILS] uploadReceiptPhoto started (FileSystem)', { type: receipt.type });
   try {
-    // Validate file type
     const allowedTypes = [
       'application/pdf',
-      'image/jpeg', 
-      'image/png', 
+      'image/jpeg',
+      'image/png',
       'image/webp'
     ]
     if (!allowedTypes.includes(receipt.type)) {
-      return { 
-        success: false, 
-        error: 'Invalid file type. Please use PDF, JPEG, PNG, or WebP.' 
+      console.error('❌ [STEP 4: FAILED] Invalid file type:', receipt.type);
+      return {
+        success: false,
+        error: 'Invalid file type. Please use PDF, JPEG, PNG, or WebP.'
       }
     }
 
-    // Handle PDFs differently (no compression needed)
-    if (receipt.type === 'application/pdf') {
-      // Generate unique filename for PDF
-      const fileName = `${userId}/${Date.now()}-invoice-${Math.random().toString(36).substring(7)}.pdf`
-      
-      // For React Native, read the file as ArrayBuffer directly
-      const response = await fetch(receipt.uri);
-      const arrayBuffer = await response.arrayBuffer();
-
-      // Upload PDF to Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from('device-invoices')
-        .upload(fileName, arrayBuffer, {
-          contentType: receipt.type,
-          upsert: false
-        })
-
-      if (uploadError) {
-        console.error('Receipt upload error:', uploadError)
-        return { 
-          success: false, 
-          error: uploadError.message 
-        }
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('device-invoices')
-        .getPublicUrl(fileName)
-
-      return { 
-        success: true, 
-        url: publicUrl 
-      }
-    }
-
-    // ✅ FIXED: Image receipts are already compressed from the add/edit device screen
-    // No need to compress again - use the compressed URI directly
-    console.log('Using pre-compressed receipt image for upload...');
-    const imageUriForUpload = receipt.uri; // Already compressed from local storage
-
-    // Generate unique filename for compressed image
-    const fileExtension = 'jpg' // Always JPEG after compression
+    const fileExtension = receipt.type === 'application/pdf' ? 'pdf' : 'jpg'
     const fileName = `${userId}/${Date.now()}-invoice-${Math.random().toString(36).substring(7)}.${fileExtension}`
 
-    // For React Native, read the file as ArrayBuffer directly
-    const response = await fetch(imageUriForUpload);
-    const arrayBuffer = await response.arrayBuffer();
+    console.log('🔵 [STEP 4a: READING] Reading file from disk via FileSystem:', receipt.uri);
 
-    // Upload to Supabase storage
+    // Use expo-file-system to read as Base64 (Reliable)
+    const base64 = await FileSystem.readAsStringAsync(receipt.uri, {
+      encoding: FileSystem.EncodingType.Base64
+    });
+    console.log('   -> Read success. Base64 length:', base64.length);
+
+    // Decode base64 to ArrayBuffer using base64-arraybuffer
+    const arrayBuffer = decode(base64);
+    console.log('   -> Converted to ArrayBuffer. Size:', arrayBuffer.byteLength);
+
+    console.log('🔵 [STEP 4b: SUPABASE] Uploading to device-invoices...');
     const { error: uploadError } = await supabase.storage
       .from('device-invoices')
       .upload(fileName, arrayBuffer, {
-        contentType: 'image/jpeg', // Always JPEG after compression
+        contentType: receipt.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg',
         upsert: false
       })
 
     if (uploadError) {
-      console.error('Receipt upload error:', uploadError)
-      return { 
-        success: false, 
-        error: uploadError.message 
-      }
+      console.error('❌ [STEP 4b: FAILED] Supabase error:', uploadError);
+      return { success: false, error: uploadError.message }
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('device-invoices')
-      .getPublicUrl(fileName)
-
-    return { 
-      success: true, 
-      url: publicUrl 
-    }
+    // Return the relative path (not public URL) for private buckets
+    console.log('✅ [STEP 4b: SUCCESS] File path:', fileName);
+    return { success: true, url: fileName }  // Store path, not public URL
 
   } catch (error) {
-    console.error('Receipt upload error:', error)
-    return { 
-      success: false, 
-      error: 'Failed to upload receipt' 
-    }
+    console.error('❌ [STEP 4: FATAL ERROR]', error);
+    return { success: false, error: 'Failed to upload receipt (FS)' }
   }
 }

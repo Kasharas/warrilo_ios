@@ -20,9 +20,9 @@ export interface SupabaseDevice {
 
 class SupabaseDataService {
   private static instance: SupabaseDataService
-  
-  private constructor() {}
-  
+
+  private constructor() { }
+
   public static getInstance(): SupabaseDataService {
     if (!SupabaseDataService.instance) {
       SupabaseDataService.instance = new SupabaseDataService()
@@ -41,25 +41,48 @@ class SupabaseDataService {
 
       if (error) {
         // Check for authentication errors
-        if (error.message?.includes('AuthApiError') || 
-            error.message?.includes('invalid request') ||
-            error.message?.includes('auth code')) {
-          
+        if (error.message?.includes('AuthApiError') ||
+          error.message?.includes('invalid request') ||
+          error.message?.includes('auth code')) {
+
           console.error('Mobile background sync: Authentication error during fetch:', {
             error: error.message,
             userId,
             platform: 'mobile',
             errorType: 'AuthAPIError'
           });
-          
+
           throw new Error('Background sync failed: Authentication error. Please log out and log in again.');
         }
-        
+
         console.error('Error fetching devices from Supabase:', error)
         throw error
       }
 
-      return data || []
+      console.log(`📥 Fetched ${(data || []).length} devices from Supabase, converting to signed URLs...`);
+
+      // Convert relative storage paths to authenticated signed URLs (for private buckets)
+      const devicesWithSignedUrls = await Promise.all(
+        (data || []).map(async (device) => {
+          console.log(`🔄 Converting URLs for device: ${device.name} (${device.id})`);
+          console.log(`   📷 Original photo_irl: ${device.photo_irl}`);
+          console.log(`   📄 Original invoice_url: ${device.invoice_url}`);
+
+          const convertedDevice = {
+            ...device,
+            photo_irl: device.photo_irl ? await this.getSignedUrl(device.photo_irl, 'device-photos') : device.photo_irl,
+            invoice_url: device.invoice_url ? await this.getSignedUrl(device.invoice_url, 'device-invoices') : device.invoice_url,
+          };
+
+          console.log(`   ✅ Converted photo_irl: ${convertedDevice.photo_irl?.substring(0, 80)}...`);
+          console.log(`   ✅ Converted invoice_url: ${convertedDevice.invoice_url?.substring(0, 80)}...`);
+
+          return convertedDevice;
+        })
+      );
+
+      console.log(`✅ All URLs converted successfully, returning ${devicesWithSignedUrls.length} devices`);
+      return devicesWithSignedUrls
     } catch (error) {
       if (error instanceof Error && error.message.includes('AuthApiError')) {
         console.error('Mobile background sync: Caught AuthAPIError:', {
@@ -67,10 +90,10 @@ class SupabaseDataService {
           userId,
           platform: 'mobile'
         });
-        
+
         throw new Error('Background sync authentication error');
       }
-      
+
       console.error('Error in getUserDevices:', error)
       throw error
     }
@@ -86,20 +109,20 @@ class SupabaseDataService {
 
       if (error) {
         // Check for authentication errors
-        if (error.message?.includes('AuthApiError') || 
-            error.message?.includes('invalid request') ||
-            error.message?.includes('auth code')) {
-          
+        if (error.message?.includes('AuthApiError') ||
+          error.message?.includes('invalid request') ||
+          error.message?.includes('auth code')) {
+
           console.error('Mobile background sync: Authentication error during device IDs fetch:', {
             error: error.message,
             userId,
             platform: 'mobile',
             errorType: 'AuthAPIError'
           });
-          
+
           throw new Error('Background sync failed: Authentication error. Please log out and log in again.');
         }
-        
+
         console.error('Error fetching device IDs from Supabase:', error)
         throw error
       }
@@ -112,10 +135,10 @@ class SupabaseDataService {
           userId,
           platform: 'mobile'
         });
-        
+
         throw new Error('Background sync authentication error');
       }
-      
+
       console.error('Error in getUserDeviceIds:', error)
       throw error
     }
@@ -131,20 +154,20 @@ class SupabaseDataService {
 
       if (error) {
         // Check for authentication errors
-        if (error.message?.includes('AuthApiError') || 
-            error.message?.includes('invalid request') ||
-            error.message?.includes('auth code')) {
-          
+        if (error.message?.includes('AuthApiError') ||
+          error.message?.includes('invalid request') ||
+          error.message?.includes('auth code')) {
+
           console.error('Mobile background sync: Authentication error during device count:', {
             error: error.message,
             userId,
             platform: 'mobile',
             errorType: 'AuthAPIError'
           });
-          
+
           throw new Error('Background sync failed: Authentication error. Please log out and log in again.');
         }
-        
+
         console.error('Error counting user devices:', error)
         throw error
       }
@@ -157,12 +180,56 @@ class SupabaseDataService {
           userId,
           platform: 'mobile'
         });
-        
+
         throw new Error('Background sync authentication error');
       }
-      
+
       console.error('Error in getUserDevicesCount:', error)
       return 0
+    }
+  }
+
+  // Helper method to convert storage path to authenticated signed URL (for private buckets)
+  private async getSignedUrl(path: string, bucket: 'device-photos' | 'device-invoices'): Promise<string> {
+    console.log(`🔐 getSignedUrl called - Path: ${path}, Bucket: ${bucket}`);
+
+    // If already a file:// URL (local), return as-is
+    if (path.startsWith('file://')) {
+      console.log(`🔐 Path is local file, returning as-is`);
+      return path;
+    }
+
+    // If it's a full public URL, extract the path
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      console.log(`🔐 Path is a full URL, extracting path...`);
+      // Extract path from URL like: https://.../storage/v1/object/public/bucket-name/userId/file.jpg
+      const match = path.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
+      if (match && match[1]) {
+        path = match[1]; // Extract "userId/file.jpg"
+        console.log(`🔐 Extracted path: ${path}`);
+      } else {
+        console.warn(`⚠️ Could not extract path from URL: ${path}`);
+        return path; // Return as-is if can't extract
+      }
+    }
+
+    // For private buckets, create a signed URL with 1 hour expiry
+    try {
+      console.log(`🔐 Creating signed URL for: ${path}`);
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(path, 3600); // 1 hour expiry
+
+      if (error) {
+        console.error(`❌ Error creating signed URL for ${bucket}:`, error);
+        return path;
+      }
+
+      console.log(`✅ Signed URL created: ${data.signedUrl.substring(0, 80)}...`);
+      return data.signedUrl;
+    } catch (error) {
+      console.error(`❌ Exception creating signed URL for ${bucket}:`, error);
+      return path;
     }
   }
 }

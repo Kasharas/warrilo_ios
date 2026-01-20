@@ -5,6 +5,7 @@ import { uploadReceiptPhoto } from '../utils/uploadReceiptPhoto'
 import { prepareDeviceData } from '../utils/prepareDeviceData'
 import { createWarrantyAlerts } from '../utils/warrantyAlertUtils'
 import { warrantyAlertService } from './warrantyAlertService'
+import { addWarrantyAlerts } from '../lib/warrantyAlertStorage'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { validateSupabaseSession } from '../lib/sessionValidator'
 
@@ -104,12 +105,31 @@ export const uploadDevice = async (
       });
 
       if (warrantyAlerts.length > 0) {
-        await warrantyAlertService.createAlerts(warrantyAlerts);
-        await AsyncStorage.setItem('warranty_alerts', JSON.stringify(warrantyAlerts));
-        console.log('✅ [STEP 6: SUCCESS] Alerts stored');
+        console.log(`📋 Created ${warrantyAlerts.length} warranty alerts for device: ${formData.deviceName}`);
+
+        // STEP 6A: Save to local storage FIRST (immediate availability)
+        try {
+          await addWarrantyAlerts(warrantyAlerts);
+          console.log('✅ [STEP 6A: SUCCESS] Alerts saved to local storage');
+        } catch (localError) {
+          console.error('❌ [STEP 6A: FAILED] Local storage error:', localError);
+          throw localError; // This is critical - we need local alerts
+        }
+
+        // STEP 6B: Sync to Supabase (background, can fail without breaking UX)
+        try {
+          await warrantyAlertService.createAlerts(warrantyAlerts);
+          console.log('✅ [STEP 6B: SUCCESS] Alerts synced to Supabase');
+        } catch (supabaseError) {
+          console.warn('⚠️ [STEP 6B: WARNING] Failed to sync alerts to Supabase (will retry later):', supabaseError);
+          // Don't throw - alerts are already in local storage and device creation should succeed
+        }
+      } else {
+        console.log('ℹ️ [STEP 6: SKIPPED] No warranty information provided, no alerts created');
       }
     } catch (e) {
       console.warn('⚠️ [STEP 6: WARNING] Alert creation non-fatal error:', e);
+      // Don't fail device creation if alert creation fails
     }
 
     return { success: true, deviceId: device.id };

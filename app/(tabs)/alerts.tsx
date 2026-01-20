@@ -11,12 +11,13 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDeviceSync } from '@/src/hooks/useDeviceSync';
 import { warrantyAlertService } from '@/src/services/warrantyAlertService';
+import { readWarrantyAlerts } from '@/src/lib/warrantyAlertStorage';
 
 export default function AlertsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { getLocalDevices } = useDeviceSync();
-  
+
   // Mock data - no alerts yet
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -63,7 +64,7 @@ export default function AlertsScreen() {
       console.log('🔴 DEBUG: Reading warranty alerts...');
       const alerts = await readWarrantyAlerts();
       console.log('🔴 DEBUG: Retrieved alerts:', alerts.length);
-      
+
       // Enrich ALL alerts with device_name (don't filter here - let getLatestWarrantyAlertsByDevice handle filtering)
       const enriched = alerts.map((a: any) => ({
         ...a,
@@ -88,71 +89,46 @@ export default function AlertsScreen() {
     }, [loadWarrantyAlerts])
   );
 
-  // Add this function inside AlertsScreen component (don't call it yet)
-  const readWarrantyAlerts = async () => {
-    try {
-      console.log('🔴 DEBUG: readWarrantyAlerts called');
-      console.log('📖 Reading warranty alerts from local storage...');
-      const alertsData = await AsyncStorage.getItem('warranty_alerts');
-      console.log('🔴 DEBUG: AsyncStorage.getItem result:', alertsData ? 'data exists' : 'no data');
-      
-      if (alertsData) {
-        const alerts = JSON.parse(alertsData);
-        console.log(`Found ${alerts.length} warranty alerts in local storage`);
-        console.log('🔴 DEBUG: Parsed alerts:', alerts);
-        return alerts;
-      }
-      
-      console.log('No warranty alerts found in local storage');
-      console.log('🔴 DEBUG: Returning empty array');
-      return [];
-    } catch (error) {
-      console.error('Error reading warranty alerts:', error);
-      console.log('🔴 DEBUG: readWarrantyAlerts error:', error.message, error.stack);
-      return [];
-    }
-  };
-
   // Date filtering is now handled inside getLatestWarrantyAlertsByDevice
 
   // Keep only the latest alert per device_id (by reminder_date) that is due today or in the past
   const getLatestWarrantyAlertsByDevice = (alerts) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     const deviceIdToLatest = new Map();
     for (const alert of alerts) {
       const key = alert.device_id || alert.deviceId;
       if (!key) continue;
-      
+
       // Check if alert is due (reminder_date <= today)
       if (!alert.reminder_date) continue;
-      
+
       const reminderDate = new Date(alert.reminder_date);
       const alertDate = new Date(
-        reminderDate.getFullYear(), 
-        reminderDate.getMonth(), 
+        reminderDate.getFullYear(),
+        reminderDate.getMonth(),
         reminderDate.getDate()
       );
-      
+
       // Only consider alerts that are due today or in the past
       if (alertDate > today) continue;
-      
+
       const existing = deviceIdToLatest.get(key);
       const currentDate = alert.reminder_date ? new Date(alert.reminder_date) : new Date(0);
       const existingDate = existing && existing.reminder_date ? new Date(existing.reminder_date) : new Date(0);
-      
+
       // Keep the most recent alert that's due for each device
       if (!existing || currentDate > existingDate) {
         deviceIdToLatest.set(key, alert);
       }
     }
-    
+
     console.log(`🔍 getLatestWarrantyAlertsByDevice called with alerts: ${alerts.length}`);
     console.log(`🔍 Alert device IDs:`, alerts.map(a => ({ device_id: a.device_id, device_name: a.device_name })));
     console.log(`🔍 getLatestWarrantyAlertsByDevice result: ${deviceIdToLatest.size} alerts`);
     console.log(`🔍 Result device IDs:`, Array.from(deviceIdToLatest.values()).map(a => ({ device_id: a.device_id, device_name: a.device_name })));
-    
+
     // Return most recent first
     return Array.from(deviceIdToLatest.values()).sort((a, b) => {
       const da = a.reminder_date ? new Date(a.reminder_date).getTime() : 0;
@@ -164,13 +140,19 @@ export default function AlertsScreen() {
   // Add inside AlertsScreen component
   const renderWarrantyAlert = (alert, index) => (
     <View key={`warranty-${index}`} style={styles.notificationItem}>
-      <Pressable 
+      <Pressable
         style={styles.notificationContentWrapper}
         onPress={() => {
-          console.log('Warranty alert pressed, navigating to device details for device_id:', alert.device_id);
+          // Prefer local_device_id (always present), fallback to device_id (Supabase ID)
+          const deviceIdToUse = alert.local_device_id || alert.device_id;
+          console.log('Warranty alert pressed, navigating to device details:', {
+            local_device_id: alert.local_device_id,
+            device_id: alert.device_id,
+            using: deviceIdToUse
+          });
           router.push({
             pathname: '/device-details',
-            params: { deviceId: alert.device_id }
+            params: { deviceId: deviceIdToUse }
           });
         }}
       >
@@ -190,7 +172,7 @@ export default function AlertsScreen() {
           </Text>
         </View>
       </Pressable>
-      <Pressable 
+      <Pressable
         style={styles.alertDeleteButton}
         onPress={() => handleDeleteAlert(alert)}
       >
@@ -212,13 +194,13 @@ export default function AlertsScreen() {
 
   const confirmDelete = async () => {
     if (!selectedAlert) return;
-    
+
     setDeleting(true);
-    
+
     try {
       // Delete from Supabase first
       await warrantyAlertService.deleteAlertsByDeviceId(selectedAlert.device_id);
-      
+
       // Only delete from local storage if Supabase deletion succeeded
       const alertsData = await AsyncStorage.getItem('warranty_alerts');
       if (alertsData) {
@@ -226,10 +208,10 @@ export default function AlertsScreen() {
         const filteredAlerts = alerts.filter(a => a.device_id !== selectedAlert.device_id);
         await AsyncStorage.setItem('warranty_alerts', JSON.stringify(filteredAlerts));
       }
-      
+
       // Refresh the alerts list
       await loadWarrantyAlerts();
-      
+
       console.log('✅ Successfully deleted warranty alerts for device:', selectedAlert.device_id);
     } catch (error) {
       console.error('❌ Error deleting warranty alerts:', error);
@@ -254,8 +236,8 @@ export default function AlertsScreen() {
 
   const filteredAlerts = alerts.filter(alert => {
     const matchesSearch = alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         alert.message.toLowerCase().includes(searchQuery.toLowerCase());
-    
+      alert.message.toLowerCase().includes(searchQuery.toLowerCase());
+
     let matchesFilter = true;
     if (selectedFilter === 'Expired warranty') {
       matchesFilter = alert.type === 'expired_warranty';
@@ -263,7 +245,7 @@ export default function AlertsScreen() {
       matchesFilter = alert.type === 'expire_soon';
     }
     // 'All' filter matches everything
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -352,14 +334,14 @@ export default function AlertsScreen() {
           <Ionicons name="notifications" size={64} color={theme.colors.neutral[300]} />
           <Text style={styles.emptyText}>No alerts found</Text>
           <Text style={styles.emptySubtext}>
-            {searchQuery || selectedFilter !== 'All' 
-              ? 'Try adjusting your search or filters' 
+            {searchQuery || selectedFilter !== 'All'
+              ? 'Try adjusting your search or filters'
               : 'You\'re all caught up! No alerts at the moment.'}
           </Text>
         </View>
       ) : (
         // Alerts List
-        <ScrollView 
+        <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.alertsListContent}
           scrollEventThrottle={16}
@@ -374,7 +356,7 @@ export default function AlertsScreen() {
         >
           {/* NEW: Add warranty alerts first (latest per device) */}
           {getLatestWarrantyAlertsByDevice(warrantyAlerts).map((alert, index) => renderWarrantyAlert(alert, index))}
-          
+
           {/* Loading indicator for warranty alerts */}
           {loadingAlerts && (
             <View style={{
@@ -458,19 +440,19 @@ export default function AlertsScreen() {
               Are you absolutely sure you want to delete this warranty alert? This action cannot be undone and all warranty alerts for this device will be permanently lost.
             </Text>
             <View style={styles.modalButtons}>
-              <Pressable 
-                style={[styles.modalButton, styles.modalButtonCancel]} 
+              <Pressable
+                style={[styles.modalButton, styles.modalButtonCancel]}
                 onPress={cancelDelete}
                 disabled={deleting}
               >
                 <Text style={[styles.modalButtonText, { color: theme.colors.label }]}>No</Text>
               </Pressable>
-              <Pressable 
+              <Pressable
                 style={[
-                  styles.modalButton, 
+                  styles.modalButton,
                   styles.modalButtonConfirm,
                   deleting && styles.modalButtonDisabled
-                ]} 
+                ]}
                 onPress={confirmDelete}
                 disabled={deleting}
               >
@@ -651,7 +633,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   alertAction: {
-            backgroundColor: theme.colors.systemBlue,
+    backgroundColor: theme.colors.systemBlue,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.md,

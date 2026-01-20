@@ -30,10 +30,10 @@ export default function DashboardScreen() {
   const [deviceCount, setDeviceCount] = useState(0);
   const [devicesWithPrices, setDevicesWithPrices] = useState<LocalDevice[]>([]);
   const [isFocusRefresh, setIsFocusRefresh] = useState(false);
-  
+
   // Warranty alerts state
   const [warrantyAlerts, setWarrantyAlerts] = useState<any[]>([]);
-  
+
   // Get navigation parameters to detect device addition
   const params = useLocalSearchParams();
 
@@ -46,13 +46,13 @@ export default function DashboardScreen() {
     try {
       console.log('📖 Dashboard: Reading warranty alerts from local storage...');
       const alertsData = await AsyncStorage.getItem('warranty_alerts');
-      
+
       if (alertsData) {
         const alerts = JSON.parse(alertsData);
         console.log(`📖 Dashboard: Found ${alerts.length} warranty alerts in local storage`);
         return alerts;
       }
-      
+
       console.log('📖 Dashboard: No warranty alerts found in local storage');
       return [];
     } catch (error) {
@@ -65,19 +65,19 @@ export default function DashboardScreen() {
   const filterCurrentWarrantyAlerts = (alerts: any[]) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     return alerts.filter(alert => {
       if (!alert.reminder_date) return false;
-      
+
       const reminderDate = new Date(alert.reminder_date);
       const alertDate = new Date(
-        reminderDate.getFullYear(), 
-        reminderDate.getMonth(), 
+        reminderDate.getFullYear(),
+        reminderDate.getMonth(),
         reminderDate.getDate()
       );
-      
+
       console.log(`📖 Dashboard: Alert check: ${alert.reminder_date} <= ${today.toDateString()} = ${alertDate <= today}`);
-      
+
       return alertDate <= today;
     });
   };
@@ -262,12 +262,12 @@ export default function DashboardScreen() {
       const localDevices = await getLocalDevices();
       console.log('Loaded devices:', localDevices);
       console.log('Device count:', localDevices.length);
-      
+
       setDevices(localDevices);
       setDeviceCount(localDevices.length);
-      
+
       console.log(`✅ Dashboard: Loaded ${localDevices.length} devices`);
-      
+
       // Verification: Check state update and device details
       console.log('🔍 DASHBOARD VERIFICATION: State updated with', localDevices.length, 'devices');
       if (localDevices.length === 0) {
@@ -275,21 +275,21 @@ export default function DashboardScreen() {
       } else {
         console.log('📋 DASHBOARD VERIFICATION: Device names:', localDevices.map(d => d.name));
       }
-      
+
       // Calculate total purchase value from actual device purchase prices
-      const devicesWithValidPrices = localDevices.filter(device => 
+      const devicesWithValidPrices = localDevices.filter(device =>
         device.purchase_price && typeof device.purchase_price === 'number' && device.purchase_price > 0
       );
-      
+
       const totalPurchaseValue = devicesWithValidPrices.reduce((total, device) => {
         return total + (device.purchase_price || 0);
       }, 0);
-      
+
       console.log('🔍 DASHBOARD VERIFICATION: Total devices:', localDevices.length);
       console.log('🔍 DASHBOARD VERIFICATION: Devices with valid prices:', devicesWithValidPrices.length);
       console.log('🔍 DASHBOARD VERIFICATION: Purchase prices found:', devicesWithValidPrices.map(d => ({ name: d.name, price: d.purchase_price })));
       console.log('🔍 DASHBOARD VERIFICATION: Total purchase value calculated:', totalPurchaseValue);
-      
+
       setTotalValue(totalPurchaseValue);
       setDevicesWithPrices(devicesWithValidPrices);
     } catch (error) {
@@ -328,8 +328,8 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -400,7 +400,7 @@ export default function DashboardScreen() {
             )}
           </View>
         </View>
-        
+
         {/* Warranty Alert - Dynamic */}
         {(() => {
           const urgentAlert = getMostUrgentWarrantyAlert();
@@ -411,7 +411,7 @@ export default function DashboardScreen() {
           if (daysUntilExpiry <= 0) return null; // hide if expired or today
           const navId = getNavIdForAlert(urgentAlert.device_id, urgentAlert.local_device_id);
           if (!navId) return null; // hide if we cannot navigate
-          
+
           return (
             <View style={styles.alertCard}>
               <View style={styles.alertHeader}>
@@ -429,7 +429,7 @@ export default function DashboardScreen() {
                 </Text>
               </View>
               <View style={styles.alertActions}>
-                <Pressable 
+                <Pressable
                   style={styles.alertButton}
                   onPress={() => handleDevicePress(navId)}
                 >
@@ -450,7 +450,7 @@ export default function DashboardScreen() {
                 <Text style={styles.viewAllText}>View All</Text>
               </Pressable>
             </View>
-            
+
             <View style={styles.deviceGrid}>
               {(() => {
                 const toTime = (d?: string | null) => {
@@ -462,89 +462,89 @@ export default function DashboardScreen() {
                   .filter(device => device && device.name)
                   .sort((a, b) => toTime(a.warranty_end_date) - toTime(b.warranty_end_date));
                 return orderedDevices.map((device) => {
-                const getIconComponent = (category?: string) => {
-                  switch (category?.toLowerCase()) {
-                    case 'electronics': return Smartphone;
-                    case 'automotive': return Laptop;
-                    case 'clothing':
-                    case 'cloth': return Watch;
-                    default: return Smartphone;
-                  }
-                };
-                
-                const getStatusColor = (device: LocalDevice) => {
-                  if (!device.warranty_end_date) return 'neutral';
-                  
-                  const endDate = new Date(device.warranty_end_date);
-                  const today = new Date();
-                  const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                  
-                  if (daysUntilExpiry < 0) return 'error'; // Expired
-                  if (daysUntilExpiry <= 30) return 'warning'; // Expiring soon
-                  return 'success'; // Active
-                };
-                
-                const getStatusText = (device: LocalDevice) => {
-                  if (!device.warranty_end_date) return 'Unknown';
-                  
-                  const endDate = new Date(device.warranty_end_date);
-                  const today = new Date();
-                  const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                  
-                  if (daysUntilExpiry < 0) return 'Expired';
-                  if (daysUntilExpiry <= 30) return 'Expiring';
-                  return 'Active';
-                };
-                
-                const IconComponent = getIconComponent(device.category);
-                const statusColor = getStatusColor(device);
-                const statusText = getStatusText(device);
-                
-                // Map status color to iOS system colors
-                const getThemeColor = (status: string) => {
-                  switch (status) {
-                    case 'success': return theme.colors.success[500];
-                    case 'warning': return theme.colors.warning[500];
-                    case 'error': return theme.colors.systemRed;
-                    default: return theme.colors.neutral[500];
-                  }
-                };
-                
-                return (
-                  <Pressable 
-                    key={device.local_id || device.id || `device-${Math.random()}`} 
-                    style={styles.deviceCard}
-                    onPress={() => handleDevicePress(device.local_id || device.id)}
-                  >
-                    {/* Warranty Status Badge - Top Right Corner */}
-                    <View style={[styles.warrantyBadge, { backgroundColor: getThemeColor(statusColor) }]}>
-                      <Text style={styles.warrantyBadgeText}>{statusText}</Text>
-                    </View>
+                  const getIconComponent = (category?: string) => {
+                    switch (category?.toLowerCase()) {
+                      case 'electronics': return Smartphone;
+                      case 'automotive': return Laptop;
+                      case 'clothing':
+                      case 'cloth': return Watch;
+                      default: return Smartphone;
+                    }
+                  };
 
-                    {/* Device Image or Icon */}
-                    {device.photo_irl ? (
-                      <View style={styles.deviceImageContainer}>
-                        <Image 
-                          source={{ uri: device.photo_irl }} 
-                          style={styles.deviceImage}
-                          resizeMode="contain"
-                        />
+                  const getStatusColor = (device: LocalDevice) => {
+                    if (!device.warranty_end_date) return 'neutral';
+
+                    const endDate = new Date(device.warranty_end_date);
+                    const today = new Date();
+                    const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+                    if (daysUntilExpiry < 0) return 'error'; // Expired
+                    if (daysUntilExpiry <= 30) return 'warning'; // Expiring soon
+                    return 'success'; // Active
+                  };
+
+                  const getStatusText = (device: LocalDevice) => {
+                    if (!device.warranty_end_date) return 'Unknown';
+
+                    const endDate = new Date(device.warranty_end_date);
+                    const today = new Date();
+                    const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+                    if (daysUntilExpiry < 0) return 'Expired';
+                    if (daysUntilExpiry <= 30) return 'Expiring';
+                    return 'Active';
+                  };
+
+                  const IconComponent = getIconComponent(device.category);
+                  const statusColor = getStatusColor(device);
+                  const statusText = getStatusText(device);
+
+                  // Map status color to iOS system colors
+                  const getThemeColor = (status: string) => {
+                    switch (status) {
+                      case 'success': return theme.colors.success[500];
+                      case 'warning': return theme.colors.warning[500];
+                      case 'error': return theme.colors.systemRed;
+                      default: return theme.colors.neutral[500];
+                    }
+                  };
+
+                  return (
+                    <Pressable
+                      key={device.local_id || device.id || `device-${Math.random()}`}
+                      style={styles.deviceCard}
+                      onPress={() => handleDevicePress(device.local_id || device.id)}
+                    >
+                      {/* Warranty Status Badge - Top Right Corner */}
+                      <View style={[styles.warrantyBadge, { backgroundColor: getThemeColor(statusColor) }]}>
+                        <Text style={styles.warrantyBadgeText}>{statusText}</Text>
                       </View>
-                    ) : (
-                      <View style={styles.deviceIconContainer}>
-                        <IconComponent size={24} color={theme.colors.systemBlue} />
-                      </View>
-                    )}
-                    
-                    <Text style={styles.deviceName}>{device.name}</Text>
-                  </Pressable>
-                );
+
+                      {/* Device Image or Icon */}
+                      {device.photo_irl ? (
+                        <View style={styles.deviceImageContainer}>
+                          <Image
+                            source={{ uri: device.photo_irl }}
+                            style={styles.deviceImage}
+                            resizeMode="contain"
+                          />
+                        </View>
+                      ) : (
+                        <View style={styles.deviceIconContainer}>
+                          <IconComponent size={24} color={theme.colors.systemBlue} />
+                        </View>
+                      )}
+
+                      <Text style={styles.deviceName}>{device.name}</Text>
+                    </Pressable>
+                  );
                 });
               })()}
             </View>
           </>
         )}
-        
+
         {/* Empty State */}
         {devices.length === 0 && !loading && (
           <View style={styles.emptyState}>
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     fontSize: theme.fontSize.sm,
-            color: theme.colors.systemBlue,
+    color: theme.colors.systemBlue,
     fontWeight: theme.fontWeight.medium,
   },
   deviceGrid: {

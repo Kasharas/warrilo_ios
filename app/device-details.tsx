@@ -20,7 +20,7 @@ export default function DeviceDetailsScreen() {
   const { user } = useAuth();
   const { getLocalDevices } = useDeviceSync();
   const { deleteDevice } = useDeviceOperations();
-  
+
   // Real device data
   const [device, setDevice] = useState<LocalDevice | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,7 @@ export default function DeviceDetailsScreen() {
   const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
   const [askedMediaPermission, setAskedMediaPermission] = useState(false);
-  
+
   // Delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -42,7 +42,7 @@ export default function DeviceDetailsScreen() {
       setLoading(true);
       const devices = await getLocalDevices();
       const foundDevice = devices.find(d => d.local_id === deviceIdToUse || d.id === deviceIdToUse);
-      
+
       if (foundDevice) {
         setDevice(foundDevice);
       } else {
@@ -109,15 +109,15 @@ export default function DeviceDetailsScreen() {
 
   const confirmDelete = async () => {
     if (!device) return;
-    
+
     console.log('🎯 Device Details: User confirmed deletion for device:', device);
     setDeleting(true);
     setError(null); // Clear any previous errors
-    
+
     try {
       await deleteDevice(device);
       console.log('✅ Device Details: Device deleted successfully');
-      
+
     } catch (error) {
       console.error('❌ Device Details: Error deleting device:', error);
       setError(error.message || 'Failed to delete device');
@@ -132,7 +132,7 @@ export default function DeviceDetailsScreen() {
       console.log('Device Details: Cannot cancel during deletion');
       return;
     }
-    
+
     console.log('Device Details: User chose to keep the item');
     setShowDeleteModal(false);
   };
@@ -178,11 +178,11 @@ export default function DeviceDetailsScreen() {
 
   const extractSerialNumber = (identifiers?: string | null) => {
     if (!identifiers) return null;
-    
+
     try {
       // Try to parse as JSON first
       const parsed = JSON.parse(identifiers);
-      
+
       // If it's an object, look for common serial number keys
       if (typeof parsed === 'object' && parsed !== null) {
         // Check for common serial number field names
@@ -192,7 +192,7 @@ export default function DeviceDetailsScreen() {
             return parsed[key];
           }
         }
-        
+
         // If no specific key found, return the first string value
         const values = Object.values(parsed);
         const firstString = values.find(val => typeof val === 'string');
@@ -200,7 +200,7 @@ export default function DeviceDetailsScreen() {
           return firstString;
         }
       }
-      
+
       // If parsing failed or it's not an object, return as is
       return identifiers;
     } catch (error) {
@@ -214,39 +214,39 @@ export default function DeviceDetailsScreen() {
       console.log('Download error: No URI provided');
       return;
     }
-    
+
     try {
       console.log('Starting download for URI:', uri);
-      
+
       // Request permission
       const hasPermission = await requestMediaLibraryWritePermissions();
       if (!hasPermission) {
         console.log('Download error: Permission denied');
         return;
       }
-      
+
       console.log('Permission granted, downloading file...');
-      
+
       // Use documentDirectory instead of cacheDirectory
       const fileExtension = uri.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `warrilo_image_${Date.now()}.${fileExtension}`;
       const targetPath = `${FileSystem.documentDirectory}${fileName}`;
-      
+
       const downloadResult = await FileSystem.downloadAsync(uri, targetPath);
       console.log('File downloaded to:', downloadResult.uri);
-      
+
       // Verify file exists
       const fileInfo = await FileSystem.getInfoAsync(downloadResult.uri);
       if (!fileInfo.exists) {
         throw new Error('Downloaded file does not exist');
       }
       console.log('File verified, size:', fileInfo.size);
-      
+
       // Try MediaLibrary first
       try {
         const asset = await MediaLibrary.createAssetAsync(downloadResult.uri);
         console.log('Asset created via MediaLibrary:', asset.id);
-        
+
         try {
           const album = await MediaLibrary.getAlbumAsync('Warrilo');
           if (album) {
@@ -257,13 +257,13 @@ export default function DeviceDetailsScreen() {
         } catch (albumErr) {
           console.log('Album operation failed (non-critical):', albumErr);
         }
-        
+
         Alert.alert('Saved', 'Image saved to Photos');
         return;
-        
+
       } catch (mediaLibErr: any) {
         console.log('MediaLibrary failed, trying Sharing API:', mediaLibErr);
-        
+
         // Fallback to sharing API
         const isAvailable = await Sharing.isAvailableAsync();
         if (isAvailable) {
@@ -277,7 +277,7 @@ export default function DeviceDetailsScreen() {
           throw new Error('Neither MediaLibrary nor Sharing is available');
         }
       }
-      
+
     } catch (e: any) {
       console.error('Download error details:', {
         message: e?.message,
@@ -335,8 +335,8 @@ export default function DeviceDetailsScreen() {
         </View>
       </View>
 
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -350,17 +350,17 @@ export default function DeviceDetailsScreen() {
         {/* Images Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Images</Text>
-          
+
           {/* Device Image */}
           <View style={styles.uploadRow}>
             {device.photo_irl ? (
-              <Pressable 
+              <Pressable
                 style={styles.uploadZone}
                 onPress={() => { setImagePreviewUri(device.photo_irl); setImagePreviewVisible(true); }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Image 
-                  source={{ uri: device.photo_irl }} 
+                <Image
+                  source={{ uri: device.photo_irl }}
                   style={styles.imagePreview}
                   resizeMode="cover"
                   onError={(e) => {
@@ -376,16 +376,16 @@ export default function DeviceDetailsScreen() {
                 </View>
               </Pressable>
             )}
-            
+
             {/* Receipt Image */}
             {device.invoice_url ? (
-              <Pressable 
+              <Pressable
                 style={styles.uploadZone}
                 onPress={() => { setImagePreviewUri(device.invoice_url); setImagePreviewVisible(true); }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Image 
-                  source={{ uri: device.invoice_url }} 
+                <Image
+                  source={{ uri: device.invoice_url }}
                   style={styles.imagePreview}
                   resizeMode="cover"
                   onError={(e) => {
@@ -407,7 +407,7 @@ export default function DeviceDetailsScreen() {
         {/* Device Information Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Device Details</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
               {device.name || 'No device name'}
@@ -436,7 +436,7 @@ export default function DeviceDetailsScreen() {
         {/* Purchase Details Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Purchase Details</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
               {device.purchase_date ? formatDate(device.purchase_date) : 'No purchase date'}
@@ -453,7 +453,7 @@ export default function DeviceDetailsScreen() {
         {/* Warranty Information Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Warranty Information</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
               {device.warranty_months ? `${device.warranty_months} months` : 'No warranty duration'}
@@ -486,35 +486,35 @@ export default function DeviceDetailsScreen() {
         {/* Notes Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Additional Notes</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.textInput}>
               {device.notes || 'No additional notes'}
             </Text>
           </View>
         </View>
-        
+
         {/* Error Display */}
         {error && (
-          <View style={[styles.section, { 
-            backgroundColor: theme.colors.systemBackground, 
-            borderColor: theme.colors.systemRed, 
+          <View style={[styles.section, {
+            backgroundColor: theme.colors.systemBackground,
+            borderColor: theme.colors.systemRed,
             borderWidth: 1
           }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ 
-                color: theme.colors.systemRed, 
+              <Text style={{
+                color: theme.colors.systemRed,
                 fontSize: theme.fontSize.sm,
                 flex: 1
               }}>{error}</Text>
             </View>
           </View>
         )}
-        
+
         {/* Delete Button */}
         <View style={styles.deleteButtonContainer}>
-          <Pressable 
-            style={styles.deleteButton} 
+          <Pressable
+            style={styles.deleteButton}
             onPress={handleDeleteDevice}
             disabled={deleting}
           >
@@ -535,7 +535,7 @@ export default function DeviceDetailsScreen() {
           <Pressable style={styles.previewCloseButton} onPress={() => setImagePreviewVisible(false)}>
             <Ionicons name="close" size={28} color={theme.colors.systemBackground} />
           </Pressable>
-          <Pressable 
+          <Pressable
             style={[styles.previewCloseButton, { right: theme.spacing.lg * 4 }]}
             onPress={() => handleDownload(imagePreviewUri)}
             accessibilityLabel="Download image"
@@ -566,19 +566,19 @@ export default function DeviceDetailsScreen() {
               Are you absolutely sure you want to delete this item? This action cannot be undone and all warranty information will be permanently lost.
             </Text>
             <View style={styles.modalButtons}>
-              <Pressable 
-                style={[styles.modalButton, styles.modalButtonCancel]} 
+              <Pressable
+                style={[styles.modalButton, styles.modalButtonCancel]}
                 onPress={cancelDelete}
                 disabled={deleting}
               >
                 <Text style={[styles.modalButtonText, { color: theme.colors.label }]}>No</Text>
               </Pressable>
-              <Pressable 
+              <Pressable
                 style={[
-                  styles.modalButton, 
+                  styles.modalButton,
                   styles.modalButtonConfirm,
                   deleting && styles.modalButtonDisabled
-                ]} 
+                ]}
                 onPress={confirmDelete}
                 disabled={deleting}
               >

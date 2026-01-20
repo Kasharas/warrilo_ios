@@ -30,7 +30,7 @@ interface DeviceCardProps {
 export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false }: DeviceCardProps) {
   const router = useRouter();
   console.log('DeviceCard rendered with onDelete:', !!onDelete);
-  
+
   // Helper function to check if image URL is valid
   const isValidImageUrl = (url?: string) => {
     if (!url) {
@@ -44,26 +44,16 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
     return valid;
   };
 
+
+
+  // ... (existing imports)
+
   // Helper function to get image source
   const getImageSource = (imageUrl?: string) => {
     if (!imageUrl) return null;
-    
-    // If it's a base64 data URL, use it directly
-    if (imageUrl.startsWith('data:')) {
-      return { uri: imageUrl };
-    }
-    
-    // If it's a Supabase Storage URL, use it
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return { uri: imageUrl };
-    }
-    
-    // If it's a local file URI, use it
-    if (imageUrl.startsWith('file://')) {
-      return { uri: imageUrl };
-    }
-    
-    return null;
+
+    // URLs from database are already signed, use them directly
+    return { uri: imageUrl };
   };
 
   // State for image loading errors
@@ -78,7 +68,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
       console.log('DeviceCard: invoice_url (receipt):', device.invoice_url);
       console.log('DeviceCard: photo_irl:', device.photo_irl);
       console.log('DeviceCard: identifiers (serial):', device.identifiers);
-      
+
       // Default navigation to edit-item screen with device data
       const editParams = {
         id: device.id,
@@ -96,10 +86,10 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
         serial_number: device.identifiers || '', // Map identifiers to serial_number
         notes: device.notes || '',
       };
-      
+
       console.log('DeviceCard: Navigation params:', editParams);
       console.log('DeviceCard: serial_number param:', editParams.serial_number);
-      
+
       router.push({
         pathname: '/edit-item',
         params: editParams
@@ -110,19 +100,19 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
   // Reset image error when image URL changes
   React.useEffect(() => {
     setImageLoadError(false);
-    
+
     // Test if the image URL is actually accessible
     if (device.photo_irl && isValidImageUrl(device.photo_irl)) {
       console.log('=== TESTING IMAGE ACCESSIBILITY ===');
       console.log('[DeviceCard] Testing URL:', device.photo_irl);
       console.log('[DeviceCard] Device:', device.name, 'ID:', device.id);
-      
+
       // For local file URIs, we don't need to test accessibility via fetch
       if (device.photo_irl.startsWith('file://')) {
         console.log('[DeviceCard] Local file URI detected, skipping fetch test');
         return;
       }
-      
+
       // Test fetch to see if image is accessible (only for HTTP/HTTPS URLs)
       fetch(device.photo_irl)
         .then(response => {
@@ -173,11 +163,11 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
   // Helper function to get warranty status and color
   const getWarrantyStatus = () => {
     if (!device.warranty_end_date) return { status: 'No Warranty', color: theme.colors.neutral[500] };
-    
+
     const endDate = new Date(device.warranty_end_date);
     const today = new Date();
     const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysUntilExpiry < 0) {
       return { status: 'Expired', color: theme.colors.systemRed };
     } else if (daysUntilExpiry <= 30) {
@@ -203,7 +193,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
             {/* Compact view - no additional info needed */}
           </View>
         </Pressable>
-        
+
         {/* Action Buttons for Compact View */}
         <View style={styles.compactActionButtonsContainer}>
           {/* Edit Button */}
@@ -212,7 +202,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
               <Text style={styles.editButtonText}>Edit</Text>
             </Pressable>
           </View>
-          
+
           {/* Delete Button */}
           {onDelete && (
             <View style={styles.deleteButtonContainer}>
@@ -261,7 +251,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
               </Text>
             </View>
           )}
-          
+
 
         </View>
 
@@ -270,7 +260,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
           <Text style={styles.deviceName} numberOfLines={2}>
             {device.name}
           </Text>
-          
+
           {device.supplier && (
             <Text style={styles.deviceBrand} numberOfLines={1}>
               {device.supplier}
@@ -287,7 +277,7 @@ export function DeviceCard({ device, onPress, onDelete, onEdit, compact = false 
             <Text style={styles.editButtonText}>Edit</Text>
           </Pressable>
         </View>
-        
+
         {/* Delete Button */}
         {onDelete && (
           <View style={styles.deleteButtonContainer}>
@@ -394,11 +384,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: theme.spacing.sm,
   },
-  
+
   editButtonContainer: {
     // Container for edit button positioning
   },
-  
+
   editButton: {
     backgroundColor: '#007AFF', // iOS system blue
     borderRadius: theme.borderRadius.md,
@@ -416,7 +406,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  
+
   editButtonText: {
     color: theme.colors.white,
     fontSize: theme.fontSize.sm,
@@ -473,7 +463,7 @@ const styles = StyleSheet.create({
   compactCardRight: {
     alignItems: 'flex-end',
   },
-  
+
   compactActionButtonsContainer: {
     position: 'absolute',
     bottom: theme.spacing.sm,

@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { testSecureStorage } from '@/lib/secureStorage';
 import { validateAuthConfiguration } from '@/lib/config';
 import { requestNotificationPermissions } from '@/src/utils/permissions';
+import { ErrorBoundary } from './ErrorBoundary';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 // Main app content component that can use auth context
@@ -26,38 +27,9 @@ function AppContent() {
     console.log('🔐 APP CONTENT: SyncReady:', syncReady);
   }, [user, loading, syncReady]);
 
-  // Auth-driven navigation guard
-  useEffect(() => {
-    console.log('🔐 AUTH GUARD: Checking auth state for navigation...');
-    console.log('🔐 AUTH GUARD: Loading:', loading);
-    console.log('🔐 AUTH GUARD: User exists:', !!user);
-    console.log('🔐 AUTH GUARD: User ID:', user?.id || 'none');
-
-    // Don't navigate while still loading
-    if (loading) {
-      console.log('🔐 AUTH GUARD: Still loading, waiting...');
-      return;
-    }
-
-    // Navigate based on auth state
-    if (user) {
-      console.log('🔐 AUTH GUARD: User authenticated, ensuring in tabs');
-      // User is logged in, make sure they're in the tabs area
-      router.replace('/(tabs)');
-    } else {
-      console.log('🔐 AUTH GUARD: No user, redirecting to welcome');
-      // User is not logged in, redirect to welcome
-      router.replace('/welcome');
-    }
-  }, [user, loading, router]);
-
-  // Additional effect to catch sign out specifically
-  useEffect(() => {
-    if (!loading && !user) {
-      console.log('🔐 AUTH GUARD: Sign out detected, forcing navigation to welcome');
-      router.replace('/welcome');
-    }
-  }, [user, loading, router]);
+  // NOTE: Navigation logic removed from _layout.tsx to prevent conflicts
+  // All initial routing is now handled by app/index.tsx
+  // This eliminates the navigation loop that caused black screen issues
 
   // App initialization
   useEffect(() => {
@@ -103,7 +75,6 @@ function AppContent() {
         headerShown: false,
         contentStyle: { backgroundColor: theme.colors.white }
       }}
-      initialRouteName="index"
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" />
@@ -121,35 +92,18 @@ function AppContent() {
 
 export default function RootLayout() {
   console.log('🚀🚀🚀 ROOT LAYOUT INITIALIZING - BUNDLE VERSION: ' + new Date().getTime());
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate initialization time
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.white }}>
-        <ActivityIndicator size="large" color={theme.colors.systemBlue} />
-        <Text style={{ marginTop: 16, color: theme.colors.neutral[600] }}>Initializing...</Text>
-      </View>
-    );
-  }
-
+  // Removed artificial loading delay - AuthContext handles loading state
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-      <StatusBar backgroundColor={theme.colors.white} style="dark" />
-      <AuthProvider>
-        <SyncProvider>
-          <AppContent />
-        </SyncProvider>
-      </AuthProvider>
-    </View>
+    <ErrorBoundary>
+      <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+        <StatusBar backgroundColor={theme.colors.white} style="dark" />
+        <AuthProvider>
+          <SyncProvider>
+            <AppContent />
+          </SyncProvider>
+        </AuthProvider>
+      </View>
+    </ErrorBoundary>
   );
 }

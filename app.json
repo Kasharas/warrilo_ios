@@ -3,7 +3,6 @@
     "name": "Warrilo",
     "slug": "warrilo-mobile",
     "version": "1.0.0",
-    "newArchEnabled": true,
     "scheme": "warrilo",
     "icon": "./assets/images/icon.png",
     "web": {
@@ -67,7 +66,10 @@
         {
           "origin": "warrilo://"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-web-browser"
     ]
   }
 }

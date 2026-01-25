@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient'
-import * as FileSystem from 'expo-file-system'
+import { File } from 'expo-file-system'
 import { decode } from 'base64-arraybuffer'
 
 interface ReceiptUploadOptions {
@@ -34,12 +34,11 @@ export const uploadReceiptPhoto = async ({
     const fileExtension = receipt.type === 'application/pdf' ? 'pdf' : 'jpg'
     const fileName = `${userId}/${Date.now()}-invoice-${Math.random().toString(36).substring(7)}.${fileExtension}`
 
-    console.log('🔵 [STEP 4a: READING] Reading file from disk via FileSystem:', receipt.uri);
+    console.log('🔵 [STEP 4a: READING] Reading file from disk via modern File API:', receipt.uri);
 
-    // Use expo-file-system to read as Base64 (Reliable)
-    const base64 = await FileSystem.readAsStringAsync(receipt.uri, {
-      encoding: FileSystem.EncodingType.Base64
-    });
+    // Use modern SDK 54 File API (Native)
+    const file = new File(receipt.uri);
+    const base64 = await file.base64();
     console.log('   -> Read success. Base64 length:', base64.length);
 
     // Decode base64 to ArrayBuffer using base64-arraybuffer

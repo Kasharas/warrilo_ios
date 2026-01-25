@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient'
-import * as FileSystem from 'expo-file-system'
+import { File } from 'expo-file-system'
 import { decode } from 'base64-arraybuffer'
 
 interface PhotoUploadOptions {
@@ -25,12 +25,11 @@ export const uploadDevicePhoto = async ({
 
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
 
-    console.log('🔵 [STEP 4c: READING] Reading file from disk via FileSystem:', photo.uri);
+    console.log('🔵 [STEP 4c: READING] Reading file from disk via modern File API:', photo.uri);
 
-    // Use expo-file-system to read as Base64 (Reliable)
-    const base64 = await FileSystem.readAsStringAsync(photo.uri, {
-      encoding: FileSystem.EncodingType.Base64
-    });
+    // Use modern SDK 54 File API (Native)
+    const file = new File(photo.uri);
+    const base64 = await file.base64();
     console.log('   -> Read success. Base64 length:', base64.length);
 
     // Decode base64 to ArrayBuffer using base64-arraybuffer

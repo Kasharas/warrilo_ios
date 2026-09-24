@@ -1254,4 +1254,32 @@ export class DeviceLocalStorage {
       });
     }
   }
+
+  /**
+   * Clear all application-specific offline data from local storage
+   */
+  static async clearApplicationData(): Promise<void> {
+    const appKeys = [
+      STORAGE_KEYS.DEVICES,
+      STORAGE_KEYS.PENDING_SYNC,
+      STORAGE_KEYS.SYNC_STATUS,
+      STORAGE_KEYS.VERSION,
+      'warranty_alerts',
+      'devices'
+    ];
+    try {
+      const storage = getStorage();
+      if (Platform.OS === 'web') {
+        appKeys.forEach(key => storage.removeItem(key));
+      } else {
+        await storage.multiRemove(appKeys);
+      }
+      console.log('Application data cleared successfully');
+    } catch (error) {
+      handlePlatformStorageError(error, 'clearApplicationData', {
+        storageKeys: appKeys,
+        asyncStorageAvailable: typeof AsyncStorage !== 'undefined' && typeof AsyncStorage.multiRemove === 'function'
+      });
+    }
+  }
 }

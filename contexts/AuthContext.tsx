@@ -20,6 +20,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error: any }>;
   resendVerification: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<{ success: boolean; error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -463,6 +464,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      console.log('🗑️ AuthContext: Starting account deletion process...');
+      console.log('🗑️ AuthContext: Current user ID:', user?.id);
+      if (!user?.id) {
+        throw new Error('No active user to delete');
+      }
+
+      // 1. Attempt to delete the user via RPC (Supabase postgres function)
+      console.log('🗑️ AuthContext: Calling Supabase RPC to delete user...');
+      const { error: rpcError } = await supabase.rpc('delete_user');
+
+      if (rpcError) {
+        console.error('❌ AuthContext: Supabase RPC error during account deletion:', rpcError);
+        // We still proceed to sign out and clear local data even if the server deletion fails
+        // to ensure the local app state is secure, but return the error.
+      } else {
+        console.log('✅ AuthContext: Supabase account deleted successfully');
+      }
+
+      // 2. Clear state immediately for instant UI feedback
+      setUser(null);
+      setSession(null);
+      setSyncReady(false);
+      setLastSyncTime(null);
+
+      // 3. Clear all local storage data
+      console.log('🗑️ AuthContext: Clearing local storage data...');
+      try {
+        await DeviceLocalStorage.clearApplicationData();
+        console.log('✅ AuthContext: Application data cleared successfully');
+      } catch (storageError) {
+        console.warn('⚠️ AuthContext: Local storage clear warning:', storageError);
+      }
+
+      // 4. Reset sync states
+      console.log('🔄 AuthContext: Resetting sync states...');
+      syncResetService.resetAllSyncStates();
+
+      // 5. Sign out to clear the local session
+      console.log('🔐 AuthContext: Signing out from local session...');
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.warn('⚠️ AuthContext: Supabase sign out warning during account deletion:', signOutError);
+      }
+
+      return { success: !rpcError, error: rpcError };
+    } catch (error) {
+      console.error('❌ AuthContext: Error during account deletion:', error);
+      return { success: false, error };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -476,6 +530,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     resendVerification,
     signOut,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

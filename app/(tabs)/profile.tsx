@@ -12,11 +12,13 @@ import { LocalDevice } from '@/src/lib/localStorage';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
   const { getLocalDevices } = useDeviceSync();
   
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const [devices, setDevices] = useState<LocalDevice[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [activeWarranties, setActiveWarranties] = useState(0);
@@ -117,6 +119,44 @@ export default function ProfileScreen() {
     setShowSignOutModal(false);
   };
 
+  const handleDeleteAccount = () => {
+    console.log('🔘 Profile: Delete account button clicked');
+    setShowDeleteAccountModal(true);
+  };
+
+  const performDeleteAccount = async () => {
+    try {
+      console.log('🔄 Profile: Starting delete account process...');
+      setIsDeletingAccount(true);
+      setShowDeleteAccountModal(false);
+      
+      // Call Context deletion
+      console.log('🔄 Profile: Calling AuthContext deleteAccount function...');
+      const { error } = await deleteAccount();
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log('✅ Profile: Account deletion completed successfully');
+      router.replace('/welcome');
+      setIsDeletingAccount(false);
+    } catch (error: any) {
+      console.error('❌ Profile: Delete account error:', error);
+      setIsDeletingAccount(false);
+      if (Platform.OS === 'web') {
+        alert('Failed to delete account. Please try again.');
+      } else {
+        Alert.alert('Error', error?.message || 'Failed to delete account. Please try again.');
+      }
+    }
+  };
+
+  const cancelDeleteAccount = () => {
+    console.log('❌ Profile: Account deletion cancelled');
+    setShowDeleteAccountModal(false);
+  };
+
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -191,7 +231,7 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-        {/* Sign Out Button */}
+        {/* Sign Out & Delete Account Buttons */}
         <View style={styles.signOutSection}>
           <Pressable 
             style={[
@@ -203,10 +243,27 @@ export default function ProfileScreen() {
               console.log('🔘 Profile: Button disabled state:', isSigningOut);
               handleSignOut();
             }} 
-            disabled={isSigningOut}
+            disabled={isSigningOut || isDeletingAccount}
           >
             <Text style={styles.signOutText}>
               {isSigningOut ? 'Signing Out...' : 'Sign Out'}
+            </Text>
+          </Pressable>
+
+          <Pressable 
+            style={[
+              styles.signOutButton, 
+              styles.deleteButtonSpacing,
+              isDeletingAccount && styles.signOutButtonDisabled
+            ]} 
+            onPress={() => {
+              console.log('🔘 Profile: Delete Account button pressed');
+              handleDeleteAccount();
+            }} 
+            disabled={isSigningOut || isDeletingAccount}
+          >
+            <Text style={styles.signOutText}>
+              {isDeletingAccount ? 'Deleting Account...' : 'Delete Account'}
             </Text>
           </Pressable>
         </View>
@@ -243,6 +300,41 @@ export default function ProfileScreen() {
                 performSignOut();
               }}>
                 <Text style={styles.modalButtonText}>Sign Out</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Native iOS-style Delete Account confirmation modal */}
+      <Modal
+        visible={showDeleteAccountModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          console.log('🔘 Profile: Delete Account modal onRequestClose triggered');
+          cancelDeleteAccount();
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Delete Account</Text>
+            <Text style={styles.modalMessage}>Are you sure you want to permanently delete your account? This action is irreversible and will delete all associated data.</Text>
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalButton} onPress={() => {
+                console.log('🔘 Profile: Modal Cancel delete pressed');
+                cancelDeleteAccount();
+              }}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable 
+                style={[styles.modalButton, { backgroundColor: theme.colors.systemRed }]} 
+                onPress={() => {
+                  console.log('🔘 Profile: Modal Confirm delete pressed');
+                  performDeleteAccount();
+                }}
+              >
+                <Text style={styles.modalButtonText}>Delete</Text>
               </Pressable>
             </View>
           </View>
@@ -447,6 +539,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.buttonX,
     borderRadius: theme.borderRadius.md,
     minHeight: 44,
+  },
+  deleteButtonSpacing: {
+    marginTop: theme.spacing.md,
   },
   signOutButtonDisabled: {
     opacity: 0.7,
